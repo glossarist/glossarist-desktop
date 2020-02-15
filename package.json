@@ -95,7 +95,7 @@
     "@blueprintjs/select": "^3.11.2",
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
-    "coulomb": "../../Coulomb/coulomb/dist",
+    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.0.2-gitpkg",
     "electron-log": "^3.0.9",
     "fs-extra": "^8.1.0",
     "immer": "^5.0.0",
