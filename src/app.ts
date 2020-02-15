@@ -14,6 +14,8 @@ export type ObjectSource =
 
 
 export const conf: AppConfig = {
+  forceDevelopmentMode: true,
+
   data: {
     concepts: {
       shortName: 'concept',
