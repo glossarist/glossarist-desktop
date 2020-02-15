@@ -44,9 +44,6 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   // These apply to the definition.
   authoritative_source: AuthoritativeSource
 
-  lineage_source: string
-  lineage_source_similarity: number
-
   //lineage_source: LineageSource
 
   // Date concept was first introduced?
@@ -57,6 +54,16 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
 
   pending_review: ConceptReview
   review_history: AcceptedConceptReview[]
+
+
+  // Deprecated
+
+  review_date?: Date
+  review_status?: string
+  review_decision?: 'accepted' | 'rejected'
+
+  lineage_source: string
+  lineage_source_similarity: number
 }
 
 type ConceptReview = {

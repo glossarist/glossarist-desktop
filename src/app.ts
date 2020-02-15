@@ -8,6 +8,11 @@ export const availableLanguages = {
 };
 
 
+export type ObjectSource =
+  { type: 'collection', collectionID: string } |
+  { type: 'catalog-preset', presetName: string };
+
+
 export const conf: AppConfig = {
   data: {
     concepts: {

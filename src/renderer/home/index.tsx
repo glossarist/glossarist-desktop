@@ -1,3 +1,5 @@
+import * as log from 'electron-log';
+
 import React, { useRef, useContext, useState, useEffect } from 'react';
 
 import Mousetrap from 'mousetrap';
@@ -5,11 +7,11 @@ import Mousetrap from 'mousetrap';
 import {
   Classes,
   H1, H3,
-  Divider, Button,
+  Button,
   Icon, IconName,
   FormGroup, InputGroup, TextArea,
   NonIdealState,
-  Tree, ITreeNode,
+  Tree, ITreeNode, IInputGroupProps, ButtonGroup,
  } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
@@ -18,7 +20,7 @@ import { MultiLanguageConcept, ConceptRef, Concept, ConceptCollection } from '..
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { DatabaseList } from 'coulomb/db/renderer/status';
 
-import { availableLanguages, conf as appConf } from '../../app';
+import { ObjectSource, availableLanguages, conf as appConf } from '../../app';
 import { app, conf as rendererConf } from '../index';
 import { LangSelector } from '../lang';
 
@@ -45,11 +47,18 @@ const Window: React.FC<WindowComponentProps> = function () {
     <div className={styles.homeWindowLayout}>
       <Panel isCollapsible={true} className={styles.topPanel} iconCollapsed="chevron-down" iconExpanded="chevron-up">
         <H1 className={styles.appTitle}>Glossarist</H1>
-        <div className={styles.moduleSelector}>
+
+        <ButtonGroup large={true} className={styles.moduleSelector}>
           {MODULES.map(moduleID =>
-            <Button onClick={() => activateModule(moduleID)}>{MODULE_CONFIG[moduleID].title}</Button>
+            <Button
+                disabled={MODULE_CONFIG[moduleID].disabled === true}
+                active={moduleID === activeModuleID}
+                key={moduleID}
+                onClick={() => activateModule(moduleID)}>
+              {MODULE_CONFIG[moduleID].title}
+            </Button>
           )}
-        </div>
+        </ButtonGroup>
       </Panel>
 
       <Module
@@ -70,17 +79,35 @@ export default Window;
 
 const ConceptBrowser: React.FC<{}> = function () {
   const conceptRefs = useContext(SourceContext).refs.sort((a, b) => a - b);
+  const concept = useContext(ConceptContext);
+
+  function handleNodeClick(node: ITreeNode) {
+    const nodeData = node.nodeData as { conceptRef: number };
+    const ref = nodeData.conceptRef;
+    if (ref) {
+      concept.select(ref);
+    } else {
+      log.error("Missing concept ref on tree node", node.nodeData)
+    }
+  }
+
+  const treeState: ITreeNode[] = conceptRefs.map(ref => {
+    return {
+      id: ref,
+      label: <ConceptItem conceptRef={ref} />,
+      nodeData: { conceptRef: ref },
+      isSelected: concept.ref === ref,
+    }
+  });
 
   return (
     <div className={styles.conceptBrowser}>
-      {conceptRefs.map(ref =>
-        <ConceptItem key={ref} conceptRef={ref} />
-      )}
+      <Tree contents={treeState} onNodeClick={handleNodeClick} />
     </div>
   );
 };
 
-const ConceptItem: React.FC<{ conceptRef: ConceptRef }> = function ({ conceptRef }) {
+const ConceptItem: React.FC<{ conceptRef: ConceptRef, className?: string }> = function ({ conceptRef, className }) {
   const lang = useContext(LangConfigContext);
   const conceptCtx = useContext(ConceptContext);
   const concept = app.useOne('concepts', conceptRef).object;
@@ -90,16 +117,8 @@ const ConceptItem: React.FC<{ conceptRef: ConceptRef }> = function ({ conceptRef
   const el = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (active && el && el.current) { el.current.scrollIntoView(); }
+    if (active && el && el.current) { el.current.scrollIntoViewIfNeeded(); }
   }, []);
-
-  function maybeSelect() {
-    if (active) {
-      conceptCtx.select(null);
-    } else {
-      conceptCtx.select(conceptRef);
-    }
-  }
 
   let maybeDesignation: string;
   if (concept) {
@@ -111,18 +130,12 @@ const ConceptItem: React.FC<{ conceptRef: ConceptRef }> = function ({ conceptRef
   }
 
   return (
-    <ItemButton
-        onClick={maybeSelect}
-        style={{ visibility: concept === null ? 'hidden' : undefined }}
-        active={active}
-        className={`
-          ${styles.conceptItem}
-          ${active ? styles.conceptItemActive : '' }
-          ${concept === null ? styles.conceptItemBeingLoaded : ''}
-          ${!maybeDesignation ? styles.conceptItemWithMissingDesignation : ''}
-        `}>
-      <span ref={el}>{maybeDesignation}</span>
-    </ItemButton>
+    <span
+        className={styles.conceptItem}
+        style={{ opacity: concept === null ? '0' : '1' }}
+        ref={el}>
+      {maybeDesignation}
+    </span>
   );
 };
 
@@ -160,10 +173,6 @@ const ConceptDetails: React.FC<{}> = function () {
 
 /* Contexts */
 
-type ObjectSource =
-  { type: 'collection', collectionID: string } |
-  { type: 'all' };
-
 interface ObjectSourceContextSpec {
   active: ObjectSource
   refs: ConceptRef[]
@@ -171,7 +180,7 @@ interface ObjectSourceContextSpec {
 }
 
 const SourceContext = React.createContext<ObjectSourceContextSpec>({
-  active: { type: 'all' },
+  active: { type: 'catalog-preset', presetName: 'all' },
   refs: [],
   select: () => {},
 });
@@ -199,7 +208,11 @@ const ConceptContext = React.createContext<ConceptContextSpec>({
 const SystemPanel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   return (
-    <p>ID: {concept.ref || '—'}</p>
+    <div className={styles.systemPanel}>
+      <FormGroup label="ID" inline={true}>
+        <InputGroup readOnly={true} value={`${concept?.ref}` || '—'} />
+      </FormGroup>
+    </div>
   );
 };
 
@@ -213,27 +226,64 @@ const DatabasePanel: React.FC<{}> = function() {
 
 const SourceRoll: React.FC<{}> = function () {
   const source = useContext(SourceContext);
-  const concepts = app.useMany<MultiLanguageConcept<any>, any>('concepts', {});
+  const concept = useContext(ConceptContext);
+  const conceptRefs = useContext(SourceContext).refs.sort((a, b) => a - b);
+
+  //const treeRef = useRef<Tree>(null);
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     if (treeRef.current && source.active.type === 'collection') {
+  //       const currentNode = treeRef.current.getNodeContentElement(source.active.collectionID);
+  //       currentNode?.scrollIntoView();
+  //     }
+  //   }, 300);
+  // }, []);
+
+  function handleNodeClick(node: ITreeNode) {
+    const nodeData = node.nodeData as { conceptRef: number };
+    const ref = nodeData.conceptRef;
+    if (ref) {
+      concept.select(ref);
+    }
+  }
+
+  const treeState: ITreeNode[] = conceptRefs.map(ref => {
+    return {
+      id: ref,
+      label: <ConceptItem conceptRef={ref} />,
+      nodeData: { conceptRef: ref },
+      isSelected: concept.ref === ref,
+    }
+  });
+
   return (
-    <>
+    <div className={styles.sourceRollPanel}>
       <H3>{source.active.type}</H3>
-      <ul className={styles.sourceRollConceptList}>
-        {Object.values(concepts.objects).map(c => <p>{c.termid}</p>)}
-      </ul>
-    </>
+      <Tree contents={treeState} onNodeClick={handleNodeClick} />
+    </div>
   );
 };
 
 const CatalogPanel: React.FC<{}> = function () {
   const source = useContext(SourceContext);
+  const src = source.active;
+
+  const treeState: ITreeNode[] = [{
+    id: 'all',
+    label: 'All concepts',
+    isSelected: src.type === 'catalog-preset' && src.presetName === 'all',
+    nodeData: { presetName: 'all' },
+  }];
+
+  function handleNodeClick(nodeData: ITreeNode) {
+    const data = nodeData.nodeData as { presetName: 'all' };
+    const presetName: string = data.presetName;
+    source.select({ type: 'catalog-preset', presetName });
+  }
+
   return (
-    <ul className={styles.catalogPanelList}>
-      <ItemButton
-          onClick={() => source.select({ type: 'all' })}
-          active={source.active.type === 'all'}>
-        All concepts
-      </ItemButton>
-    </ul>
+    <Tree contents={treeState} onNodeClick={handleNodeClick} />
   );
 };
 
@@ -247,7 +297,7 @@ const CollectionsPanel: React.FC<{}> = function () {
     setTimeout(() => {
       if (treeRef.current && source.active.type === 'collection') {
         const currentNode = treeRef.current.getNodeContentElement(source.active.collectionID);
-        currentNode?.scrollIntoView();
+        currentNode?.scrollIntoViewIfNeeded();
       }
     }, 300);
   }, []);
@@ -255,7 +305,11 @@ const CollectionsPanel: React.FC<{}> = function () {
   function handleNodeClick(nodeData: ITreeNode) {
     const data = nodeData.nodeData as { collectionID: string };
     const collectionID: string = data.collectionID;
-    source.select({ type: 'collection', collectionID });
+    const collectionToSelect: ConceptCollection | undefined = collections.objects[collectionID];
+    const canSelect = collectionToSelect?.items.length > 0;
+    if (canSelect) {
+      source.select({ type: 'collection', collectionID });
+    }
   }
 
   function collectionToNode([_, collection]: [number | string, ConceptCollection]): ITreeNode {
@@ -264,6 +318,8 @@ const CollectionsPanel: React.FC<{}> = function () {
     filter(c => c.parentID === collection.id);
 
     const hasChildren = children.length > 0;
+    const hasItems = collection.items.length > 0;
+    const isSelected = source.active.type === 'collection' ? (hasItems && (source.active.collectionID === collection.id)) : false;
 
     return {
       id: collection.id,
@@ -271,7 +327,7 @@ const CollectionsPanel: React.FC<{}> = function () {
       isExpanded: hasChildren,
       label: collection.label,
       childNodes: [...children.entries()].map(collectionToNode),
-      isSelected: source.active.type === 'collection' ? source.active.collectionID === collection.id : false,
+      isSelected: isSelected,
       nodeData: { collectionID: collection.id },
     };
   }
@@ -287,20 +343,99 @@ const CollectionsPanel: React.FC<{}> = function () {
 
 const BasicsPanel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
-  const isLoading = concept.isLoading;
   const localized = concept.activeLocalized;
+
   return (
-    <>
-      <FormGroup label="Designation" className={isLoading ? Classes.SKELETON : undefined}>
-        <InputGroup fill={true} large={true} readOnly value={localized?.term} />
-      </FormGroup>
-      <FormGroup label="Definition" className={isLoading ? Classes.SKELETON : undefined}>
-        <TextArea className={styles.basicsPanelDefinition} fill={true} readOnly value={localized?.definition} />
-      </FormGroup>
-    </>
+    <div className={styles.basicsPanel}>
+
+    {localized !== null
+      ? <>
+          <FormGroup
+              label="Designation"
+              className={styles.designation}>
+            <InputGroup
+              large={true}
+              defaultValue={localized?.term}
+              {...panelFieldProps(concept)} />
+          </FormGroup>
+
+          <FormGroup
+              label="Definition">
+            <TextArea
+              growVertically={true}
+              className={styles.basicsPanelDefinition}
+              value={localized?.definition || ''}
+              {...panelFieldProps(concept)} />
+          </FormGroup>
+        </>
+
+      : null}
+    </div>
   );
 };
 
+const StatusPanel: React.FC<{}> = function () {
+  const concept = useContext(ConceptContext);
+  const localized = concept.activeLocalized;
+
+  return (
+    <div className={styles.statusPanel}>
+
+    {localized !== null
+      ? <>
+          <FormGroup
+              label="Entry status"
+              inline
+              className={styles.entryStatus}>
+            <InputGroup
+              defaultValue={localized?.entry_status}
+              {...panelFieldProps(concept)} />
+          </FormGroup>
+        </>
+
+      : null}
+    </div>
+  );
+};
+
+const CurrentReviewPanel: React.FC<{}> = function () {
+  const concept = useContext(ConceptContext);
+  const localized = concept.activeLocalized;
+
+  return (
+    <div className={styles.currentReviewPanel}>
+
+    {localized !== null
+      ? <>
+          <FormGroup
+              inline
+              label="Pending">
+            <InputGroup
+              defaultValue={localized?.review_date && !localized?.review_decision ? 'Yes' : 'No'}
+              {...panelFieldProps(concept)} />
+          </FormGroup>
+
+          <FormGroup
+              inline
+              label="Decision">
+            <InputGroup
+              defaultValue={localized?.review_decision || '—'}
+              {...panelFieldProps(concept)} />
+          </FormGroup>
+        </>
+
+      : null}
+    </div>
+  );
+};
+
+const PanelPlaceholder: React.FC<{}> = function () {
+  return (
+    <div className={styles.panelPlaceholder}>
+      Coming soon.
+    </div>
+  );
+};
 
 interface PanelProps {
   title?: string
@@ -344,13 +479,15 @@ const Panel: React.FC<PanelProps> = function ({
         ? <div
               className={styles.panelTitleBar}
               onClick={(isCollapsible === true && isCollapsed === false) ? onCollapse : onExpand}>
-            <Icon icon={isCollapsible ? toggleIcon : 'blank'} />
+            <Icon className={styles.panelTriggerIcon} icon={isCollapsible ? toggleIcon : 'blank'} />
             {title}
           </div>
         : null}
-      <div className={styles.panelContents}>
-        {children}
-      </div>
+      {isCollapsible && isCollapsed
+        ? null
+        : <div className={styles.panelContents}>
+            {children}
+          </div>}
     </div>
   );
 };
@@ -362,8 +499,24 @@ const SelectLanguage: ToolbarItem = function () {
   return <LangSelector />;
 };
 
+const AddCollection: ToolbarItem = function () {
+  return <Button icon="add" title="Add collection" disabled={true} />;
+};
+
 
 /* Sidebars */ 
+
+const SPanel: React.FC<{ key: string, term: string, cfg: PanelConfig<any> }> = function ({ key, term, cfg }) {
+  return (
+    <Panel
+        className={styles.sidebarPanel}
+        key={`${key}${cfg.objectIndependent ? '' : term}`}
+        isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
+        title={cfg.title}>
+      <cfg.Contents {...cfg.props || {}} />
+    </Panel>
+  );
+};
 
 interface SidebarProps {
   position: 'left' | 'right'
@@ -371,25 +524,16 @@ interface SidebarProps {
   panelSet: PanelConfig<any>[]
 }
 const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle }) {
+  const concept = useContext(ConceptContext);
   const [firstPanel, ...restOfPanels] = panelSet;
+
+  const term = `${concept.activeLocalized?.id}`;
 
   let lastPanel: PanelConfig | null;
   if (panelSet.length > 1) {
     lastPanel = restOfPanels.splice(restOfPanels.length - 1, 1)[0];
   } else {
     lastPanel = null;
-  }
-
-  function panel(cfg: PanelConfig, key?: number) {
-    return (
-      <Panel
-          className={styles.sidebarPanel}
-          key={key}
-          isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
-          title={cfg.title}>
-        <cfg.Contents {...cfg.props || {}} />
-      </Panel>
-    );
   }
 
   return (
@@ -403,27 +547,132 @@ const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle 
           ${position === 'left' ? styles.moduleSidebarLeft : styles.moduleSidebarRight}`}>
 
       <div className={styles.fixedPanel}>
-        {panel(firstPanel)}
+        <SPanel term={term} key="first" cfg={firstPanel} />
       </div>
 
       <div className={styles.restOfPanels}>
         {[...restOfPanels.entries()].map(([idx, cfg]) =>
           <>
-            {panel(cfg, idx)}
-            <Divider key={`divider-${idx}`} />
+            <SPanel term={term} key={`${idx}`} cfg={cfg} />
           </>
         )}
       </div>
 
       {lastPanel
         ? <div className={styles.fixedPanel}>
-            {panel(lastPanel)}
+            <SPanel term={term} key="last" cfg={lastPanel} />
           </div>
         : null}
 
     </Panel>
   );
 };
+
+
+/* Module configuration */
+
+interface PanelConfig<T = {}> {
+  title: string
+  actions?: ToolbarItem[]
+  Contents: React.FC<T>
+  objectIndependent?: true
+  props?: T
+  collapsed?: 'never' | 'by-default'
+}
+
+const PANELS: { [id: string]: PanelConfig<any> } = {
+  system: { Contents: SystemPanel, title: "System" },
+  databases: { Contents: DatabasePanel, title: "Repositories", objectIndependent: true },
+  sourceRoll: { Contents: SourceRoll, title: "Source", objectIndependent: true },
+  collections: { Contents: CollectionsPanel, title: "Collections", actions: [AddCollection] },
+  catalog: { Contents: CatalogPanel, title: "Catalog" },
+  basics: { Contents: BasicsPanel, title: "Basics" },
+  status: { Contents: StatusPanel, title: "Status" },
+  currentReview: { Contents: CurrentReviewPanel, title: "Current review" },
+
+  relationships: { Contents: () => <PanelPlaceholder />, title: "Relationships" },
+  uses: { Contents: () => <PanelPlaceholder />, title: "Uses (lineage)" },
+  changelog: { Contents: () => <PanelPlaceholder />, title: "Change log" },
+  compareLineage: { Contents: () => <PanelPlaceholder />, title: "Compare previous use" },
+  compareLanguage: { Contents: () => <PanelPlaceholder />, title: "Compare language" },
+};
+
+type ToolbarItem = React.FC<{}>;
+
+interface ModuleConfig {
+  hotkey: string
+  title: string
+  leftSidebar: PanelConfig[]
+  rightSidebar: PanelConfig[]
+  MainView: React.FC<any>
+  mainToolbar: ToolbarItem[]
+  disabled?: true
+}
+
+const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
+  propose: {
+    disabled: true,
+    hotkey: 'n',
+    title: "Propose",
+    leftSidebar: [PANELS.source, PANELS.databases],
+    MainView: () => <NonIdealState title="Comoponent not implement" />,
+    mainToolbar: [SelectLanguage],
+    rightSidebar: [PANELS.relationships],
+  },
+  explore: {
+    hotkey: 'b',
+    title: "Explore",
+    leftSidebar: [PANELS.system, PANELS.catalog, PANELS.collections, PANELS.databases],
+    MainView: ConceptBrowser,
+    mainToolbar: [SelectLanguage],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.basics, PANELS.relationships, PANELS.uses],
+  },
+  examine: {
+    hotkey: 'v',
+    title: "Examine",
+    leftSidebar: [PANELS.system, PANELS.sourceRoll, PANELS.databases],
+    MainView: ConceptDetails, // basics, notes, examples
+    mainToolbar: [SelectLanguage],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.uses, PANELS.changelog],
+  },
+  edit: {
+    disabled: true,
+    hotkey: 'c',
+    title: "Edit",
+    leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRoll, PANELS.databases],
+    MainView: () => <NonIdealState title="Comoponent not implement" />,
+    mainToolbar: [SelectLanguage],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.compareLanguage, PANELS.compareLineage],
+  },
+  review: {
+    disabled: true,
+    hotkey: 'x',
+    title: "Review",
+    leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRoll, PANELS.databases],
+    MainView: () => <NonIdealState title="Comoponent not implement" />,
+    mainToolbar: [SelectLanguage],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.compareLanguage, PANELS.compareLineage],
+  },
+  translate: {
+    disabled: true,
+    hotkey: 'l',
+    title: "Translate",
+    leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRoll, PANELS.databases],
+    MainView: () => <NonIdealState title="Comoponent not implement" />,
+    mainToolbar: [SelectLanguage, /*SelectTargetLanguage*/],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.lineage, PANELS.changelog],
+  },
+};
+
+
+const MODULES: (keyof typeof MODULE_CONFIG)[] = [
+  'explore',
+  'examine',
+  'edit',
+  'review',
+  'translate',
+  'propose',
+]
 
 
 /* Modules */
@@ -435,16 +684,16 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const [selectedConceptRef, selectConceptRef] = useState(null as null | ConceptRef);
   const concept = app.useOne<MultiLanguageConcept<any>, number>('concepts', selectedConceptRef);
 
-  const [activeSource, selectSource] = useState({ type: 'all' } as ObjectSource);
+  const [activeSource, selectSource] = useState({ type: 'catalog-preset', presetName: 'all' } as ObjectSource);
   const concepts = app.useIDs<number, { query: { inSource: ObjectSource }}>('concepts', { query: { inSource: activeSource }});
 
   let localizedConcept: Concept<any, any> | null | undefined;
   // `null` means not yet localized into `lang.selected`, `undefined` means still loading.
 
   if (concept.object) {
-    localizedConcept = concept.object[lang.selected as keyof typeof availableLanguages] || null;
+    localizedConcept = concept.object[lang.selected as keyof typeof availableLanguages] || undefined;
   } else {
-    localizedConcept = undefined;
+    localizedConcept = null;
   }
 
   function handleLeftSidebarToggle(state: boolean) {}
@@ -483,118 +732,20 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
 };
 
 
-/* Module configuration */
+/* Utilities */
 
-interface PanelConfig<T = {}> {
-  title: string
-  Contents: React.FC<T>
-  props?: T
-  collapsed?: 'never' | 'by-default'
+function panelFieldProps(concept: ConceptContextSpec) {
+  /* Props shared across BP3 input groups, textareas in panel fields. */
+
+  return {
+    fill: true,
+    intent: concept.activeLocalized === undefined ? 'danger' : undefined as IInputGroupProps["intent"],
+    disabled: concept.isLoading,
+    readOnly: true,
+  };
 }
 
-const PANELS: { [id: string]: PanelConfig<any> } = {
-  system: { Contents: SystemPanel, title: "System" },
-  databases: { Contents: DatabasePanel, title: "Repositories" },
-  sourceRoll: { Contents: SourceRoll, title: "Source" },
-  collections: { Contents: CollectionsPanel, title: "Collections" },
-  catalog: { Contents: CatalogPanel, title: "Catalog" },
-  basics: { Contents: BasicsPanel, title: "Basics" },
-};
-
-type ToolbarItem = React.FC<{}>;
-
-interface ModuleConfig {
-  hotkey: string,
-  title: string,
-  leftSidebar: PanelConfig[]
-  rightSidebar: PanelConfig[]
-  MainView: React.FC<any>
-  mainToolbar: ToolbarItem[]
-}
-
-const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
-  explore: {
-    hotkey: 'b',
-    title: "Explore",
-    leftSidebar: [PANELS.system, PANELS.catalog, PANELS.collections, PANELS.databases],
-    MainView: ConceptBrowser,
-    mainToolbar: [SelectLanguage],
-    rightSidebar: [PANELS.basics],
-  },
-  examine: {
-    hotkey: 'v',
-    title: "Examine",
-    leftSidebar: [PANELS.system, PANELS.databases],
-    MainView: ConceptDetails, // basics, notes, examples
-    mainToolbar: [SelectLanguage],
-    rightSidebar: [],
-  },
-
-  // propose: {
-  //   hotkey: 'n',
-  //   title: "Propose",
-  //   leftSidebar: [PANELS.source, PANELS.databases],
-  //   MainView: ConceptProposalForm,
-  //   mainToolbar: [SelectLanguage],
-  //   rightSidebar: [PANELS.relationships],
-  // },
-  // explore: {
-  //   hotkey: 'b',
-  //   title: "Explore",
-  //   leftSidebar: [PANELS.system, PANELS.catalog, PANELS.collections, PANELS.databases],
-  //   MainView: ConceptBrowser,
-  //   mainToolbar: [SelectLanguage],
-  //   rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.basics, PANELS.relationships, PANELS.uses],
-  // },
-  // examine: {
-  //   hotkey: 'v',
-  //   title: "Examine",
-  //   leftSidebar: [PANELS.system, PANELS.sourceRoll, PANELS.databases],
-  //   MainView: ConceptDetails, // basics, notes, examples
-  //   mainToolbar: [SelectLanguage],
-  //   rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.uses, PANELS.changelog],
-  // },
-  // edit: {
-  //   hotkey: 'c',
-  //   title: "Edit",
-  //   leftSidebar: [System, Changelog, SourceRoll, Databases],
-  //   MainView: ConceptEdit, // basics, notes, examples
-  //   mainToolbar: [SelectLanguage],
-  //   rightSidebar: [Status, CurrentReview, Relationships, CompareLanguage, CompareLineage],
-  // },
-  // review: {
-  //   hotkey: 'x',
-  //   title: "Review",
-  //   leftSidebar: [System, Changelog, SourceRoll, Databases],
-  //   MainView: ConceptReview, // basics, notes, examples, review notes
-  //   mainToolbar: [SelectLanguage],
-  //   rightSidebar: [Status, CurrentReview, Relationships, CompareLanguage, CompareLineage],
-  // },
-  // translate: {
-  //   hotkey: 'l',
-  //   title: "Translate",
-  //   leftSidebar: [System, Changelog, SourceRoll, Databases],
-  //   MainView: ConceptTranslation, // basics, notes, examples
-  //   mainToolbar: [SelectLanguage, SelectTargetLanguage],
-  //   rightSidebar: [Status, CurrentReview, Lineage, Changelog],
-  // },
-};
-
-
-const MODULES: (keyof typeof MODULE_CONFIG)[] = [
-  'explore',
-  'examine',
-  // 'edit',
-  // 'review',
-  // 'translate',
-  // 'map',
-  // 'propose',
-]
-
-
-/* Utility components */
-
-const ItemButton: React.FC<any> = function (props) {
-  const finalProps = { ...props, className: `${props.className || ''} ${styles.itemButton}`}
-  return <Button {...finalProps}>{props.children}</Button>
-}
+// const ItemButton: React.FC<any> = function (props) {
+//   const finalProps = { ...props, className: `${props.className || ''} ${styles.itemButton}`}
+//   return <Button {...finalProps}>{props.children}</Button>
+// }

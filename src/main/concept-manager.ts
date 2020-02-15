@@ -1,13 +1,9 @@
-//import * as log from 'electron-log';
+import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 
 import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
+import { ObjectSource } from '../app';
 import { app } from '.';
-
-
-type ObjectSource =
-  { type: 'collection', collectionID: string } |
-  { type: 'all' };
 
 
 class ConceptManager extends Manager<MultiLanguageConcept<any>, number, { inSource: ObjectSource }> {
@@ -24,14 +20,17 @@ class ConceptManager extends Manager<MultiLanguageConcept<any>, number, { inSour
     const collectionManager = (await app).managers.collections as Manager<ConceptCollection, string>;
     const ids = await super.listIDs(query);
 
-    if (query.inSource.type === 'all') {
+    const src = query.inSource;
+
+    if (src.type === 'catalog-preset' && src.presetName === 'all') {
       return ids;
-    } else if (query.inSource.type === 'collection') {
-      const collection = await collectionManager.read(query.inSource.collectionID);
+    } else if (src.type === 'collection') {
+      const collection = await collectionManager.read(src.collectionID);
       const collectionItemIDs = collection.items;
       const idsInCollection = ids.filter(id => collectionItemIDs.includes(id));
       return idsInCollection;
     } else {
+      log.error("Glossarist: Invalid concept source", src)
       throw new Error("Invalid source in query");
     }
   }
