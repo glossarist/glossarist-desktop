@@ -29,7 +29,4 @@ export const conf: RendererConfig<typeof appConf> = {
 };
 
 
-localStorage.clear();
-
-
 export const app = renderApp(conf);
