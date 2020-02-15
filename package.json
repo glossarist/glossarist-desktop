@@ -27,7 +27,6 @@
     }
   },
   "build": {
-    "afterSign": "./scripts/hooks/after-sign.js",
     "productName": "ISO/TC 211 Geolexica Desktop",
     "appId": "org.glossarist.isotc211",
     "mac": {
