@@ -1,0 +1,134 @@
+{
+  "name": "geolexica",
+  "version": "0.0.1",
+  "description": "Geolexica database viewer & editor for desktop",
+  "repository": "git@github.com:geolexica/geolexica-desktop.git",
+  "bugs": "https://github.com/geolexica/geolexica-desktop/issues",
+  "author": "Ribose Inc. <open.source@ribose.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-webpack dev",
+    "compile": "electron-webpack",
+    "dist": "cross-env DEBUG=electron-builder electron-builder",
+    "dist:win": "electron-builder -w",
+    "dist:mac": "electron-builder -m",
+    "pack": "electron-builder --dir",
+    "release": "electron-builder --publish always",
+    "cdist": "yarn compile && electron-builder -mlw",
+    "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+  },
+  "electronWebpack": {
+    "staticSourceDirectory": "src/static",
+    "main": {
+      "webpackConfig": "main.webpack.js"
+    },
+    "renderer": {
+      "webpackConfig": "renderer.webpack.js"
+    }
+  },
+  "build": {
+    "productName": "Geolexica Desktop",
+    "appId": "org.geolexica.desktop",
+    "afterSign": "./scripts/hooks/after-sign.js",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": "dmg",
+      "gatekeeperAssess": false,
+      "hardenedRuntime": true,
+      "entitlements": "assets/mac/entitlements.mac.inherit.plist",
+      "entitlementsInherit": "assets/mac/entitlements.mac.inherit.plist"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 440,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "artifactName": "geolexica-desktop-${version}.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable"
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "runAfterFinish": true,
+      "installerIcon": "build/icon.ico",
+      "artifactName": "electron-gha-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "geolexica-desktop.exe"
+    },
+    "appx": {
+      "backgroundColor": "#464646",
+      "publisherDisplayName": "Geolexica",
+      "artifactName": "geolexica-desktop-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "dependencies": {
+    "@blueprintjs/core": "^3.20.0",
+    "@blueprintjs/datetime": "^3.15.0",
+    "@blueprintjs/icons": "^3.12.0",
+    "@blueprintjs/select": "^3.11.2",
+    "@types/node-fetch": "^2.5.4",
+    "async-lock": "^1.2.2",
+    "coulomb": "../../Coulomb/coulomb/dist",
+    "electron-log": "^3.0.9",
+    "fs-extra": "^8.1.0",
+    "immer": "^5.0.0",
+    "moment": "^2.24.0",
+    "mousetrap": "^1.6.5",
+    "node-fetch": "^2.6.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-transition-group": "^4.3.0",
+    "source-map-support": "^0.5.16",
+    "throttle-debounce": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/async-lock": "^1.1.1",
+    "@types/fs-extra": "^8.0.0",
+    "@types/mousetrap": "^1.6.3",
+    "@types/node": "^12.12.6",
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "^16.9.4",
+    "@types/react-transition-group": "^4.2.3",
+    "@types/throttle-debounce": "^2.1.0",
+    "cross-env": "^6.0.3",
+    "electron": "^7.1.2",
+    "electron-builder": "^21.2.0",
+    "electron-notarize": "^0.2.1",
+    "electron-react-devtools": "^0.5.3",
+    "electron-webpack": "^2.7.4",
+    "electron-webpack-ts": "^3.2.0",
+    "node-sass": "^4.12.0",
+    "npm-run-all": "^4.1.5",
+    "sass-loader": "^7.1.0",
+    "typescript": "^3.7.2",
+    "typescript-plugin-css-modules": "^2.1.2",
+    "webpack": "~4.35.2"
+  }
+}

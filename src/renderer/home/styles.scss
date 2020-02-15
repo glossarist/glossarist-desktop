@@ -1,0 +1,171 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+$macOSWinTitleH: 2.5rem;
+
+
+html, body, #app {
+  height: 100vh;
+  width: 100vw;
+}
+#app {
+  cursor: default;
+  overflow: hidden;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+:local .itemButton {
+  justify-content: flex-start;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  :global .bp3-button-text {
+    flex: 1;
+  }
+}
+
+
+:local .homeWindowLayout {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+}
+
+:local .topPanel {
+  height: 4rem;
+
+  .panelContents {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panelTitleBar {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+  }
+}
+
+:local .moduleView {
+  flex: 1;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+:local .moduleSidebar {
+  display: flex;
+  flex-flow: row nowrap;
+  overflow: hidden;
+  width: 20rem;
+
+  &.panelCollapsed {
+    width: auto;
+  }
+
+  &.moduleSidebarRight {
+    flex-flow: row-reverse nowrap;
+  }
+
+  > .panelContents {
+    flex: 1;
+    display: flex;
+    flex-flow: column nowrap;
+
+    .fixedPanel {
+      flex: 0;
+    }
+
+    .restOfPanels {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-flow: column nowrap;
+    }
+
+    .panel {
+      flex: 0;
+      display: flex;
+      flex-flow: column nowrap;
+
+      .panelTitleBar {
+        height: 2rem;
+      }
+      .panelContents {
+        overflow-y: auto;
+      }
+    }
+  }
+
+  > .panelTitleBar {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+  }
+}
+
+:local .moduleMainView {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+
+  > :first-child {
+    flex: 1;
+  }
+
+  .conceptBrowser {
+    display: flex;
+    flex-flow: column nowrap;
+    overflow-y: auto;
+
+    .conceptItem {
+    }
+  }
+}
+
+:local .databasePanel {
+  width: 10rem;
+}
+
+:local .panel {
+  &.panelCollapsible {
+    &.panelCollapsed {
+      .panelContents {
+        display: none;
+      }
+    }
+  }
+}
+
+:local .activePane {
+  padding-top: 2rem;
+}
+
+:local .buttonBar {
+  margin-right: 2rem;
+  width: $pt-navbar-height;
+
+  > * {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    width: $pt-navbar-height;
+    height: $pt-navbar-height;
+  }
+}
+
+:local .conceptItem {
+  .conceptID {
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+
+  &.missingTerm {
+    font-style: italic;
+  }
+}
