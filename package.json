@@ -29,7 +29,7 @@
   "build": {
     "afterSign": "./scripts/hooks/after-sign.js",
     "productName": "ISO/TC 211 Geolexica Desktop",
-    "appId": "org.glossarist",
+    "appId": "org.glossarist.isotc211",
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",

@@ -16,7 +16,7 @@ module.exports = async function notarize(params) {
   }
 
   // Use the same appId as specified in electron-builder configuration
-  let appId = 'org.glossarist';
+  let appId = 'org.glossarist.isotc211';
 
   let appPath = path.join(
     params.appOutDir,
