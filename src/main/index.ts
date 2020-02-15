@@ -1,4 +1,3 @@
-import * as log from 'electron-log';
 import * as path from 'path';
 import { app as electronApp } from 'electron';
 
@@ -6,8 +5,6 @@ import { MainConfig } from 'coulomb/config/main';
 import { initMain } from 'coulomb/app/main';
 
 import { default as Manager, ManagerOptions } from 'coulomb/db/isogit-yaml/main/manager';
-
-import { listen } from 'coulomb/ipc/main';
 
 import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
 import { conf as appConf, availableLanguages } from '../app';
