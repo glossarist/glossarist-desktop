@@ -35,21 +35,21 @@ export const conf: AppConfig = {
   windows: {
     splash: {
       openerParams: {
-        title: 'Glossarist',
+        title: 'ISO/TC 211 Geolexica',
         frameless: true,
         dimensions: { width: 800, height: 500, minWidth: 800, minHeight: 500 },
       },
     },
     default: {
       openerParams: {
-        title: 'Glossarist Desktop',
+        title: 'ISO/TC 211 Geolexica Desktop',
         frameless: false,
         dimensions: { width: 1200, height: 700, minWidth: 800, minHeight: 500 },
       },
     },
     settings: {
       openerParams: {
-        title: 'Glossarist Desktop settings',
+        title: 'ISO/TC 211 Geolexica Desktop Settings',
         frameless: true,
         dimensions: { width: 800, height: 500, minWidth: 800, minHeight: 500 },
       },
