@@ -30,18 +30,21 @@ export const SourceContext = React.createContext<ObjectSourceContextSpec>({
 });
 
 
+export type MaybeActiveConcept = MultiLanguageConcept<any> | null;
+export type MaybeActiveLocalizedConcept = Concept<any, any> | null | undefined;
+// `null` means not yet localized into `lang.selected`, `undefined` means probably still loading.
+
 export interface ConceptContextSpec {
-  active: MultiLanguageConcept<any> | null
-  activeLocalized: Concept<any, any> | null | undefined
-  // `null` means not yet localized into `lang.selected`, `undefined` means still loading.
+  active: MaybeActiveConcept
+  activeLocalized: MaybeActiveLocalizedConcept
   isLoading: boolean
   ref: ConceptRef | null
   select: (ref: ConceptRef | null) => void
 }
 export const ConceptContext = React.createContext<ConceptContextSpec>({
   active: null,
-  isLoading: false,
   activeLocalized: null,
+  isLoading: false,
   ref: null,
   select: () => {},
 })
