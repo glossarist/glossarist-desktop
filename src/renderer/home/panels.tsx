@@ -284,7 +284,7 @@ export const LineagePanel: React.FC<{}> = function () {
 
   function openAuthSource() {
     if (authURL) {
-      callIPC('open-arbitrary-window', { title: "Authoritative source", url: authURL, showWhileLoading: true });
+      require('electron').shell.openExternal(authURL.toString());
     }
   }
 
