@@ -190,7 +190,7 @@ export const BasicsPanel: React.FC<{}> = function () {
 
   return (
     <div className={`${styles.basicsPanel} ${rtlClass}`}>
-      {localized !== null
+      {localized !== null && localized !== undefined
         ? <>
             <FormGroup
                 key="designation"
@@ -199,7 +199,7 @@ export const BasicsPanel: React.FC<{}> = function () {
                 className={styles.designation}>
               <InputGroup
                 large={true}
-                value={localized?.term}
+                value={localized.term}
                 className={`${rtlClass} ${designationValidityClass} ${loadingClass}`}
                 {...field} />
             </FormGroup>
@@ -210,11 +210,11 @@ export const BasicsPanel: React.FC<{}> = function () {
               <TextArea
                 growVertically={true}
                 className={`${styles.definition} ${rtlClass} ${loadingClass}`}
-                value={localized?.definition}
+                value={localized.definition}
                 {...field} />
             </FormGroup>
 
-            {[...localized?.notes.entries() || []].map(([idx, note]) =>
+            {[...localized.notes.entries()].map(([idx, note]) =>
               <FormGroup
                   key={`note-${idx}`}
                   inline
@@ -224,7 +224,7 @@ export const BasicsPanel: React.FC<{}> = function () {
               </FormGroup>
             )}
 
-            {[...localized?.examples.entries() || []].map(([idx, example]) =>
+            {[...localized.examples.entries()].map(([idx, example]) =>
               <FormGroup
                   key={`note-${idx}`}
                   inline
@@ -247,14 +247,14 @@ export const StatusPanel: React.FC<{}> = function () {
 
   return (
     <div className={styles.statusPanel}>
-      {localized !== null
+      {localized !== null && localized !== undefined
         ? <>
             <FormGroup
                 label="Entry status"
                 inline
                 className={styles.entryStatus}>
               <InputGroup
-                value={localized?.entry_status}
+                value={localized.entry_status}
                 {...panelFieldProps(concept)} />
             </FormGroup>
           </>
