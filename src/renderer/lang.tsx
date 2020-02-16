@@ -17,6 +17,6 @@ export const LangSelector: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
 
   return <Popover content={<LanguageMenu />} position={Position.RIGHT_TOP}>
-    <Button icon="translate" text={lang.available[lang.selected]} small={true} />
+    <Button icon="translate" text={lang.available[lang.selected]} />
   </Popover>;
 };

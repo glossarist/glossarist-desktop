@@ -1,6 +1,7 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-$macOSWinTitleH: 2.5rem;
+$transition1: .2s linear;
+$panelLightBg: $light-gray4;
 
 
 html, body, #app {
@@ -25,19 +26,18 @@ html, body, #app {
   }
 }
 
-$transition1: .2s linear;
-$panelLightBg: $light-gray4;
 
+:local .panel .panelContents {
+  padding: .375rem;
+}
 
 :local .panel {
   .panelContents {
-    padding: .25rem;
   }
 
   .panelTitleBar {
-    background: $panelLightBg;
     transition: background-color $transition1;
-    background-color: $panelLightBg;
+    background: $light-gray3;
     text-transform: uppercase;
     font-size: 80%;
     letter-spacing: -.01em;
@@ -52,6 +52,7 @@ $panelLightBg: $light-gray4;
 
     &:hover {
       background-color: $light-gray2;
+      box-shadow: $pt-elevation-shadow-1;
 
       .panelTriggerIcon {
         opacity: 1;
@@ -73,11 +74,20 @@ $panelLightBg: $light-gray4;
     box-shadow: none;
   }
   :global .bp3-form-group {
-    padding: .25rem;
+    padding: 0 .25rem;
+    padding-bottom: .25rem;
     margin-bottom: 0;
 
+    &:first-child {
+      padding-top: .25rem;
+    }
+
+    .bp3-label {
+      margin-bottom: 0;
+      padding-left: .25rem;
+    }
+
     &.bp3-inline {
-      padding-left: .5rem;
       padding-right: .5rem;
     }
   }
@@ -104,8 +114,8 @@ $panelLightBg: $light-gray4;
   }
 
   .panelContents {
-    height: 4rem;
-    padding: 0 1rem .5rem 1rem;
+    height: 3.75rem;
+    padding: 0 1rem .35rem 1rem;
 
     display: flex;
     flex-flow: row nowrap;
@@ -119,6 +129,8 @@ $panelLightBg: $light-gray4;
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
+    z-index: 2;
+    position: relative;
   }
 }
 
@@ -128,12 +140,16 @@ $panelLightBg: $light-gray4;
   flex-flow: row nowrap;
   align-items: stretch;
   overflow: hidden;
+  z-index: 2;
+  box-shadow: $pt-elevation-shadow-1;
 }
 
 :local .moduleSidebar {
   display: flex;
   flex-flow: row nowrap;
-  overflow: hidden;
+  background: $panelLightBg;
+  box-shadow: $pt-elevation-shadow-2;
+  z-index: 2;
 
   &.panelCollapsed {
     width: auto;
@@ -195,7 +211,9 @@ $panelLightBg: $light-gray4;
       }
       .panelContents {
         overflow-y: auto;
+        overflow-x: hidden;
         padding: .25rem;
+        background: $pt-app-background-color;
       }
     }
   }
@@ -213,10 +231,25 @@ $panelLightBg: $light-gray4;
   display: flex;
   flex-flow: column nowrap;
   overflow: hidden;
-  padding: .25rem 0;
 
   > :first-child {
     flex: 1;
+    overflow-y: scroll;
+  }
+
+  .moduleToolbar {
+    padding: .5rem;
+    background: $light-gray2;
+    display: flex;
+    align-items: center;
+
+    > * {
+      margin-right: .5rem;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
   }
 
   .conceptBrowser {
@@ -230,6 +263,30 @@ $panelLightBg: $light-gray4;
       &.missingDesignation {
         font-style: italic;
       }
+    }
+  }
+
+  .singleConcept {
+    padding: 2rem;
+  }
+
+  .examineConcept {
+    .designation {
+      font-weight: normal;
+      font-family: Georgia, serif;
+      font-size: 210%;
+      margin-bottom: 1rem;
+    }
+    .example, .note {
+      .label {
+        margin-right: 1rem;
+      }
+    }
+    .example {
+      font-style: italic;
+    }
+    .definition {
+      font-size: 120%;
     }
   }
 }
@@ -256,5 +313,12 @@ $panelLightBg: $light-gray4;
     :global .bp3-input {
       font-weight: bold;
     }
+  }
+  .note {
+    font-size: 90%;
+  }
+  .example {
+    font-size: 90%;
+    font-style: italic;
   }
 }

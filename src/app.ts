@@ -3,7 +3,14 @@ import { AppConfig } from 'coulomb/config/app';
 
 export const availableLanguages = {
   'eng': 'English',
-  'fra': 'Francias',
+  'fra': 'French',
+  'ara': 'Arabic',
+  'ger': 'German',
+  'kor': 'Korean',
+  'msa': 'Malaysian',
+  'rus': 'Russian',
+  'spa': 'Spanish',
+  'swe': 'Swedish',
   'chn': 'Chinese',
 };
 
@@ -14,8 +21,6 @@ export type ObjectSource =
 
 
 export const conf: AppConfig = {
-  forceDevelopmentMode: true,
-
   data: {
     concepts: {
       shortName: 'concept',

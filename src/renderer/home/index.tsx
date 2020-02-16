@@ -1,4 +1,5 @@
 import * as log from 'electron-log';
+import { debounce } from 'throttle-debounce';
 
 import React, { useRef, useContext, useState, useEffect } from 'react';
 
@@ -6,23 +7,29 @@ import Mousetrap from 'mousetrap';
 
 import {
   Classes,
-  H1, H3,
+  H1,
   Button,
   Icon, IconName,
-  FormGroup, InputGroup, TextArea,
+  InputGroup, FormGroup, TextArea,
   NonIdealState,
-  Tree, ITreeNode, IInputGroupProps, ButtonGroup,
+  Tree, ITreeNode, ButtonGroup,
  } from '@blueprintjs/core';
 
+import { callIPC } from 'coulomb/ipc/renderer';
+
 import { WindowComponentProps } from 'coulomb/config/renderer';
-import { MultiLanguageConcept, ConceptRef, Concept, ConceptCollection } from '../../models/concepts';
+import { MultiLanguageConcept, ConceptRef, Concept } from '../../models/concepts';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { DatabaseList } from 'coulomb/db/renderer/status';
 
-import { ObjectSource, availableLanguages, conf as appConf } from '../../app';
-import { app, conf as rendererConf } from '../index';
+import { ObjectSource, availableLanguages } from '../../app';
+import { app } from '../index';
 import { LangSelector } from '../lang';
+import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
+
+import { ConceptItem } from './concepts';
+import * as panels from './panels';
+import { SourceContext, ConceptContext, TextSearchContext } from './contexts';
 
 import styles from './styles.scss';
 
@@ -39,13 +46,13 @@ const Window: React.FC<WindowComponentProps> = function () {
         Mousetrap.unbind(hotkey);
       }
     };
-  });
+  }, []);
 
   const module = MODULE_CONFIG[activeModuleID];
 
   return (
     <div className={styles.homeWindowLayout}>
-      <Panel isCollapsible={true} className={styles.topPanel} iconCollapsed="chevron-down" iconExpanded="chevron-up">
+      <Panel isCollapsible={true} className={styles.topPanel} iconCollapsed="caret-down" iconExpanded="caret-up">
         <H1 className={styles.appTitle}>Glossarist</H1>
 
         <ButtonGroup large={true} className={styles.moduleSelector}>
@@ -78,7 +85,7 @@ export default Window;
 // Concept browser
 
 const ConceptBrowser: React.FC<{}> = function () {
-  const conceptRefs = useContext(SourceContext).refs.sort((a, b) => a - b);
+  const concepts = useContext(SourceContext).objects;
   const concept = useContext(ConceptContext);
 
   function handleNodeClick(node: ITreeNode) {
@@ -91,12 +98,12 @@ const ConceptBrowser: React.FC<{}> = function () {
     }
   }
 
-  const treeState: ITreeNode[] = conceptRefs.map(ref => {
+  const treeState: ITreeNode[] = concepts.map(c => {
     return {
-      id: ref,
-      label: <ConceptItem conceptRef={ref} />,
-      nodeData: { conceptRef: ref },
-      isSelected: concept.ref === ref,
+      id: c.termid,
+      label: <ConceptItem concept={c} />,
+      nodeData: { conceptRef: c.termid },
+      isSelected: concept.ref === c.termid,
     }
   });
 
@@ -107,335 +114,124 @@ const ConceptBrowser: React.FC<{}> = function () {
   );
 };
 
-const ConceptItem: React.FC<{ conceptRef: ConceptRef, className?: string }> = function ({ conceptRef, className }) {
-  const lang = useContext(LangConfigContext);
-  const conceptCtx = useContext(ConceptContext);
-  const concept = app.useOne('concepts', conceptRef).object;
-
-  const active = conceptCtx.ref === conceptRef;
-
-  const el = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (active && el && el.current) { el.current.scrollIntoViewIfNeeded(); }
-  }, []);
-
-  let maybeDesignation: string;
-  if (concept) {
-    const localizedConcept = concept[lang.selected as keyof typeof availableLanguages] || concept.eng;
-    maybeDesignation = localizedConcept.term;
-  } else {
-    // TODO: Use something better than just raw reference as designation while data is being loaded
-    maybeDesignation = `${conceptRef}`;
-  }
-
-  return (
-    <span
-        className={styles.conceptItem}
-        style={{ opacity: concept === null ? '0' : '1' }}
-        ref={el}>
-      {maybeDesignation}
-    </span>
-  );
-};
-
 // Concept details
 
 const ConceptDetails: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
-  const concept = useContext(ConceptContext);
-  const localized = concept.activeLocalized;
-  const isLoading = concept.isLoading;
+  const ctx = useContext(ConceptContext);
+  const concept = ctx.activeLocalized;
+  const isLoading = ctx.isLoading;
 
   let conceptDetails: JSX.Element;
 
-  if (localized === null) {
+  if (concept === undefined) {
     conceptDetails = <NonIdealState title={`Entry not yet translated into ${lang.available[lang.selected]}.`} />
+  } else if (concept === null) {
+    conceptDetails = <NonIdealState title="No concept is selected" />
   } else {
     conceptDetails = (
-      <>
-        <H1 className={isLoading ? Classes.SKELETON : undefined}>{localized?.term}</H1>
-        <p className={isLoading ? Classes.SKELETON : undefined}>{localized?.definition}</p>
-      </>
+      <div className={lang.selected === 'ara' ? Classes.RTL : undefined}>
+        <H1 className={`${styles.designation} ${isLoading ? Classes.SKELETON : undefined}`}>{concept?.term}</H1>
+
+        <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
+          <p className={`${styles.definition} ${isLoading ? Classes.SKELETON : undefined}`}>{concept?.definition}</p>
+
+          {[...concept.examples.entries()].map(([idx, item]) =>
+            <p className={styles.example} key={`example-${idx}`}>
+              <span className={styles.label}>EXAMPLE:</span>
+              {item}
+            </p>
+          )}
+
+          {[...concept.notes.entries()].map(([idx, item]) =>
+             <p className={styles.note} key={`note-${idx}`}>
+              <span className={styles.label}>NOTE:</span>
+               {item}
+             </p>
+           )}
+        </div>
+      </div>
     );
   }
-
   return (
     <div className={`
-          ${localized === null ? styles.conceptDetailsNotLocalized : ''}
-          ${isLoading ? styles.conceptDetailsBeingLoaded : ''}
+          ${styles.singleConcept}
+          ${styles.examineConcept}
+          ${concept === null ? styles.conceptNotLocalized : ''}
+          ${isLoading ? styles.conceptBeingLoaded : ''}
         `}>
       {conceptDetails}
     </div>
   );
 };
 
+// Concept details
 
-/* Contexts */
+const ConceptEdit: React.FC<{}> = function () {
+  const lang = useContext(LangConfigContext);
+  const ctx = useContext(ConceptContext);
 
-interface ObjectSourceContextSpec {
-  active: ObjectSource
-  refs: ConceptRef[]
-  select: (source: ObjectSource) => void
-}
+  type InitialConcept = Omit<Omit<Concept<any, any>, 'id'>, 'authoritative_source'>;
 
-const SourceContext = React.createContext<ObjectSourceContextSpec>({
-  active: { type: 'catalog-preset', presetName: 'all' },
-  refs: [],
-  select: () => {},
-});
+  const [concept, updateConcept] = useState<Concept<any, any> | InitialConcept>(ctx.activeLocalized || {
+    language_code: lang.selected,
+    entry_status: 'proposed',
+    term: '',
+    definition: '',
+    notes: [],
+    examples: [],
+  });
 
-
-interface ConceptContextSpec {
-  active: MultiLanguageConcept<any> | null
-  activeLocalized: Concept<any, any> | null | undefined
-  isLoading: boolean
-  ref: ConceptRef | null
-  select: (ref: ConceptRef | null) => void
-}
-
-const ConceptContext = React.createContext<ConceptContextSpec>({
-  active: null,
-  isLoading: false,
-  activeLocalized: null,
-  ref: null,
-  select: () => {},
-})
-
-
-/* Panels */
-
-const SystemPanel: React.FC<{}> = function () {
-  const concept = useContext(ConceptContext);
-  return (
-    <div className={styles.systemPanel}>
-      <FormGroup label="ID" inline={true}>
-        <InputGroup readOnly={true} value={`${concept?.ref}` || '—'} />
-      </FormGroup>
-    </div>
-  );
-};
-
-const DatabasePanel: React.FC<{}> = function() {
-  return (
-    <DatabaseList
-      databases={appConf.databases}
-      databaseStatusComponents={rendererConf.databaseStatusComponents} />
-  );
-};
-
-const SourceRoll: React.FC<{}> = function () {
-  const source = useContext(SourceContext);
-  const concept = useContext(ConceptContext);
-  const conceptRefs = useContext(SourceContext).refs.sort((a, b) => a - b);
-
-  //const treeRef = useRef<Tree>(null);
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     if (treeRef.current && source.active.type === 'collection') {
-  //       const currentNode = treeRef.current.getNodeContentElement(source.active.collectionID);
-  //       currentNode?.scrollIntoView();
-  //     }
-  //   }, 300);
-  // }, []);
-
-  function handleNodeClick(node: ITreeNode) {
-    const nodeData = node.nodeData as { conceptRef: number };
-    const ref = nodeData.conceptRef;
-    if (ref) {
-      concept.select(ref);
-    }
-  }
-
-  const treeState: ITreeNode[] = conceptRefs.map(ref => {
-    return {
-      id: ref,
-      label: <ConceptItem conceptRef={ref} />,
-      nodeData: { conceptRef: ref },
-      isSelected: concept.ref === ref,
+  const writeChanges = debounce(500, () => {
+    if (ctx.active) {
+      callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
+      ('model-concepts-update-one', {
+        objectID: ctx.active.termid,
+        object: { ...ctx.active, [lang.selected]: concept },
+        commit: false,
+      });
     }
   });
 
-  return (
-    <div className={styles.sourceRollPanel}>
-      <H3>{source.active.type}</H3>
-      <Tree contents={treeState} onNodeClick={handleNodeClick} />
-    </div>
-  );
-};
+  useEffect(writeChanges, [JSON.stringify(concept)]);
 
-const CatalogPanel: React.FC<{}> = function () {
-  const source = useContext(SourceContext);
-  const src = source.active;
-
-  const treeState: ITreeNode[] = [{
-    id: 'all',
-    label: 'All concepts',
-    isSelected: src.type === 'catalog-preset' && src.presetName === 'all',
-    nodeData: { presetName: 'all' },
-  }];
-
-  function handleNodeClick(nodeData: ITreeNode) {
-    const data = nodeData.nodeData as { presetName: 'all' };
-    const presetName: string = data.presetName;
-    source.select({ type: 'catalog-preset', presetName });
+  function handleTermChange(evt: React.FormEvent<HTMLInputElement>) {
+    const val = (evt.target as HTMLInputElement).value;
+    updateConcept((concept) => ({ ...concept, term: val }));
   }
 
-  return (
-    <Tree contents={treeState} onNodeClick={handleNodeClick} />
-  );
-};
-
-const CollectionsPanel: React.FC<{}> = function () {
-  const source = useContext(SourceContext);
-  const collections = app.useMany<ConceptCollection, {}>('collections', {});
-
-  const treeRef = useRef<Tree>(null);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (treeRef.current && source.active.type === 'collection') {
-        const currentNode = treeRef.current.getNodeContentElement(source.active.collectionID);
-        currentNode?.scrollIntoViewIfNeeded();
-      }
-    }, 300);
-  }, []);
-
-  function handleNodeClick(nodeData: ITreeNode) {
-    const data = nodeData.nodeData as { collectionID: string };
-    const collectionID: string = data.collectionID;
-    const collectionToSelect: ConceptCollection | undefined = collections.objects[collectionID];
-    const canSelect = collectionToSelect?.items.length > 0;
-    if (canSelect) {
-      source.select({ type: 'collection', collectionID });
-    }
+  function handleDefChange(evt: React.FormEvent<HTMLTextAreaElement>) {
+    const val = (evt.target as HTMLTextAreaElement).value;
+    updateConcept((concept) => ({ ...concept, definition: val }));
   }
 
-  function collectionToNode([_, collection]: [number | string, ConceptCollection]): ITreeNode {
-    const children = Object.values(collections.objects).
-    filter(c => c.parentID !== undefined).
-    filter(c => c.parentID === collection.id);
-
-    const hasChildren = children.length > 0;
-    const hasItems = collection.items.length > 0;
-    const isSelected = source.active.type === 'collection' ? (hasItems && (source.active.collectionID === collection.id)) : false;
-
-    return {
-      id: collection.id,
-      hasCaret: hasChildren,
-      isExpanded: hasChildren,
-      label: collection.label,
-      childNodes: [...children.entries()].map(collectionToNode),
-      isSelected: isSelected,
-      nodeData: { collectionID: collection.id },
-    };
+  if (ctx.ref === null) {
+    return <NonIdealState title="No concept is selected" />;
   }
 
-  const treeState: ITreeNode[] = [...Object.entries(collections.objects)].
-  filter(([_, collection]) => collection.parentID === undefined).
-  map(collectionToNode);
-
-  return (
-    <Tree ref={treeRef} contents={treeState} onNodeClick={handleNodeClick} className={styles.collectionsPanelList} />
+  const conceptForm = (
+    <div className={lang.selected === 'ara' ? Classes.RTL : undefined}>
+      <FormGroup label="Designation" labelInfo="(required)" intent={!concept.term ? 'danger' : undefined}>
+        <InputGroup fill value={concept.term} onChange={handleTermChange} />
+      </FormGroup>
+      <FormGroup label="Definition" labelInfo="(required)" intent={!concept.definition ? 'danger' : undefined}>
+        <TextArea fill value={concept.definition} growVertically onChange={handleDefChange} />
+      </FormGroup>
+    </div>
   );
-};
-
-const BasicsPanel: React.FC<{}> = function () {
-  const concept = useContext(ConceptContext);
-  const localized = concept.activeLocalized;
 
   return (
-    <div className={styles.basicsPanel}>
-
-    {localized !== null
-      ? <>
-          <FormGroup
-              label="Designation"
-              className={styles.designation}>
-            <InputGroup
-              large={true}
-              defaultValue={localized?.term}
-              {...panelFieldProps(concept)} />
-          </FormGroup>
-
-          <FormGroup
-              label="Definition">
-            <TextArea
-              growVertically={true}
-              className={styles.basicsPanelDefinition}
-              value={localized?.definition || ''}
-              {...panelFieldProps(concept)} />
-          </FormGroup>
-        </>
-
-      : null}
+    <div className={`
+          ${styles.singleConcept}
+          ${styles.editConcept}
+        `}>
+      {conceptForm}
     </div>
   );
 };
 
-const StatusPanel: React.FC<{}> = function () {
-  const concept = useContext(ConceptContext);
-  const localized = concept.activeLocalized;
 
-  return (
-    <div className={styles.statusPanel}>
-
-    {localized !== null
-      ? <>
-          <FormGroup
-              label="Entry status"
-              inline
-              className={styles.entryStatus}>
-            <InputGroup
-              defaultValue={localized?.entry_status}
-              {...panelFieldProps(concept)} />
-          </FormGroup>
-        </>
-
-      : null}
-    </div>
-  );
-};
-
-const CurrentReviewPanel: React.FC<{}> = function () {
-  const concept = useContext(ConceptContext);
-  const localized = concept.activeLocalized;
-
-  return (
-    <div className={styles.currentReviewPanel}>
-
-    {localized !== null
-      ? <>
-          <FormGroup
-              inline
-              label="Pending">
-            <InputGroup
-              defaultValue={localized?.review_date && !localized?.review_decision ? 'Yes' : 'No'}
-              {...panelFieldProps(concept)} />
-          </FormGroup>
-
-          <FormGroup
-              inline
-              label="Decision">
-            <InputGroup
-              defaultValue={localized?.review_decision || '—'}
-              {...panelFieldProps(concept)} />
-          </FormGroup>
-        </>
-
-      : null}
-    </div>
-  );
-};
-
-const PanelPlaceholder: React.FC<{}> = function () {
-  return (
-    <div className={styles.panelPlaceholder}>
-      Coming soon.
-    </div>
-  );
-};
+/* Panels */
 
 interface PanelProps {
   title?: string
@@ -452,22 +248,27 @@ const Panel: React.FC<PanelProps> = function ({
     isCollapsible, isCollapsedByDefault,
     onToggle,
     children }) {
-  const [isCollapsed, setCollapsedState] = useState((isCollapsedByDefault || false) as boolean);
+  const state = useRef({ collapsed: (isCollapsedByDefault || false) as boolean});
+  const [isCollapsed, setCollapsedState] = useState(state.current.collapsed);
 
   useEffect(() => {
     onToggle ? onToggle(isCollapsed) : void 0;
   }, [isCollapsed]);
 
   function onCollapse() {
+    state.current.collapsed = true;
+    onToggle ? onToggle(true) : void 0;
     setCollapsedState(true);
   }
   function onExpand() {
+    state.current.collapsed = false;
+    onToggle ? onToggle(false) : void 0;
     setCollapsedState(false);
   }
 
   const toggleIcon: IconName = isCollapsed
-    ? (iconCollapsed || 'chevron-right')
-    : (iconExpanded || 'chevron-down');
+    ? (iconCollapsed || 'caret-right')
+    : (iconExpanded || 'caret-down');
 
   return (
     <div className={`
@@ -499,6 +300,43 @@ const SelectLanguage: ToolbarItem = function () {
   return <LangSelector />;
 };
 
+const CompareLanguage: ToolbarItem = function () {
+  const concept = useContext(ConceptContext);
+  return <LangSelectorWide disableUnlessTranslated={true} value={concept.active || undefined} />;
+};
+
+const SelectTargetLanguage: ToolbarItem = function () {
+  const concept = useContext(ConceptContext);
+  return <LangSelectorWide value={concept.active || undefined} />;
+};
+
+const SearchByText: ToolbarItem = function () {
+  const searchCtx = useContext(TextSearchContext);
+  const [query, setQuery] = useState(searchCtx.query || '' as string);
+
+  const handleChange = function (evt: React.FormEvent<HTMLInputElement>) {
+    setQuery((evt.target as HTMLInputElement).value);
+  }
+  const updateQuery = debounce(400, searchCtx.setQuery);
+
+  useEffect(() => {
+    updateQuery(query);
+
+    return function cleanup() {
+      updateQuery.cancel();
+    }
+  }, [query]);
+
+  return <InputGroup round
+    value={query}
+    onChange={handleChange}
+    leftIcon="search"
+    placeholder="Type to search…"
+    title="Search is performed across English designations and definitions, as well as concept identifiers."
+    rightElement={<Button minimal icon="cross" onClick={() => setQuery('')} />}
+  />;
+};
+
 const AddCollection: ToolbarItem = function () {
   return <Button icon="add" title="Add collection" disabled={true} />;
 };
@@ -506,11 +344,11 @@ const AddCollection: ToolbarItem = function () {
 
 /* Sidebars */ 
 
-const SPanel: React.FC<{ key: string, term: string, cfg: PanelConfig<any> }> = function ({ key, term, cfg }) {
+const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = function ({ id, term, cfg }) {
   return (
     <Panel
         className={styles.sidebarPanel}
-        key={`${key}${cfg.objectIndependent ? '' : term}`}
+        key={`${id}${cfg.objectIndependent ? '' : term}`}
         isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
         title={cfg.title}>
       <cfg.Contents {...cfg.props || {}} />
@@ -540,27 +378,25 @@ const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle 
     <Panel
         onToggle={onToggle}
         isCollapsible={true}
-        iconExpanded={position === 'left' ? 'chevron-left' : 'chevron-right'}
-        iconCollapsed={position === 'left' ? 'chevron-right' : 'chevron-left'}
+        iconExpanded={position === 'left' ? 'caret-left' : 'caret-right'}
+        iconCollapsed={position === 'left' ? 'caret-right' : 'caret-left'}
         className={`
           ${styles.moduleSidebar}
           ${position === 'left' ? styles.moduleSidebarLeft : styles.moduleSidebarRight}`}>
 
       <div className={styles.fixedPanel}>
-        <SPanel term={term} key="first" cfg={firstPanel} />
+        <SPanel term={term} id="first" cfg={firstPanel} />
       </div>
 
       <div className={styles.restOfPanels}>
         {[...restOfPanels.entries()].map(([idx, cfg]) =>
-          <>
-            <SPanel term={term} key={`${idx}`} cfg={cfg} />
-          </>
+          <SPanel key={idx} term={term} id={`${idx}`} cfg={cfg} />
         )}
       </div>
 
       {lastPanel
         ? <div className={styles.fixedPanel}>
-            <SPanel term={term} key="last" cfg={lastPanel} />
+            <SPanel term={term} id="last" cfg={lastPanel} />
           </div>
         : null}
 
@@ -581,20 +417,20 @@ interface PanelConfig<T = {}> {
 }
 
 const PANELS: { [id: string]: PanelConfig<any> } = {
-  system: { Contents: SystemPanel, title: "System" },
-  databases: { Contents: DatabasePanel, title: "Repositories", objectIndependent: true },
-  sourceRoll: { Contents: SourceRoll, title: "Source", objectIndependent: true },
-  collections: { Contents: CollectionsPanel, title: "Collections", actions: [AddCollection] },
-  catalog: { Contents: CatalogPanel, title: "Catalog" },
-  basics: { Contents: BasicsPanel, title: "Basics" },
-  status: { Contents: StatusPanel, title: "Status" },
-  currentReview: { Contents: CurrentReviewPanel, title: "Current review" },
+  system: { Contents: panels.SystemPanel, title: "System" },
+  databases: { Contents: panels.DatabasePanel, title: "Repositories", objectIndependent: true },
+  sourceRoll: { Contents: panels.SourceRoll, title: "Source", objectIndependent: true },
+  collections: { Contents: panels.CollectionsPanel, title: "Collections", actions: [AddCollection], objectIndependent: true },
+  catalog: { Contents: panels.CatalogPanel, title: "Catalog" },
+  basics: { Contents: panels.BasicsPanel, title: "Basics" },
+  status: { Contents: panels.StatusPanel, title: "Status" },
+  currentReview: { Contents: panels.CurrentReviewPanel, title: "Current review" },
+  uses: { Contents: panels.LineagePanel, title: "Lineage" },
+  changelog: { Contents: panels.Changelog, title: "Changelog" },
 
-  relationships: { Contents: () => <PanelPlaceholder />, title: "Relationships" },
-  uses: { Contents: () => <PanelPlaceholder />, title: "Uses (lineage)" },
-  changelog: { Contents: () => <PanelPlaceholder />, title: "Change log" },
-  compareLineage: { Contents: () => <PanelPlaceholder />, title: "Compare previous use" },
-  compareLanguage: { Contents: () => <PanelPlaceholder />, title: "Compare language" },
+  relationships: { Contents: () => <panels.PanelPlaceholder />, title: "Relationships" },
+  compareLineage: { Contents: () => <panels.PanelPlaceholder />, title: "Compare lineage" },
+  compareLanguage: { Contents: () => <panels.PanelPlaceholder />, title: "Compare translation" },
 };
 
 type ToolbarItem = React.FC<{}>;
@@ -615,7 +451,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     hotkey: 'n',
     title: "Propose",
     leftSidebar: [PANELS.source, PANELS.databases],
-    MainView: () => <NonIdealState title="Comoponent not implement" />,
+    MainView: () => <NonIdealState title="Component not implemented" />,
     mainToolbar: [SelectLanguage],
     rightSidebar: [PANELS.relationships],
   },
@@ -624,7 +460,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     title: "Explore",
     leftSidebar: [PANELS.system, PANELS.catalog, PANELS.collections, PANELS.databases],
     MainView: ConceptBrowser,
-    mainToolbar: [SelectLanguage],
+    mainToolbar: [SelectLanguage, SearchByText],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.basics, PANELS.relationships, PANELS.uses],
   },
   examine: {
@@ -632,24 +468,23 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     title: "Examine",
     leftSidebar: [PANELS.system, PANELS.sourceRoll, PANELS.databases],
     MainView: ConceptDetails, // basics, notes, examples
-    mainToolbar: [SelectLanguage],
-    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.uses, PANELS.changelog],
+    mainToolbar: [CompareLanguage],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.changelog, PANELS.uses],
   },
   edit: {
-    disabled: true,
     hotkey: 'c',
     title: "Edit",
-    leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRoll, PANELS.databases],
-    MainView: () => <NonIdealState title="Comoponent not implement" />,
-    mainToolbar: [SelectLanguage],
-    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.compareLanguage, PANELS.compareLineage],
+    leftSidebar: [PANELS.system, PANELS.compareLineage, PANELS.sourceRoll, PANELS.databases],
+    MainView: ConceptEdit,
+    mainToolbar: [CompareLanguage],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.changelog],
   },
   review: {
     disabled: true,
     hotkey: 'x',
     title: "Review",
     leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRoll, PANELS.databases],
-    MainView: () => <NonIdealState title="Comoponent not implement" />,
+    MainView: () => <NonIdealState title="Component not implemented" />,
     mainToolbar: [SelectLanguage],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.compareLanguage, PANELS.compareLineage],
   },
@@ -658,9 +493,9 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     hotkey: 'l',
     title: "Translate",
     leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRoll, PANELS.databases],
-    MainView: () => <NonIdealState title="Comoponent not implement" />,
-    mainToolbar: [SelectLanguage, /*SelectTargetLanguage*/],
-    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.lineage, PANELS.changelog],
+    MainView: () => <NonIdealState title="Component not implemented" />,
+    mainToolbar: [SelectTargetLanguage],
+    rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.changelog, PANELS.uses],
   },
 };
 
@@ -685,7 +520,60 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const concept = app.useOne<MultiLanguageConcept<any>, number>('concepts', selectedConceptRef);
 
   const [activeSource, selectSource] = useState({ type: 'catalog-preset', presetName: 'all' } as ObjectSource);
-  const concepts = app.useIDs<number, { query: { inSource: ObjectSource }}>('concepts', { query: { inSource: activeSource }});
+
+  const [textQuery, setTextQuery] = useState('' as string);
+
+  const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
+  ('concepts', { query: { inSource: activeSource, matchingText: textQuery }}).objects;
+
+  const concepts = {
+    ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
+      ('concepts', { query: { inSource: activeSource }}).ids,
+    objects: Object.values(_objs).sort((a, b) => a.termid - b.termid),
+  };
+
+  const currentIndex = concepts.objects.findIndex((c) => c.termid === selectedConceptRef);
+
+  const collectionsMigrated = useRef({ yes: false });
+
+  useEffect(() => {
+    if (concepts.ids.length > 0 && collectionsMigrated.current.yes !== true) {
+      callIPC('initialize-standards-collections');
+      collectionsMigrated.current.yes = true;
+    }
+  }, [concepts.ids.length]);
+
+  // Hotkey navigation up/down
+  useEffect(() => {
+    function selectNext() {
+      const ref = getNextRef(currentIndex);
+      if (ref) { selectConceptRef(ref); }
+    }
+    function selectPrevious() {
+      const ref = getPreviousRef(currentIndex);
+      if (ref) { selectConceptRef(ref); }
+    }
+    function getNextRef(idx: number| undefined): ConceptRef | undefined {
+      if (idx !== undefined && concepts.objects[idx + 1]) {
+        return concepts.objects[idx + 1].termid;
+      }
+      return undefined;
+    }
+    function getPreviousRef(idx: number| undefined): ConceptRef | undefined  {
+      if (idx !== undefined && idx >= 1 && concepts.objects[idx - 1]) {
+        return concepts.objects[idx - 1].termid;
+      }
+      return undefined;
+    }
+
+    Mousetrap.bind('j', selectNext);
+    Mousetrap.bind('k', selectPrevious);
+
+    return function cleanup() {
+      Mousetrap.unbind('j');
+      Mousetrap.unbind('k');
+    };
+  }, [JSON.stringify(concepts.ids), currentIndex]);
 
   let localizedConcept: Concept<any, any> | null | undefined;
   // `null` means not yet localized into `lang.selected`, `undefined` means still loading.
@@ -708,44 +596,33 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
           ref: selectedConceptRef,
           select: selectConceptRef,
         }}>
-      <SourceContext.Provider value={{ active: activeSource, select: selectSource, refs: concepts.ids }}>
-        <div className={styles.moduleView}>
-          {leftSidebar.length > 0
-            ? <Sidebar position="left" panelSet={leftSidebar} onToggle={handleLeftSidebarToggle} />
-            : null}
+      <SourceContext.Provider
+          value={{
+            active: activeSource,
+            select: selectSource,
+            refs: concepts.ids,
+            objects: concepts.objects,
+          }}>
+        <TextSearchContext.Provider value={{ query: textQuery, setQuery: setTextQuery }}>
+          <div className={styles.moduleView}>
+            {leftSidebar.length > 0
+              ? <Sidebar position="left" panelSet={leftSidebar} onToggle={handleLeftSidebarToggle} />
+              : null}
 
-          <div className={styles.moduleMainView}>
-            <MainView />
+            <div className={styles.moduleMainView}>
+              <MainView />
 
-            <div className={styles.moduleToolbar}>
-              {mainToolbar.map(El => <El />)}
+              <div className={styles.moduleToolbar}>
+                {mainToolbar.map(El => <El />)}
+              </div>
             </div>
-          </div>
 
-          {rightSidebar.length > 0
-            ? <Sidebar position="right" panelSet={rightSidebar} onToggle={handleRightSidebarToggle} />
-            : null}
-        </div>
+            {rightSidebar.length > 0
+              ? <Sidebar position="right" panelSet={rightSidebar} onToggle={handleRightSidebarToggle} />
+              : null}
+          </div>
+        </TextSearchContext.Provider>
       </SourceContext.Provider>
     </ConceptContext.Provider>
   );
 };
-
-
-/* Utilities */
-
-function panelFieldProps(concept: ConceptContextSpec) {
-  /* Props shared across BP3 input groups, textareas in panel fields. */
-
-  return {
-    fill: true,
-    intent: concept.activeLocalized === undefined ? 'danger' : undefined as IInputGroupProps["intent"],
-    disabled: concept.isLoading,
-    readOnly: true,
-  };
-}
-
-// const ItemButton: React.FC<any> = function (props) {
-//   const finalProps = { ...props, className: `${props.className || ''} ${styles.itemButton}`}
-//   return <Button {...finalProps}>{props.children}</Button>
-// }

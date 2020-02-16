@@ -14,7 +14,7 @@
     "dist:mac": "electron-builder -m",
     "pack": "electron-builder --dir",
     "release": "electron-builder --publish always",
-    "cdist": "yarn compile && electron-builder -mlw",
+    "cdist": "yarn compile && electron-builder -m",
     "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "electronWebpack": {
@@ -27,7 +27,7 @@
     }
   },
   "build": {
-    "productName": "ISO/TC 211 Geolexica Desktop",
+    "productName": "Geolexica",
     "appId": "org.glossarist.isotc211",
     "mac": {
       "category": "public.app-category.productivity",
@@ -94,7 +94,7 @@
     "@blueprintjs/select": "^3.11.2",
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
-    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.0.2-gitpkg",
+    "coulomb": "file:../../Coulomb/coulomb/dist",
     "electron-log": "^4.0.6",
     "fs-extra": "^8.1.0",
     "immer": "^5.0.0",
@@ -111,23 +111,23 @@
     "@types/async-lock": "^1.1.1",
     "@types/fs-extra": "^8.0.0",
     "@types/mousetrap": "^1.6.3",
-    "@types/node": "^12.12.6",
+    "@types/node": "^12.12.7",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.4",
     "@types/react-transition-group": "^4.2.3",
     "@types/throttle-debounce": "^2.1.0",
-    "cross-env": "^6.0.3",
-    "electron": "^7.1.2",
-    "electron-builder": "^22.3.2",
+    "cross-env": "^7.0.0",
+    "electron": "^8.0.1",
+    "electron-builder": "^21.2.0",
     "electron-notarize": "^0.2.1",
     "electron-react-devtools": "^0.5.3",
     "electron-webpack": "^2.7.4",
     "electron-webpack-ts": "^3.2.0",
     "node-sass": "^4.12.0",
     "npm-run-all": "^4.1.5",
-    "sass-loader": "^7.1.0",
+    "sass-loader": "^8.0.2",
     "typescript": "^3.7.2",
     "typescript-plugin-css-modules": "^2.1.2",
-    "webpack": "~4.35.2"
+    "webpack": "~4.41.5"
   }
 }

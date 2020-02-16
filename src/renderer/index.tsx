@@ -3,10 +3,6 @@ import { renderApp } from 'coulomb/app/renderer';
 import { conf as appConf, availableLanguages } from '../app';
 
 
-import { EventEmitter } from 'events'
-EventEmitter.defaultMaxListeners = 10000;
-
-
 export const conf: RendererConfig<typeof appConf> = {
   app: appConf,
 

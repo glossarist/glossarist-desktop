@@ -4,10 +4,15 @@ import { app as electronApp } from 'electron';
 import { MainConfig } from 'coulomb/config/main';
 import { initMain } from 'coulomb/app/main';
 
+import { listen } from 'coulomb/ipc/main';
 import { default as Manager, ManagerOptions } from 'coulomb/db/isogit-yaml/main/manager';
+import { default as BackendCls } from 'coulomb/db/isogit-yaml/main/base';
+import { default as ModelManagerCls } from 'coulomb/db/isogit-yaml/main/manager';
 
 import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
 import { conf as appConf, availableLanguages } from '../app';
+
+import { default as ConceptManagerCls } from './concept-manager';
 
 
 const appDataPath = electronApp.getPath('userData');
@@ -24,7 +29,7 @@ export const conf: MainConfig<typeof appConf> = {
 
   databases: {
     default: {
-      backend: () => import('coulomb/db/isogit-yaml/main/base'),
+      backend: BackendCls,
       options: {
         workDir: path.join(appDataPath, 'glossarist-database'),
         upstreamRepoURL: 'https://github.com/ISO-TC211/geolexica-database',
@@ -38,7 +43,7 @@ export const conf: MainConfig<typeof appConf> = {
     concepts: {
       dbName: 'default',
       options: {
-        cls: () => import('./concept-manager'),
+        cls: ConceptManagerCls,
         workDir: 'concepts',
         idField: 'termid',
       } as ManagerOptions<MultiLanguageConcept<any>>,
@@ -46,7 +51,7 @@ export const conf: MainConfig<typeof appConf> = {
     collections: {
       dbName: 'default',
       options: {
-        cls: () => import('coulomb/db/isogit-yaml/main/manager'),
+        cls: ModelManagerCls,
         workDir: 'collections',
         idField: 'id',
       } as ManagerOptions<ConceptCollection>,
@@ -58,7 +63,9 @@ export const conf: MainConfig<typeof appConf> = {
 export const app = initMain(conf);
 
 
-(async () => {
+listen<{}, {}>
+('initialize-standards-collections', async () => {
+
   // Create and write standards collection, with sub-collections being standards
   // mentioned in concept authoritative sources / lineage sources / review events.
   const _app = await app;
@@ -104,8 +111,10 @@ export const app = initMain(conf);
         };
         await collectionManager.create(collection, `Create subcollection for standard  ${standard}`);
       }
+
+      await collectionManager.reportUpdatedData();
     }, 4000);
   }
 
   return {};
-})();
+})

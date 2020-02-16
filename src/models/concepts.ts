@@ -10,7 +10,7 @@ type ConceptRelation =
 
 export type MultiLanguageConcept<Ref extends ConceptRef> = {
   termid: Ref
-  relations: ConceptRelation[]
+  relations?: ConceptRelation[]
   eng: Concept<Ref, AuthoritativeLanguage>
   // English is required, others optional
 } & _Concepts<Ref>;
@@ -26,16 +26,16 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   language_code: Lang
   entry_status: ConceptStatus
 
-  subject_field: SubjectFieldLabel
+  //subject_field: SubjectFieldLabel
 
   term: Designation
 
-  // This is superfluous in current data schema,
+  // Superfluous in current data schema,
   // which allows only one designation per concept,
   // which would hence be the preferred one.
   // When designations are decoupled from concept,
   // there may be preferred and non-preferred designations.
-  is_preferred: boolean
+  //is_preferred: boolean
 
   definition: Definition
   notes: Note[]
@@ -47,23 +47,25 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   //lineage_source: LineageSource
 
   // Date concept was first introduced?
-  date_accepted: Date
+  date_accepted?: Date
 
   // ?
-  release: string
+  release?: string
 
-  pending_review: ConceptReview
-  review_history: AcceptedConceptReview[]
+  //pending_review: ConceptReview
+  //review_history: AcceptedConceptReview[]
 
 
-  // Deprecated
+  // Deprecated:
+
+  classification?: 'preferred'
 
   review_date?: Date
   review_status?: string
   review_decision?: 'accepted' | 'rejected'
 
-  lineage_source: string
-  lineage_source_similarity: number
+  lineage_source?: string
+  lineage_source_similarity?: number
 }
 
 type ConceptReview = {
@@ -102,7 +104,7 @@ type Note = string;
 type Example = string;
 // Rich text
 
-type ConceptStatus = 'retired' | 'valid'
+type ConceptStatus = 'retired' | 'valid' | 'superseded' | 'proposed'
 
 export type ConceptRef = number;
 
