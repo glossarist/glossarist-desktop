@@ -1,7 +1,7 @@
 import * as log from 'electron-log';
 import { debounce } from 'throttle-debounce';
 
-import React, { useRef, useContext, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useContext, useState, useEffect } from 'react';
 
 import Mousetrap from 'mousetrap';
 
@@ -15,7 +15,7 @@ import {
   Tree, ITreeNode, ButtonGroup,
  } from '@blueprintjs/core';
 
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
 import { MultiLanguageConcept, ConceptRef, Concept } from '../../models/concepts';
