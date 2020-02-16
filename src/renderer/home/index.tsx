@@ -142,9 +142,9 @@ const ConceptDetails: React.FC<{}> = function () {
 
   let conceptDetails: JSX.Element;
 
-  if (concept === undefined) {
-    conceptDetails = <NonIdealState title={`Entry not yet translated into ${lang.available[lang.selected]}.`} />
-  } else if (concept === null) {
+  if (concept === null) {
+    conceptDetails = <NonIdealState title={`Not yet translated into ${lang.available[lang.selected]}.`} />
+  } else if (concept === undefined) {
     conceptDetails = <NonIdealState title="No concept is selected" />
   } else {
     conceptDetails = (
