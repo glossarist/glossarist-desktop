@@ -157,18 +157,6 @@ html, body, #app {
     width: auto;
   }
 
-  &.moduleSidebarLeft {
-    > .panelContents > .restOfPanels .panel {
-      padding-left: $panelPadding;
-    }
-  }
-  &.moduleSidebarRight {
-    flex-flow: row-reverse nowrap;
-    > .panelContents > .restOfPanels .panel {
-      padding-right: $panelPadding;
-    }
-  }
-
   > .panelContents {
     width: 18rem;
     flex: 1;
@@ -231,6 +219,16 @@ html, body, #app {
     flex-flow: column nowrap;
     justify-content: center;
     width: 1rem;
+  }
+
+  &.moduleSidebarLeft {
+    > .panelContents .restOfPanels {
+    }
+  }
+  &.moduleSidebarRight {
+    flex-flow: row-reverse nowrap;
+    > .panelContents .restOfPanels {
+    }
   }
 }
 
