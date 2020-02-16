@@ -20,7 +20,7 @@ import { ConceptContextSpec, ConceptContext, SourceContext } from './contexts';
 import { ConceptItem } from './concepts';
 
 import styles from './styles.scss';
-import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
+import { useIPCValue } from 'coulomb/ipc/renderer';
 
 
 export const SystemPanel: React.FC<{}> = function () {
