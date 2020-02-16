@@ -249,6 +249,7 @@ const ConceptEdit: React.FC<{}> = function () {
 
 interface PanelProps {
   title?: string
+  TitleComponent?: React.FC<{}>
   className?: string
   iconCollapsed?: IconName
   iconExpanded?: IconName
@@ -257,7 +258,8 @@ interface PanelProps {
   onToggle?: (state: boolean) => void
 }
 const Panel: React.FC<PanelProps> = function ({
-    title, className,
+    className,
+    title, TitleComponent,
     iconCollapsed, iconExpanded,
     isCollapsible, isCollapsedByDefault,
     onToggle,
@@ -290,12 +292,12 @@ const Panel: React.FC<PanelProps> = function ({
         ${styles.panel}
         ${isCollapsible === true ? styles.panelCollapsible : ''}
         ${isCollapsible === true && isCollapsed === true ? styles.panelCollapsed : ''}`}>
-      {title || isCollapsible
+      {title || TitleComponent || isCollapsible
         ? <div
               className={styles.panelTitleBar}
               onClick={(isCollapsible === true && isCollapsed === false) ? onCollapse : onExpand}>
             <Icon className={styles.panelTriggerIcon} icon={isCollapsible ? toggleIcon : 'blank'} />
-            {title}
+            {TitleComponent ? <TitleComponent /> : title}
           </div>
         : null}
       {isCollapsible && isCollapsed
@@ -372,6 +374,7 @@ const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = fu
     <Panel
         className={styles.sidebarPanel}
         isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
+        TitleComponent={cfg.Title}
         title={cfg.title}>
       <cfg.Contents {...cfg.props || {}} />
     </Panel>
@@ -431,6 +434,7 @@ const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle 
 
 interface PanelConfig<T = {}> {
   title: string
+  Title?: React.FC<{}>
   actions?: ToolbarItem[]
   Contents: React.FC<T>
   objectIndependent?: true
