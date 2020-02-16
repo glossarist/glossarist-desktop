@@ -314,6 +314,10 @@ const SelectTargetLanguage: ToolbarItem = function () {
   return <LangSelectorWide value={concept.active || undefined} />;
 };
 
+const SortOrder: ToolbarItem = function () {
+  return <Button disabled icon="sort">Custom order</Button>;
+};
+
 const SearchByText: ToolbarItem = function () {
   const searchCtx = useContext(TextSearchContext);
   const [query, setQuery] = useState(searchCtx.query || '' as string);
