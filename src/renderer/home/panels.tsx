@@ -150,8 +150,12 @@ export const CollectionsPanel: React.FC<{}> = function () {
     filter(c => c.parentID === collection.id);
 
     const hasChildren = children.length > 0;
-    const hasItems = collection.items.length > 0;
-    const isSelected = source.active.type === 'collection' ? (hasItems && (source.active.collectionID === collection.id)) : false;
+
+    const itemCount = hasChildren ? 0 : collection.items.length;
+    const hasItems = !hasChildren ? itemCount > 0 : false;
+    const isSelected = source.active.type === 'collection'
+      ? (hasItems && (source.active.collectionID === collection.id))
+      : false;
 
     return {
       id: collection.id,
@@ -159,6 +163,7 @@ export const CollectionsPanel: React.FC<{}> = function () {
       isExpanded: hasChildren,
       label: collection.label,
       childNodes: [...children.entries()].map(collectionToNode),
+      secondaryLabel: hasItems ? <Tag minimal>{itemCount}</Tag> : undefined,
       isSelected: isSelected,
       nodeData: { collectionID: collection.id },
     };
