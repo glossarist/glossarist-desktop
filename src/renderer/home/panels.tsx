@@ -131,7 +131,7 @@ export const CollectionsPanel: React.FC<{}> = function () {
         const currentNode = treeRef.current.getNodeContentElement(source.active.collectionID);
         currentNode?.scrollIntoViewIfNeeded();
       }
-    }, 300);
+    }, 500);
   }, []);
 
   function handleNodeClick(nodeData: ITreeNode) {
