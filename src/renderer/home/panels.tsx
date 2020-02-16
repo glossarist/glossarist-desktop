@@ -6,7 +6,7 @@ import {
   H3,
   Switch, Button,
   FormGroup, InputGroup, TextArea,
-  Text, Tooltip,
+  Text,
   Tree, ITreeNode,
   IInputGroupProps,
   Tag, Icon,
