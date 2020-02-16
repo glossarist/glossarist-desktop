@@ -237,20 +237,18 @@ export const StatusPanel: React.FC<{}> = function () {
 
   return (
     <div className={styles.statusPanel}>
-
-    {localized !== null
-      ? <>
-          <FormGroup
-              label="Entry status"
-              inline
-              className={styles.entryStatus}>
-            <InputGroup
-              defaultValue={localized?.entry_status}
-              {...panelFieldProps(concept)} />
-          </FormGroup>
-        </>
-
-      : null}
+      {localized !== null
+        ? <>
+            <FormGroup
+                label="Entry status"
+                inline
+                className={styles.entryStatus}>
+              <InputGroup
+                value={localized?.entry_status}
+                {...panelFieldProps(concept)} />
+            </FormGroup>
+          </>
+        : null}
     </div>
   );
 };
