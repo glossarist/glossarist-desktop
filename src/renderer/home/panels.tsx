@@ -3,7 +3,7 @@ import React, { useRef, useContext, useEffect } from 'react';
 import { ConceptCollection } from '../../models/concepts';
 
 import {
-  H3,
+  H3, Classes,
   Switch, Button,
   FormGroup, InputGroup, TextArea,
   Text,
@@ -70,14 +70,20 @@ export const SourceRoll: React.FC<{}> = function () {
     }
   }
 
-  const treeState: ITreeNode[] = concepts.map(c => {
-    return {
+  let treeState: ITreeNode[];
+  if (source.isLoading) {
+    treeState = [1, 2, 3, 4].map(id => ({
+      id: id,
+      label: <span className={Classes.SKELETON}>Loading…</span>,
+    }));
+  } else {
+    treeState = concepts.map(c => ({
       id: c.termid,
       label: <ConceptItem concept={c} />,
       nodeData: { conceptRef: c.termid },
       isSelected: concept.ref === c.termid,
-    }
-  });
+    }));
+  }
 
   return (
     <div ref={panelRef} className={styles.sourceRollPanel}>
