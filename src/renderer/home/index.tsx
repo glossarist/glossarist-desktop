@@ -547,8 +547,6 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
   ('concepts', { query: { inSource: activeSource, matchingText: textQuery }});
 
-  const concept = selectedConceptRef ? (_objs.objects[selectedConceptRef] || null) : null;
-
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
       ('concepts', { query: { inSource: activeSource }}).ids,
@@ -602,13 +600,12 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
     };
   }, [JSON.stringify(concepts.ids), currentIndex]);
 
-  let localizedConcept: Concept<any, any> | null | undefined;
-
-  if (concept) {
-    localizedConcept = concept[lang.selected as keyof typeof availableLanguages] || null;
-  } else {
-    localizedConcept = undefined;
-  }
+  const concept = selectedConceptRef
+    ? (_objs.objects[selectedConceptRef] || null)
+    : null; 
+  const localizedConcept = concept
+    ? (concept[lang.selected as keyof typeof availableLanguages] || null)
+    : undefined;
 
   return (
     <ConceptContext.Provider
