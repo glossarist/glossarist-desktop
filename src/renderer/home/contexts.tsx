@@ -10,7 +10,7 @@ export interface TextSearchContextSpec {
 }
 export const TextSearchContext = React.createContext<TextSearchContextSpec>({
   query: '',
-  setQuery: (newQuery: string) => {}
+  setQuery: () => {}
 });
 
 
