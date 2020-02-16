@@ -10,7 +10,7 @@ import { default as BackendCls } from 'coulomb/db/isogit-yaml/main/base';
 import { default as ModelManagerCls } from 'coulomb/db/isogit-yaml/main/manager';
 
 import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
-import { conf as appConf, availableLanguages } from '../app';
+import { conf as appConf } from '../app';
 
 import { default as ConceptManagerCls } from './concept-manager';
 
@@ -81,14 +81,12 @@ listen<{}, {}>
     const concepts = await conceptManager.readAll();
     var standards: Record<string, string[]> = {};
     for (const [ref, concept] of Object.entries(concepts)) {
-      for (const lang of Object.keys(availableLanguages)) {
-        const localized = concept[lang as keyof typeof availableLanguages];
-        if (localized) {
-          const lineage = localized.lineage_source;
-          if (lineage) {
-            const standard = lineage.split(',')[0].split('(')[0].trim();
-            standards[standard] = [ ...(standards[standard] || []), ref ];
-          }
+      const localized = concept.eng;
+      if (localized) {
+        const lineage = localized.lineage_source;
+        if (lineage) {
+          const standard = lineage.split(',')[0].split('(')[0].trim();
+          standards[standard] = [ ...(standards[standard] || []), ref ];
         }
       }
     }
