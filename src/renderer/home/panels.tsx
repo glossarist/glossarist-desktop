@@ -47,11 +47,11 @@ export const Changelog: React.FC<{}> = function () {
 
 
 export const DatabasePanel: React.FC<{}> = function() {
-  return (
+  return useMemo(() => (
     <DatabaseList
       databases={appConf.databases}
       databaseStatusComponents={rendererConf.databaseStatusComponents} />
-  );
+  ), Object.keys(appConf.databases));
 };
 
 
