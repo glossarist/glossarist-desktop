@@ -425,9 +425,8 @@ interface PanelConfig<T = {}> {
 
 const PANELS: { [id: string]: PanelConfig<any> } = {
   system: { Contents: panels.SystemPanel, title: "System" },
-  databases: { Contents: panels.DatabasePanel, title: "Repositories", objectIndependent: true },
-  sourceRoll: { Contents: panels.SourceRoll, title: "Source", objectIndependent: true },
-  collections: { Contents: panels.CollectionsPanel, title: "Collections", actions: [AddCollection], objectIndependent: true },
+  databases: { Contents: panels.DatabasePanel, title: "Repositories" },
+  sourceRoll: { Contents: panels.SourceRoll, title: "Source" },
   catalog: { Contents: panels.CatalogPanel, title: "Catalog" },
   basics: { Contents: panels.BasicsPanel, title: "Basics" },
   status: { Contents: panels.StatusPanel, title: "Status" },
