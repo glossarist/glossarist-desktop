@@ -29,7 +29,11 @@ import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/wid
 
 import { ConceptItem } from './concepts';
 import * as panels from './panels';
-import { SourceContext, ConceptContext, TextSearchContext } from './contexts';
+import {
+  SourceContext,
+  ConceptContext,
+  TextSearchContext,
+ } from './contexts';
 
 import styles from './styles.scss';
 
