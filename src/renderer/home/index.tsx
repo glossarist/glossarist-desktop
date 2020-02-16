@@ -539,9 +539,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const lang = useContext(LangConfigContext);
 
   const [selectedConceptRef, selectConceptRef] = useState(null as null | ConceptRef);
-
   const [activeSource, selectSource] = useState({ type: 'catalog-preset', presetName: 'all' } as ObjectSource);
-
   const [textQuery, setTextQuery] = useState('' as string);
 
   const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
