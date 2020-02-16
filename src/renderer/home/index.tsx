@@ -59,7 +59,7 @@ const Window: React.FC<WindowComponentProps> = function () {
           iconExpanded="caret-up">
         <H1 className={styles.appTitle}>Glossarist</H1>
 
-        <ButtonGroup large={true} className={styles.moduleSelector}>
+        <ButtonGroup large className={styles.moduleSelector}>
           {MODULES.map(moduleID =>
             <Button
                 disabled={MODULE_CONFIG[moduleID].disabled === true}
