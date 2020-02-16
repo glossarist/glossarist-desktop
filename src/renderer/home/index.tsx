@@ -325,7 +325,12 @@ const SelectTargetLanguage: ToolbarItem = function () {
 };
 
 const SortOrder: ToolbarItem = function () {
-  return <Button disabled icon="sort">Custom order</Button>;
+  const src = useContext(SourceContext).active;
+  if (src.type === 'catalog-preset' && src.presetName === 'all') {
+    return <Button disabled icon="sort-numerical">Concept ID</Button>;
+  } else {
+    return <Button disabled icon="sort">Custom order</Button>;
+  }
 };
 
 const SearchByText: ToolbarItem = function () {
