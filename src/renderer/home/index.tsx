@@ -52,7 +52,11 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   return (
     <div className={styles.homeWindowLayout}>
-      <Panel isCollapsible={true} className={styles.topPanel} iconCollapsed="caret-down" iconExpanded="caret-up">
+      <Panel
+          isCollapsible
+          className={styles.topPanel}
+          iconCollapsed="caret-down"
+          iconExpanded="caret-up">
         <H1 className={styles.appTitle}>Glossarist</H1>
 
         <ButtonGroup large={true} className={styles.moduleSelector}>
