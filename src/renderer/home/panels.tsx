@@ -16,6 +16,8 @@ import { app, conf as rendererConf } from '../index';
 import { conf as appConf } from '../../app';
 import { DatabaseList } from 'coulomb/db/renderer/status';
 
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+
 import { ConceptContextSpec, ConceptContext, SourceContext } from './contexts';
 import { ConceptItem } from './concepts';
 
@@ -173,59 +175,67 @@ export const CollectionsPanel: React.FC<{}> = function () {
 
 
 export const BasicsPanel: React.FC<{}> = function () {
+  const lang = useContext(LangConfigContext);
   const concept = useContext(ConceptContext);
   const localized = concept.activeLocalized;
   const field = panelFieldProps(concept);
+  const rtlClass = lang.selected === 'ara' ? Classes.RTL : '';
+
+  const isValid = localized ? ['retired', 'superseded'].indexOf(localized.entry_status) < 0 : undefined;
+  const designationValidityClass = isValid === false ? styles.invalidDesignation : '';
+  const loadingClass = concept.isLoading ? Classes.SKELETON : undefined;
+  const preferredDesignationMarker = localized?.classification === 'preferred'
+    ? <span className={loadingClass}>preferred</span>
+    : undefined;
 
   return (
-    <div className={styles.basicsPanel}>
-
-    {localized !== null
-      ? <>
-          {/*}
+    <div className={`${styles.basicsPanel} ${rtlClass}`}>
+      {localized !== null
+        ? <>
             <FormGroup
                 key="designation"
                 label="Designation"
-                labelInfo={localized?.classification}
+                labelInfo={preferredDesignationMarker}
                 className={styles.designation}>
               <InputGroup
                 large={true}
                 value={localized?.term}
+                className={`${rtlClass} ${designationValidityClass} ${loadingClass}`}
                 {...field} />
             </FormGroup>
-          */}
 
-          <FormGroup
-              key="definition">
-            <TextArea
-              growVertically={true}
-              className={styles.definition}
-              value={localized?.definition || ''}
-              {...field} />
-          </FormGroup>
-
-          {[...localized?.notes.entries() || []].map(([idx, note]) =>
             <FormGroup
-                key={`note-${idx}`}
-                inline
-                label="NOTE">
-              <Text
-                className={styles.note}>{note}</Text>
+                className={rtlClass}
+                key="definition">
+              <TextArea
+                growVertically={true}
+                className={`${styles.definition} ${rtlClass} ${loadingClass}`}
+                value={localized?.definition}
+                {...field} />
             </FormGroup>
-          )}
 
-          {[...localized?.examples.entries() || []].map(([idx, example]) =>
-            <FormGroup
-                key={`note-${idx}`}
-                inline
-                label="EXAMPLE">
-              <Text
-                className={styles.example}>{example}</Text>
-            </FormGroup>
-          )}
-        </>
+            {[...localized?.notes.entries() || []].map(([idx, note]) =>
+              <FormGroup
+                  key={`note-${idx}`}
+                  inline
+                  label="NOTE">
+                <Text
+                  className={`${styles.note} ${loadingClass}`}>{note}</Text>
+              </FormGroup>
+            )}
 
-      : null}
+            {[...localized?.examples.entries() || []].map(([idx, example]) =>
+              <FormGroup
+                  key={`note-${idx}`}
+                  inline
+                  label="EXAMPLE">
+                <Text
+                  className={`${loadingClass} ${styles.example}`}>{example}</Text>
+              </FormGroup>
+            )}
+          </>
+
+        : null}
     </div>
   );
 };
