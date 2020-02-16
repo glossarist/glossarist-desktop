@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useEffect } from 'react';
+import React, { useMemo, useRef, useContext, useEffect } from 'react';
 
 import { ConceptCollection } from '../../models/concepts';
 
