@@ -179,7 +179,7 @@ const ConceptDetails: React.FC<{}> = function () {
   );
 };
 
-// Concept details
+// Concept edit
 
 const ConceptEdit: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
