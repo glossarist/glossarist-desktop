@@ -41,12 +41,8 @@ export const Changelog: React.FC<{}> = function () {
   const hasUncommittedChanges = useIPCValue<{ objectID: number }, { modified: boolean }>
   ('model-concepts-get-modified-status', { modified: false }, { objectID: concept.ref || -1 });
 
-  async function handleCommit() {
-    console.debug("YO");
-  }
   return <ObjectStorageStatus
-    hasUncommittedChanges={hasUncommittedChanges.value.modified}
-    onCommit={handleCommit} />
+    hasUncommittedChanges={hasUncommittedChanges.value.modified} />
 }
 
 
