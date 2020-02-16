@@ -2,7 +2,7 @@ import React, { useRef, useContext, useEffect } from 'react';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
-import { ConceptRef, MultiLanguageConcept } from '../../models/concepts';
+import { MultiLanguageConcept } from '../../models/concepts';
 
 import { availableLanguages } from '../../app';
 import { ConceptContext } from './contexts';
