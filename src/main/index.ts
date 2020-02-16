@@ -63,6 +63,10 @@ export const conf: MainConfig<typeof appConf> = {
 export const app = initMain(conf);
 
 
+/* This is a temporary endpoint serving for data migration.
+   It creates an initial set of collections based on concept lineage source.
+   This will be removed once collections are committed to the database. */
+
 listen<{}, {}>
 ('initialize-standards-collections', async () => {
 
