@@ -184,53 +184,68 @@ const ConceptDetails: React.FC<{}> = function () {
 const ConceptEdit: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
+  const active = ctx.active;
+  const auth = active ? active[lang.default as keyof typeof availableLanguages] : undefined;
 
-  type InitialConcept = Omit<Omit<Concept<any, any>, 'id'>, 'authoritative_source'>;
+  const [concept, updateConcept] = useState<Concept<any, any> | undefined>(auth);
+  const [commitInProgress, setCommitInProgress] = useState(false);
+  const hasUncommittedChanges = concept && auth &&
+    JSON.stringify(auth) !== JSON.stringify(concept);
 
-  const [concept, updateConcept] = useState<Concept<any, any> | InitialConcept>(ctx.activeLocalized || {
-    language_code: lang.selected,
-    entry_status: 'proposed',
-    term: '',
-    definition: '',
-    notes: [],
-    examples: [],
-  });
+  useEffect(() => {
+    // Make sure edit screen updates if user navigates to another concept while editing.
+    // NOTE: This will cause unsaved changes to be lost.
+    updateConcept(ctx.active?.eng || undefined);
+  }, [ctx.ref])
 
-  const writeChanges = debounce(500, () => {
-    if (ctx.active) {
-      callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
+  const commitChanges = async () => {
+    if (active !== null && concept !== undefined) {
+      setCommitInProgress(true);
+
+      await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
       ('model-concepts-update-one', {
-        objectID: ctx.active.termid,
-        object: { ...ctx.active, [lang.selected]: concept },
-        commit: false,
+        objectID: active.termid,
+        object: { ...active, eng: concept },
+        commit: true,
       });
-    }
-  });
 
-  useEffect(writeChanges, [JSON.stringify(concept)]);
+      setCommitInProgress(false);
+      setImmediate(() => { ctx.select(null); ctx.select(active.termid) });
+    }
+  };
 
   function handleTermChange(evt: React.FormEvent<HTMLInputElement>) {
     const val = (evt.target as HTMLInputElement).value;
-    updateConcept((concept) => ({ ...concept, term: val }));
+    updateConcept(c => ( c ? { ...c, term: val } : c));
   }
 
   function handleDefChange(evt: React.FormEvent<HTMLTextAreaElement>) {
     const val = (evt.target as HTMLTextAreaElement).value;
-    updateConcept((concept) => ({ ...concept, definition: val }));
+    updateConcept(c => ( c ? { ...c, definition: val } : c));
   }
 
-  if (ctx.ref === null) {
+  if (concept === undefined) {
     return <NonIdealState title="No concept is selected" />;
   }
 
   const conceptForm = (
     <div className={lang.selected === 'ara' ? Classes.RTL : undefined}>
+
       <FormGroup label="Designation" labelInfo="(required)" intent={!concept.term ? 'danger' : undefined}>
         <InputGroup fill value={concept.term} onChange={handleTermChange} />
       </FormGroup>
+
       <FormGroup label="Definition" labelInfo="(required)" intent={!concept.definition ? 'danger' : undefined}>
         <TextArea fill value={concept.definition} growVertically onChange={handleDefChange} />
       </FormGroup>
+
+      <Button
+          onClick={commitInProgress ? undefined : commitChanges}
+          active={commitInProgress}
+          intent={concept && hasUncommittedChanges ? "success" : undefined}
+          disabled={!concept || !hasUncommittedChanges}>
+        Save version
+      </Button>
     </div>
   );
 
