@@ -617,7 +617,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
               <MainView />
 
               <div className={styles.moduleToolbar}>
-                {mainToolbar.map(El => <El />)}
+                {[...mainToolbar.entries()].map(([idx, El]) => <El key={idx} />)}
               </div>
             </div>
 
