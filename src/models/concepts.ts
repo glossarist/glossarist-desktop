@@ -1,7 +1,7 @@
 import { availableLanguages } from '../app';
 
 import { StandardRef, StandardClause } from './standards';
-import { ReviewRef } from './reviews';
+// import { ReviewRef } from './reviews';
 
 
 type ConceptRelation =
@@ -68,15 +68,15 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   lineage_source_similarity?: number
 }
 
-type ConceptReview = {
-  /* Represents a completed (accepted) review. */
-  review: ReviewRef
-  reviewer_notes: string
-}
+// type ConceptReview = {
+//   /* Represents a completed (accepted) review. */
+//   review: ReviewRef
+//   reviewer_notes: string
+// }
 
-type AcceptedConceptReview = ConceptReview & {
-  accepted_version: GitHash
-}
+// type AcceptedConceptReview = ConceptReview & {
+//   accepted_version: GitHash
+// }
 
 // type LineageSource = {
 //   ref: StandardRef
@@ -121,7 +121,7 @@ export interface ConceptCollection {
   items: ConceptRef[]
 }
 
-type GitHash = string;
+// type GitHash = string;
 
 type SupportedLanguages = typeof availableLanguages;
 
