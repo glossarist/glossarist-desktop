@@ -15,7 +15,7 @@ const LanguageMenu: React.FC<{}> = function () {
         labelElement={<Tag minimal>Default</Tag>}
         onClick={() => lang.select(lang.default)} />
 
-      <Menu.Divider title="Show translation" />
+      <Menu.Divider title="Prefer translation" />
 
       {Object.entries(lang.available).
           filter(([langId, _]) => langId !== lang.default).
