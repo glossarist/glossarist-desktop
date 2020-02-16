@@ -2,6 +2,7 @@
 
 $transition1: .2s linear;
 $panelLightBg: $light-gray4;
+$panelPadding: .375rem;
 
 
 html, body, #app {
@@ -27,14 +28,12 @@ html, body, #app {
 }
 
 
+
 :local .panel .panelContents {
-  padding: .375rem;
+  padding: $panelPadding;
 }
 
 :local .panel {
-  .panelContents {
-  }
-
   .panelTitleBar {
     transition: background-color $transition1;
     background: $light-gray3;
@@ -72,6 +71,9 @@ html, body, #app {
     background: transparent;
     border: 0;
     box-shadow: none;
+  }
+  :global textarea.bp3-input {
+    padding-top: 0;
   }
   :global .bp3-form-group {
     padding: 0 .25rem;
@@ -155,8 +157,16 @@ html, body, #app {
     width: auto;
   }
 
+  &.moduleSidebarLeft {
+    > .panelContents > .restOfPanels .panel {
+      padding-left: $panelPadding;
+    }
+  }
   &.moduleSidebarRight {
     flex-flow: row-reverse nowrap;
+    > .panelContents > .restOfPanels .panel {
+      padding-right: $panelPadding;
+    }
   }
 
   > .panelContents {
@@ -176,10 +186,8 @@ html, body, #app {
       display: flex;
       flex-flow: column nowrap;
       padding-bottom: 2rem;
-
-      .panel {
-        margin: .5rem .25rem 0 .25rem;
-      }
+      margin: -$panelPadding;
+      padding: $panelPadding;
     }
 
     .panel {
@@ -226,6 +234,17 @@ html, body, #app {
   }
 }
 
+
+:local .invalidDesignation {
+  text-decoration: line-through;
+  opacity: .4;
+
+  :global .bp3-input {
+    text-decoration: line-through;
+  }
+}
+
+
 :local .moduleMainView {
   flex: 1;
   display: flex;
@@ -256,13 +275,15 @@ html, body, #app {
     display: flex;
     flex-flow: column nowrap;
     overflow-y: auto;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 
-    .item {
-      transition: opacity $transition1;
-
-      &.missingDesignation {
-        font-style: italic;
-      }
+    .conceptID {
+      opacity: .4;
+      width: 2rem;
+      font-size: 80%;
+    }
+    .conceptItem {
     }
   }
 
@@ -309,6 +330,11 @@ html, body, #app {
 }
 
 :local .basicsPanel {
+  :global .bp3-rtl {
+    .bp3-input {
+      direction: rtl;
+    }
+  }
   .designation {
     :global .bp3-input {
       font-family: Georgia, serif;

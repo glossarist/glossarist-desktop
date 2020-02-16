@@ -89,8 +89,10 @@ export default Window;
 // Concept browser
 
 const ConceptBrowser: React.FC<{}> = function () {
-  const concepts = useContext(SourceContext).objects;
+  const source = useContext(SourceContext);
+  const concepts = source.objects;
   const concept = useContext(ConceptContext);
+  const lang = useContext(LangConfigContext);
 
   function handleNodeClick(node: ITreeNode) {
     const nodeData = node.nodeData as { conceptRef: number };
@@ -102,14 +104,24 @@ const ConceptBrowser: React.FC<{}> = function () {
     }
   }
 
-  const treeState: ITreeNode[] = concepts.map(c => {
-    return {
+  let treeState: ITreeNode[];
+  if (source.isLoading) {
+    treeState = [...Array(3).keys()].map(id => ({
+      id: id,
+      label: <span className={Classes.SKELETON}>{makeStringOfLength(getRandomInt(15, 60))}</span>,
+    } as ITreeNode));
+  } else {
+    treeState = concepts.map(c => ({
       id: c.termid,
       label: <ConceptItem concept={c} />,
+      icon: <span className={styles.conceptID}>{c.termid}</span>,
+      secondaryLabel: !c[lang.selected as keyof typeof availableLanguages]
+        ? <Icon intent="warning" icon="translate" />
+        : <Icon icon="blank" />,
       nodeData: { conceptRef: c.termid },
       isSelected: concept.ref === c.termid,
-    }
-  });
+    } as ITreeNode));
+  }
 
   return (
     <div className={styles.conceptBrowser}>
@@ -125,6 +137,7 @@ const ConceptDetails: React.FC<{}> = function () {
   const ctx = useContext(ConceptContext);
   const concept = ctx.activeLocalized;
   const isLoading = ctx.isLoading;
+  const loadingClass = isLoading ? Classes.SKELETON : undefined;
 
   let conceptDetails: JSX.Element;
 
@@ -135,20 +148,20 @@ const ConceptDetails: React.FC<{}> = function () {
   } else {
     conceptDetails = (
       <div className={lang.selected === 'ara' ? Classes.RTL : undefined}>
-        <H1 className={`${styles.designation} ${isLoading ? Classes.SKELETON : undefined}`}>{concept?.term}</H1>
+        <H1 className={`${styles.designation} ${loadingClass}`}>{concept?.term}</H1>
 
         <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
-          <p className={`${styles.definition} ${isLoading ? Classes.SKELETON : undefined}`}>{concept?.definition}</p>
+          <p className={`${styles.definition} ${loadingClass}`}>{concept?.definition}</p>
 
           {[...concept.examples.entries()].map(([idx, item]) =>
-            <p className={styles.example} key={`example-${idx}`}>
+            <p className={`${styles.example} ${loadingClass}`} key={`example-${idx}`}>
               <span className={styles.label}>EXAMPLE:</span>
               {item}
             </p>
           )}
 
           {[...concept.notes.entries()].map(([idx, item]) =>
-             <p className={styles.note} key={`note-${idx}`}>
+             <p className={`${styles.note} ${loadingClass}`} key={`note-${idx}`}>
               <span className={styles.label}>NOTE:</span>
                {item}
              </p>
@@ -427,6 +440,7 @@ const PANELS: { [id: string]: PanelConfig<any> } = {
   system: { Contents: panels.SystemPanel, title: "System" },
   databases: { Contents: panels.DatabasePanel, title: "Repositories" },
   sourceRoll: { Contents: panels.SourceRoll, title: "Source" },
+  collections: { Contents: panels.CollectionsPanel, title: "Collections", actions: [AddCollection] },
   catalog: { Contents: panels.CatalogPanel, title: "Catalog" },
   basics: { Contents: panels.BasicsPanel, title: "Basics" },
   status: { Contents: panels.StatusPanel, title: "Status" },
@@ -466,7 +480,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     title: "Explore",
     leftSidebar: [PANELS.system, PANELS.catalog, PANELS.collections, PANELS.databases],
     MainView: ConceptBrowser,
-    mainToolbar: [SelectLanguage, SearchByText],
+    mainToolbar: [SelectLanguage, SearchByText, SortOrder],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.basics, PANELS.relationships, PANELS.uses],
   },
   examine: {
@@ -523,19 +537,20 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const lang = useContext(LangConfigContext);
 
   const [selectedConceptRef, selectConceptRef] = useState(null as null | ConceptRef);
-  const concept = app.useOne<MultiLanguageConcept<any>, number>('concepts', selectedConceptRef);
 
   const [activeSource, selectSource] = useState({ type: 'catalog-preset', presetName: 'all' } as ObjectSource);
 
   const [textQuery, setTextQuery] = useState('' as string);
 
   const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
-  ('concepts', { query: { inSource: activeSource, matchingText: textQuery }}).objects;
+  ('concepts', { query: { inSource: activeSource, matchingText: textQuery }});
+
+  const concept = selectedConceptRef ? (_objs.objects[selectedConceptRef] || null) : null;
 
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
       ('concepts', { query: { inSource: activeSource }}).ids,
-    objects: Object.values(_objs).sort((a, b) => a.termid - b.termid),
+    objects: Object.values(_objs.objects).sort((a, b) => a.termid - b.termid),
   };
 
   const currentIndex = concepts.objects.findIndex((c) => c.termid === selectedConceptRef);
@@ -582,19 +597,18 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   }, [JSON.stringify(concepts.ids), currentIndex]);
 
   let localizedConcept: Concept<any, any> | null | undefined;
-  // `null` means not yet localized into `lang.selected`, `undefined` means still loading.
 
-  if (concept.object) {
-    localizedConcept = concept.object[lang.selected as keyof typeof availableLanguages] || undefined;
+  if (concept) {
+    localizedConcept = concept[lang.selected as keyof typeof availableLanguages] || null;
   } else {
-    localizedConcept = null;
+    localizedConcept = undefined;
   }
 
   return (
     <ConceptContext.Provider
         value={{
-          active: concept.object,
-          isLoading: concept === null,
+          active: concept,
+          isLoading: _objs.isUpdating,
           activeLocalized: localizedConcept,
           ref: selectedConceptRef,
           select: selectConceptRef,
@@ -605,6 +619,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
             select: selectSource,
             refs: concepts.ids,
             objects: concepts.objects,
+            isLoading: _objs.isUpdating,
           }}>
         <TextSearchContext.Provider value={{ query: textQuery, setQuery: setTextQuery }}>
           <div className={styles.moduleView}>
@@ -629,3 +644,18 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
     </ConceptContext.Provider>
   );
 };
+
+
+function getRandomInt(min: number, max: number): number {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function makeStringOfLength(length: number) {
+   var result = '';
+   for (var i = 0; i < length; i++) {
+      result += '0';
+   }
+   return result;
+}

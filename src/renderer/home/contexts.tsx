@@ -16,12 +16,14 @@ export const TextSearchContext = React.createContext<TextSearchContextSpec>({
 
 export interface ObjectSourceContextSpec {
   active: ObjectSource
+  isLoading: boolean
   refs: ConceptRef[]
   objects: MultiLanguageConcept<any>[]
   select: (source: ObjectSource) => void
 }
 export const SourceContext = React.createContext<ObjectSourceContextSpec>({
   active: { type: 'catalog-preset', presetName: 'all' },
+  isLoading: false,
   objects: [],
   refs: [],
   select: () => {},
@@ -31,6 +33,7 @@ export const SourceContext = React.createContext<ObjectSourceContextSpec>({
 export interface ConceptContextSpec {
   active: MultiLanguageConcept<any> | null
   activeLocalized: Concept<any, any> | null | undefined
+  // `null` means not yet localized into `lang.selected`, `undefined` means still loading.
   isLoading: boolean
   ref: ConceptRef | null
   select: (ref: ConceptRef | null) => void
