@@ -221,14 +221,8 @@ html, body, #app {
     width: 1rem;
   }
 
-  &.moduleSidebarLeft {
-    > .panelContents .restOfPanels {
-    }
-  }
   &.moduleSidebarRight {
     flex-flow: row-reverse nowrap;
-    > .panelContents .restOfPanels {
-    }
   }
 }
 
@@ -281,15 +275,15 @@ html, body, #app {
       width: 2rem;
       font-size: 80%;
     }
-    .conceptItem {
-    }
   }
 
-  .singleConcept {
-    padding: 2rem;
+  .editConcept {
+    padding: 1rem;
   }
 
   .examineConcept {
+    padding: 2rem;
+
     .designation {
       font-weight: normal;
       font-family: Georgia, serif;
@@ -306,6 +300,8 @@ html, body, #app {
     }
     .definition {
       font-size: 120%;
+      margin-left: 1em;
+      margin-bottom: 2rem;
     }
   }
 }
@@ -318,13 +314,10 @@ html, body, #app {
   padding: .25rem;
 }
 
-:local .currentReviewPanel {
-}
-
 :local .sourceRollPanel {
-}
-
-:local .systemPanel {
+  .sourceName {
+    color: $pt-text-color-muted;
+  }
 }
 
 :local .basicsPanel {
