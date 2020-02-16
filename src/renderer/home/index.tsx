@@ -352,7 +352,6 @@ const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = fu
   return (
     <Panel
         className={styles.sidebarPanel}
-        key={`${id}${cfg.objectIndependent ? '' : term}`}
         isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
         title={cfg.title}>
       <cfg.Contents {...cfg.props || {}} />
@@ -362,7 +361,7 @@ const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = fu
 
 interface SidebarProps {
   position: 'left' | 'right'
-  onToggle: (state: boolean) => void
+  onToggle?: (state: boolean) => void
   panelSet: PanelConfig<any>[]
 }
 const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle }) {
@@ -588,9 +587,6 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
     localizedConcept = null;
   }
 
-  function handleLeftSidebarToggle(state: boolean) {}
-  function handleRightSidebarToggle(state: boolean) {}
-
   return (
     <ConceptContext.Provider
         value={{
@@ -610,10 +606,10 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
         <TextSearchContext.Provider value={{ query: textQuery, setQuery: setTextQuery }}>
           <div className={styles.moduleView}>
             {leftSidebar.length > 0
-              ? <Sidebar position="left" panelSet={leftSidebar} onToggle={handleLeftSidebarToggle} />
+              ? <Sidebar key="left" position="left" panelSet={leftSidebar} />
               : null}
 
-            <div className={styles.moduleMainView}>
+            <div key="main" className={styles.moduleMainView}>
               <MainView />
 
               <div className={styles.moduleToolbar}>
@@ -622,7 +618,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
             </div>
 
             {rightSidebar.length > 0
-              ? <Sidebar position="right" panelSet={rightSidebar} onToggle={handleRightSidebarToggle} />
+              ? <Sidebar key="right" position="right" panelSet={rightSidebar} />
               : null}
           </div>
         </TextSearchContext.Provider>
