@@ -2,8 +2,8 @@
   "name": "geolexica",
   "version": "0.0.1",
   "description": "Geolexica database viewer & editor for desktop",
-  "repository": "git@github.com:geolexica/geolexica-desktop.git",
-  "bugs": "https://github.com/geolexica/geolexica-desktop/issues",
+  "repository": "git@github.com:geolexica/isotc211-desktop.git",
+  "bugs": "https://github.com/geolexica/isotc211-desktop/issues",
   "author": "Ribose Inc. <open.source@ribose.com>",
   "license": "MIT",
   "scripts": {
@@ -51,7 +51,7 @@
           "path": "/Applications"
         }
       ],
-      "artifactName": "geolexica-desktop-${version}.${ext}"
+      "artifactName": "isotc211-desktop-${version}.${ext}"
     },
     "win": {
       "target": [
@@ -73,12 +73,12 @@
       "artifactName": "electron-gha-${version}.${ext}"
     },
     "portable": {
-      "artifactName": "geolexica-desktop.exe"
+      "artifactName": "isotc211-desktop.exe"
     },
     "appx": {
       "backgroundColor": "#464646",
       "publisherDisplayName": "Geolexica",
-      "artifactName": "geolexica-desktop-${version}.${ext}"
+      "artifactName": "isotc211-desktop-${version}.${ext}"
     },
     "publish": [
       {
