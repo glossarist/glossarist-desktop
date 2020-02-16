@@ -14,7 +14,7 @@
     "dist:mac": "electron-builder -m",
     "pack": "electron-builder --dir",
     "release": "electron-builder --publish always",
-    "cdist": "yarn compile && electron-builder -m",
+    "cdist": "yarn compile && electron-builder -mlw",
     "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "electronWebpack": {
