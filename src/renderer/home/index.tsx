@@ -430,6 +430,21 @@ const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle 
 };
 
 
+const SourceRollTitle: React.FC<{}> = function () {
+  const src = useContext(SourceContext).active;
+
+  let sourceName: string | null;
+  if (src.type === 'catalog-preset' && src.presetName === 'all') {
+    sourceName = "All concepts";
+  } else if (src.type === 'collection') {
+    sourceName = "Collection";
+  } else {
+    sourceName = null;
+  }
+  return <>{sourceName}</>;
+}
+
+
 /* Module configuration */
 
 interface PanelConfig<T = {}> {
@@ -445,7 +460,8 @@ interface PanelConfig<T = {}> {
 const PANELS: { [id: string]: PanelConfig<any> } = {
   system: { Contents: panels.SystemPanel, title: "System" },
   databases: { Contents: panels.DatabasePanel, title: "Repositories" },
-  sourceRoll: { Contents: panels.SourceRoll, title: "Source" },
+  sourceRollTranslated: { Contents: panels.PossiblyTranslatedSourceRoll, title: "Source", Title: SourceRollTitle },
+  sourceRollAuthoritative: { Contents: panels.AuthoritativeLanguageSourceRoll, title: "Source", Title: SourceRollTitle },
   collections: { Contents: panels.CollectionsPanel, title: "Collections", actions: [AddCollection] },
   catalog: { Contents: panels.CatalogPanel, title: "Catalog" },
   basics: { Contents: panels.BasicsPanel, title: "Basics" },
