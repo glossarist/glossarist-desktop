@@ -106,10 +106,7 @@ const ConceptBrowser: React.FC<{}> = function () {
 
   let treeState: ITreeNode[];
   if (source.isLoading) {
-    treeState = [...Array(3).keys()].map(id => ({
-      id: id,
-      label: <span className={Classes.SKELETON}>{makeStringOfLength(getRandomInt(15, 60))}</span>,
-    } as ITreeNode));
+    treeState = LOADING_TREE_STATE;
   } else {
     treeState = concepts.map(c => ({
       id: c.termid,
@@ -659,3 +656,10 @@ function makeStringOfLength(length: number) {
    }
    return result;
 }
+
+const LOADING_TREE_STATE: ITreeNode[] = [...Array(3).keys()].map(id => ({
+    id: id,
+    label: <span className={Classes.SKELETON}>
+      {makeStringOfLength(getRandomInt(15, 60))}
+    </span>,
+  } as ITreeNode))
