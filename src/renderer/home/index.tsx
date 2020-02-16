@@ -552,10 +552,14 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
       ('concepts', { query: { inSource: activeSource }}).ids,
-    objects: Object.values(_objs.objects).sort((a, b) => a.termid - b.termid),
+    objects: useMemo(() => (
+      Object.values(_objs.objects).sort((a, b) => a.termid - b.termid)
+    ), [Object.keys(_objs.objects)]),
   };
 
-  const currentIndex = concepts.objects.findIndex((c) => c.termid === selectedConceptRef);
+  const currentIndex = useMemo(() => (
+    concepts.objects.findIndex((c) => c.termid === selectedConceptRef)
+  ), [selectedConceptRef]);
 
   const collectionsMigrated = useRef({ yes: false });
 
