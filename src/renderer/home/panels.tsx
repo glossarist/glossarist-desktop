@@ -3,7 +3,7 @@ import React, { useMemo, useRef, useContext, useEffect } from 'react';
 import { ConceptCollection } from '../../models/concepts';
 
 import {
-  H3, Classes,
+  H5, Classes,
   Switch, Button,
   FormGroup, InputGroup, TextArea,
   Text,
@@ -13,7 +13,7 @@ import {
 } from '@blueprintjs/core';
 
 import { app, conf as rendererConf } from '../index';
-import { conf as appConf } from '../../app';
+import { conf as appConf, availableLanguages } from '../../app';
 import { DatabaseList } from 'coulomb/db/renderer/status';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
@@ -57,12 +57,20 @@ export const DatabasePanel: React.FC<{}> = function() {
 };
 
 
-export const SourceRoll: React.FC<{}> = function () {
+export const PossiblyTranslatedSourceRoll: React.FC<{}> = function () {
+  const lang = useContext(LangConfigContext);
+  return <SourceRoll lang={lang.selected as keyof typeof availableLanguages} />;
+};
+
+export const AuthoritativeLanguageSourceRoll: React.FC<{}> = function () {
+  const lang = useContext(LangConfigContext);
+  return <SourceRoll lang={lang.default as keyof typeof availableLanguages} />;
+};
+
+const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function ({ lang }) {
   const source = useContext(SourceContext);
   const concept = useContext(ConceptContext);
   const concepts = source.objects;
-
-  const panelRef = useRef<HTMLDivElement>(null);
 
   function handleNodeClick(node: ITreeNode) {
     const nodeData = node.nodeData as { conceptRef: number };
@@ -81,17 +89,14 @@ export const SourceRoll: React.FC<{}> = function () {
   } else {
     treeState = concepts.map(c => ({
       id: c.termid,
-      label: <ConceptItem concept={c} />,
+      label: <ConceptItem lang={lang} concept={c} />,
       nodeData: { conceptRef: c.termid },
       isSelected: concept.ref === c.termid,
     }));
   }
 
   return (
-    <div ref={panelRef} className={styles.sourceRollPanel}>
-      <H3>{source.active.type}</H3>
-      <Tree contents={treeState} onNodeClick={handleNodeClick} />
-    </div>
+    <Tree contents={treeState} onNodeClick={handleNodeClick} />
   );
 };
 

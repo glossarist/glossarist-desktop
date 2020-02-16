@@ -110,7 +110,7 @@ const ConceptBrowser: React.FC<{}> = function () {
   } else {
     treeState = concepts.map(c => ({
       id: c.termid,
-      label: <ConceptItem concept={c} />,
+      label: <ConceptItem lang={lang.default as keyof typeof availableLanguages} concept={c} />,
       icon: <span className={styles.conceptID}>{c.termid}</span>,
       secondaryLabel: !c[lang.selected as keyof typeof availableLanguages]
         ? <Icon intent="warning" icon="translate" />
@@ -507,7 +507,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     disabled: true,
     hotkey: 'n',
     title: "Propose",
-    leftSidebar: [PANELS.source, PANELS.databases],
+    leftSidebar: [PANELS.sourceRollAuthoritative, PANELS.databases],
     MainView: () => <NonIdealState title="Component not implemented" />,
     mainToolbar: [SelectLanguage],
     rightSidebar: [PANELS.relationships],
@@ -523,7 +523,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
   examine: {
     hotkey: 'v',
     title: "Examine",
-    leftSidebar: [PANELS.system, PANELS.sourceRoll, PANELS.databases],
+    leftSidebar: [PANELS.system, PANELS.sourceRollTranslated, PANELS.databases],
     MainView: ConceptDetails, // basics, notes, examples
     mainToolbar: [CompareLanguage],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.changelog, PANELS.uses],
@@ -531,7 +531,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
   edit: {
     hotkey: 'c',
     title: "Edit",
-    leftSidebar: [PANELS.system, PANELS.compareLineage, PANELS.sourceRoll, PANELS.databases],
+    leftSidebar: [PANELS.system, PANELS.compareLineage, PANELS.sourceRollAuthoritative, PANELS.databases],
     MainView: ConceptEdit,
     mainToolbar: [CompareLanguage],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.changelog],
