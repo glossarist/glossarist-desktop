@@ -537,7 +537,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     title: "Edit",
     leftSidebar: [PANELS.system, PANELS.compareLineage, PANELS.sourceRollAuthoritative, PANELS.databases],
     MainView: ConceptEdit,
-    mainToolbar: [CompareLanguage],
+    mainToolbar: [],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.changelog],
   },
   review: {
