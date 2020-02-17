@@ -102,11 +102,6 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   const [commitInProgress, setCommitInProgress] = useState(false);
   const langCtx = useContext(LangConfigContext);
 
-  useEffect(() => {
-    // This will unset flag set in commitChanges.
-    setCommitInProgress(false);
-  }, [JSON.stringify(props.concept)])
-
   function sanitizeEntry(entry: Concept<any, any>): Concept<any, any> | undefined {
     if ((entry.term || '').trim() === '' || (entry.definition || '').trim() === '') {
       return undefined;
@@ -126,12 +121,16 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     if (sanitized !== undefined) {
       setCommitInProgress(true);
 
-      await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
-      ('model-concepts-update-one', {
-        objectID: props.concept.termid,
-        object: { ...props.concept, [entry.language_code]: sanitized },
-        commit: true,
-      });
+      try {
+        await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
+        ('model-concepts-update-one', {
+          objectID: props.concept.termid,
+          object: { ...props.concept, [entry.language_code]: sanitized },
+          commit: true,
+        });
+      } catch (e) {
+        setCommitInProgress(false);
+      }
     }
   };
 
