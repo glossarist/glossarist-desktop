@@ -584,20 +584,18 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
   ('concepts', { query: { inSource: activeSource, matchingText: textQuery }});
 
+  const keys = JSON.stringify(Object.keys(_objs.objects));
+
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
       ('concepts', { query: { inSource: activeSource }}).ids,
     objects: useMemo(() => (
       Object.values(_objs.objects).sort((a, b) => a.termid - b.termid)
-    ), [Object.keys(_objs.objects)]),
+    ), [keys]),
   };
 
-  const currentIndex = useMemo(() => (
-    concepts.objects.findIndex((c) => c.termid === selectedConceptRef)
-  ), [selectedConceptRef]);
-
+  // One-off collection migration call
   const collectionsMigrated = useRef({ yes: false });
-
   useEffect(() => {
     if (concepts.ids.length > 0 && collectionsMigrated.current.yes !== true) {
       callIPC('initialize-standards-collections');
@@ -605,7 +603,12 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
     }
   }, [concepts.ids.length]);
 
-  // Hotkey navigation up/down
+
+  // Hotkey navigation up/down concept roll
+  const currentIndex = useMemo(() => (
+    concepts.objects.findIndex((c) => c.termid === selectedConceptRef)
+  ), [keys, JSON.stringify(activeSource), selectedConceptRef]);
+
   useEffect(() => {
     function selectNext() {
       const ref = getNextRef(currentIndex);
@@ -635,7 +638,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
       Mousetrap.unbind('j');
       Mousetrap.unbind('k');
     };
-  }, [JSON.stringify(concepts.ids), currentIndex]);
+  }, [keys, currentIndex]);
 
   const concept = selectedConceptRef
     ? (_objs.objects[selectedConceptRef] || null)
