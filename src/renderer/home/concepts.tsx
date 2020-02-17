@@ -213,7 +213,8 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   );
 
   const hasUncommittedChanges = entry && props.entry &&
-    JSON.stringify(props.entry) !== JSON.stringify(sanitized);
+    JSON.stringify([props.entry.term, props.entry.definition, props.entry.notes, props.entry.examples]) !==
+    JSON.stringify([sanitized?.term, sanitized?.definition, sanitized?.notes, sanitized?.examples]);
 
   const isValid = ['retired', 'superseded'].indexOf(props.entry.entry_status) < 0;
 
