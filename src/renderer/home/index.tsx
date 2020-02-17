@@ -350,7 +350,6 @@ const ConceptEditAuthoritative: React.FC<{}> = function () {
     }
   }, [lang.selected]);
 
-
   const auth = active ? active[lang.default as keyof typeof availableLanguages] : undefined;
 
   if (ctx.active === null) {
