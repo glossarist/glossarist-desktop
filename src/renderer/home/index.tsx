@@ -25,7 +25,7 @@ import { app } from '../index';
 import { LangSelector } from '../lang';
 import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
 
-import { ConceptItem, EntryEdit } from './concepts';
+import { ConceptItem, EntryDetails, EntryEdit } from './concepts';
 import * as panels from './panels';
 import {
   SourceContext,
@@ -138,7 +138,6 @@ const ConceptDetails: React.FC<{}> = function () {
   const ctx = useContext(ConceptContext);
   const concept = ctx.activeLocalized;
   const isLoading = ctx.isLoading;
-  const loadingClass = isLoading ? Classes.SKELETON : undefined;
 
   let conceptDetails: JSX.Element;
 
@@ -147,29 +146,7 @@ const ConceptDetails: React.FC<{}> = function () {
   } else if (concept === undefined) {
     conceptDetails = <NonIdealState title="No concept is selected" />
   } else {
-    conceptDetails = (
-      <div className={lang.selected === 'ara' ? Classes.RTL : undefined}>
-        <H1 className={`${styles.designation} ${loadingClass}`}>{concept?.term}</H1>
-
-        <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
-          <p className={`${styles.definition} ${loadingClass}`}>{concept?.definition}</p>
-
-          {[...concept.examples.entries()].map(([idx, item]) =>
-            <p className={`${styles.example} ${loadingClass}`} key={`example-${idx}`}>
-              <span className={styles.label}>EXAMPLE:</span>
-              {item}
-            </p>
-          )}
-
-          {[...concept.notes.entries()].map(([idx, item]) =>
-             <p className={`${styles.note} ${loadingClass}`} key={`note-${idx}`}>
-              <span className={styles.label}>NOTE:</span>
-               {item}
-             </p>
-           )}
-        </div>
-      </div>
-    );
+    conceptDetails = <EntryDetails isLoading={isLoading} entry={concept} />;
   }
   return (
     <div className={`

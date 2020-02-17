@@ -1,7 +1,7 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
 
 import {
-  ButtonGroup, Button,
+  H2, ButtonGroup, Button,
   Callout,
   FormGroup, InputGroup, TextArea,
   Classes,
@@ -53,6 +53,37 @@ function ({ lang, concept, className }) {
         `}
         ref={el}>
       {designation}
+    </div>
+  );
+};
+
+
+// Viewing terminological entries
+
+export const EntryDetails: React.FC<{ isLoading: boolean, entry: Concept<any, any> }> = function ({ isLoading, entry }) {
+  const loadingClass = isLoading ? Classes.SKELETON : undefined;
+
+  return (
+    <div className={entry.language_code === 'ara' ? Classes.RTL : undefined}>
+      <H2 className={`${styles.designation} ${loadingClass}`}>{entry?.term}</H2>
+
+      <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
+        <p className={`${styles.definition} ${loadingClass}`}>{entry?.definition}</p>
+
+        {[...entry.examples.entries()].map(([idx, item]) =>
+          <p className={`${styles.example} ${loadingClass}`} key={`example-${idx}`}>
+            <span className={styles.label}>EXAMPLE:</span>
+            {item}
+          </p>
+        )}
+
+        {[...entry.notes.entries()].map(([idx, item]) =>
+            <p className={`${styles.note} ${loadingClass}`} key={`note-${idx}`}>
+            <span className={styles.label}>NOTE:</span>
+              {item}
+            </p>
+          )}
+      </div>
     </div>
   );
 };
