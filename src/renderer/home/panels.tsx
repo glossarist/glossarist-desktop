@@ -248,7 +248,7 @@ export const StatusPanel: React.FC<{}> = function () {
       {localized !== null && localized !== undefined
         ? <>
             <FormGroup
-                label="Entry status"
+                label={<>Entry&nbsp;status</>}
                 inline
                 className={styles.entryStatus}>
               <InputGroup
