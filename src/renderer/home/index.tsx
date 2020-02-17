@@ -193,8 +193,10 @@ const ConceptEdit: React.FC<{}> = function () {
 
   const [concept, updateConcept] = useState<Concept<any, any> | undefined>(auth);
   const [commitInProgress, setCommitInProgress] = useState(false);
+  const [sanitized, updateSanitized] = useState<Concept<any, any> | undefined>(concept);
+
   const hasUncommittedChanges = concept && auth &&
-    JSON.stringify(auth) !== JSON.stringify(concept);
+    JSON.stringify(auth) !== JSON.stringify(sanitized);
 
   useEffect(() => {
     // Make sure edit screen updates if user navigates to another concept while editing.
@@ -205,14 +207,24 @@ const ConceptEdit: React.FC<{}> = function () {
     setCommitInProgress(false);
   }, [JSON.stringify(ctx.active)])
 
+  useEffect(() => {
+    if (concept) {
+      updateSanitized({
+        ...concept,
+        notes: concept.notes.filter(i => i.trim() !== ''),
+        examples: concept.examples.filter(i => i.trim() !== ''),
+      })
+    }
+  }, [JSON.stringify(concept)]);
+
   const commitChanges = async () => {
-    if (active !== null && concept !== undefined) {
+    if (active !== null && sanitized !== undefined) {
       setCommitInProgress(true);
 
       await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
       ('model-concepts-update-one', {
         objectID: active.termid,
-        object: { ...active, eng: concept },
+        object: { ...active, eng: sanitized },
         commit: true,
       });
     }
@@ -222,10 +234,39 @@ const ConceptEdit: React.FC<{}> = function () {
     const val = (evt.target as HTMLInputElement).value;
     updateConcept(c => ( c ? { ...c, term: val } : c));
   }
-
   function handleDefChange(evt: React.FormEvent<HTMLTextAreaElement>) {
     const val = (evt.target as HTMLTextAreaElement).value;
     updateConcept(c => ( c ? { ...c, definition: val } : c));
+  }
+  function handleItemAddition(field: 'notes' | 'examples') {
+    return () => {
+      updateConcept(c => ( c ? { ...c, [field]: [...c[field], ''] } : c));
+    };
+  }
+  function handleItemDeletion(field: 'notes' | 'examples', idx: number) {
+    return () => {
+      updateConcept(c => {
+        if (c) {
+          var items = [ ...c[field] ];
+          items.splice(idx, 1);
+          return { ...c, [field]: items };
+        }
+        return c;
+      });
+    };
+  }
+  function handleItemEdit(field: 'notes' | 'examples', idx: number) {
+    return (evt: React.FormEvent<HTMLTextAreaElement>) => {
+      evt.persist();
+      updateConcept(c => {
+        if (c) {
+          var items = [ ...c[field] ];
+          items[idx] = (evt.target as HTMLTextAreaElement).value;
+          return { ...c, [field]: items };
+        }
+        return c;
+      });
+    };
   }
 
   if (concept === undefined) {
@@ -234,22 +275,40 @@ const ConceptEdit: React.FC<{}> = function () {
 
   const conceptForm = (
     <div className={lang.selected === 'ara' ? Classes.RTL : undefined}>
-
       <FormGroup label="Designation" labelInfo="(required)" intent={!concept.term ? 'danger' : undefined}>
-        <InputGroup fill value={concept.term} onChange={handleTermChange} />
+        <InputGroup large fill value={concept.term} onChange={handleTermChange} />
       </FormGroup>
 
       <FormGroup label="Definition" labelInfo="(required)" intent={!concept.definition ? 'danger' : undefined}>
         <TextArea fill value={concept.definition} growVertically onChange={handleDefChange} />
       </FormGroup>
 
-      <Button
-          onClick={commitInProgress ? undefined : commitChanges}
-          active={commitInProgress}
-          intent={concept && hasUncommittedChanges ? "success" : undefined}
-          disabled={ctx.isLoading || !concept || !hasUncommittedChanges}>
-        Save version
-      </Button>
+      {[...concept.examples.entries()].map(([idx, item]) =>
+        <FormGroup
+            key={`example-${idx}`}
+            label={`EXAMPLE ${idx + 1}`}
+            labelInfo={<Button minimal
+              title="Delete this example"
+              icon="cross" intent="danger"
+              onClick={handleItemDeletion('examples', idx)} />}
+            intent={item.trim() === '' ? 'danger' : undefined}>
+          <TextArea fill value={item} growVertically onChange={handleItemEdit('examples', idx)} />
+        </FormGroup>
+      )}
+
+      {[...concept.notes.entries()].map(([idx, item]) =>
+        <FormGroup
+            key={`note-${idx}`}
+            label={`NOTE ${idx + 1}`}
+            labelInfo={<Button minimal
+              title="Delete this note"
+              icon="cross" intent="danger"
+              onClick={handleItemDeletion('notes', idx)} />}
+            intent={item.trim() === '' ? 'danger' : undefined}>
+          <TextArea fill value={item} growVertically onChange={handleItemEdit('notes', idx)} />
+        </FormGroup>
+      )}
+
     </div>
   );
 
@@ -270,6 +329,18 @@ const ConceptEdit: React.FC<{}> = function () {
           </Callout>
         : null}
       {conceptForm}
+
+      <ButtonGroup>
+        <Button onClick={handleItemAddition('examples')}>Append an example</Button>
+        <Button onClick={handleItemAddition('notes')}>Append a note</Button>
+        <Button
+            onClick={commitInProgress ? undefined : commitChanges}
+            active={commitInProgress}
+            intent={concept && hasUncommittedChanges ? "success" : undefined}
+            disabled={ctx.isLoading || !concept || !hasUncommittedChanges}>
+          Save version
+        </Button>
+      </ButtonGroup>
     </div>
   );
 };
