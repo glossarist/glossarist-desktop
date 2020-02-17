@@ -197,9 +197,6 @@ const EntryEdit: React.FC<EntryEditProps> = function (props) {
   const [commitInProgress, setCommitInProgress] = useState(false);
   const langCtx = useContext(LangConfigContext);
 
-  const hasUncommittedChanges = entry && props.entry &&
-    JSON.stringify(props.entry) !== JSON.stringify(sanitized);
-
   useEffect(() => {
     // This will unset flag set in commitChanges.
     setCommitInProgress(false);
@@ -304,6 +301,9 @@ const EntryEdit: React.FC<EntryEditProps> = function (props) {
       )}
     </div>
   );
+
+  const hasUncommittedChanges = entry && props.entry &&
+    JSON.stringify(props.entry) !== JSON.stringify(sanitized);
 
   const isValid = props.entry
     ? ['retired', 'superseded'].indexOf(props.entry.entry_status) < 0
