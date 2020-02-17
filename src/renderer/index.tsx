@@ -21,6 +21,8 @@ export const conf: RendererConfig<typeof appConf> = {
       available: availableLanguages,
       selected: 'eng',
       default: 'eng',
+      // NOTE: Default language is treated as authoritative language.
+      // TODO: Support more than one authoritative language.
     }),
   }],
 };
