@@ -183,48 +183,46 @@ const ConceptDetails: React.FC<{}> = function () {
   );
 };
 
-// Concept edit
+// Editing terminological entries
 
-const ConceptEdit: React.FC<{}> = function () {
-  const lang = useContext(LangConfigContext);
-  const ctx = useContext(ConceptContext);
-  const active = ctx.active;
-  const auth = active ? active[lang.default as keyof typeof availableLanguages] : undefined;
-
-  const [concept, updateConcept] = useState<Concept<any, any> | undefined>(auth);
+interface EntryEditProps {
+  concept: MultiLanguageConcept<any>
+  entry: Concept<any, any>
+  lang: keyof typeof availableLanguages
+  isLoading: boolean
+}
+const EntryEdit: React.FC<EntryEditProps> = function (props) {
+  const [entry, updateEntry] = useState<Concept<any, any>>(props.entry);
+  const [sanitized, updateSanitized] = useState<Concept<any, any>>(entry);
   const [commitInProgress, setCommitInProgress] = useState(false);
-  const [sanitized, updateSanitized] = useState<Concept<any, any> | undefined>(concept);
+  const langCtx = useContext(LangConfigContext);
 
-  const hasUncommittedChanges = concept && auth &&
-    JSON.stringify(auth) !== JSON.stringify(sanitized);
+  const hasUncommittedChanges = entry && props.entry &&
+    JSON.stringify(props.entry) !== JSON.stringify(sanitized);
 
   useEffect(() => {
-    // Make sure edit screen updates if user navigates to another concept while editing.
-    // NOTE: This will cause unsaved changes to be lost.
-    updateConcept(ctx.active?.eng || undefined);
-
     // This will unset flag set in commitChanges.
     setCommitInProgress(false);
-  }, [JSON.stringify(ctx.active)])
+  }, [JSON.stringify(props.concept)])
 
   useEffect(() => {
-    if (concept) {
+    if (entry) {
       updateSanitized({
-        ...concept,
-        notes: concept.notes.filter(i => i.trim() !== ''),
-        examples: concept.examples.filter(i => i.trim() !== ''),
+        ...entry,
+        notes: entry.notes.filter(i => i.trim() !== ''),
+        examples: entry.examples.filter(i => i.trim() !== ''),
       })
     }
-  }, [JSON.stringify(concept)]);
+  }, [JSON.stringify(entry)]);
 
   const commitChanges = async () => {
-    if (active !== null && sanitized !== undefined) {
+    if (props.entry !== null && sanitized !== undefined) {
       setCommitInProgress(true);
 
       await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
       ('model-concepts-update-one', {
-        objectID: active.termid,
-        object: { ...active, eng: sanitized },
+        objectID: props.concept.termid,
+        object: { ...props.concept, [props.lang]: sanitized },
         commit: true,
       });
     }
@@ -232,58 +230,54 @@ const ConceptEdit: React.FC<{}> = function () {
 
   function handleTermChange(evt: React.FormEvent<HTMLInputElement>) {
     const val = (evt.target as HTMLInputElement).value;
-    updateConcept(c => ( c ? { ...c, term: val } : c));
+    updateEntry(e => ( e ? { ...e, term: val } : e));
   }
   function handleDefChange(evt: React.FormEvent<HTMLTextAreaElement>) {
     const val = (evt.target as HTMLTextAreaElement).value;
-    updateConcept(c => ( c ? { ...c, definition: val } : c));
+    updateEntry(e => ( e ? { ...e, definition: val } : e));
   }
   function handleItemAddition(field: 'notes' | 'examples') {
     return () => {
-      updateConcept(c => ( c ? { ...c, [field]: [...c[field], ''] } : c));
+      updateEntry(e => ( e ? { ...e, [field]: [...e[field], ''] } : e));
     };
   }
   function handleItemDeletion(field: 'notes' | 'examples', idx: number) {
     return () => {
-      updateConcept(c => {
-        if (c) {
-          var items = [ ...c[field] ];
+      updateEntry(e => {
+        if (e) {
+          var items = [ ...e[field] ];
           items.splice(idx, 1);
-          return { ...c, [field]: items };
+          return { ...e, [field]: items };
         }
-        return c;
+        return e;
       });
     };
   }
   function handleItemEdit(field: 'notes' | 'examples', idx: number) {
     return (evt: React.FormEvent<HTMLTextAreaElement>) => {
       evt.persist();
-      updateConcept(c => {
-        if (c) {
-          var items = [ ...c[field] ];
+      updateEntry(e => {
+        if (e) {
+          var items = [ ...e[field] ];
           items[idx] = (evt.target as HTMLTextAreaElement).value;
-          return { ...c, [field]: items };
+          return { ...e, [field]: items };
         }
-        return c;
+        return e;
       });
     };
   }
 
-  if (concept === undefined) {
-    return <NonIdealState title="No concept is selected" />;
-  }
-
   const conceptForm = (
-    <div className={lang.selected === 'ara' ? Classes.RTL : undefined}>
-      <FormGroup label="Designation" labelInfo="(required)" intent={!concept.term ? 'danger' : undefined}>
-        <InputGroup large fill value={concept.term} onChange={handleTermChange} />
+    <div className={props.lang === 'ara' ? Classes.RTL : undefined}>
+      <FormGroup label="Designation" labelInfo="(required)" intent={!entry.term ? 'danger' : undefined}>
+        <InputGroup large fill value={entry.term} onChange={handleTermChange} />
       </FormGroup>
 
-      <FormGroup label="Definition" labelInfo="(required)" intent={!concept.definition ? 'danger' : undefined}>
-        <TextArea fill value={concept.definition} growVertically onChange={handleDefChange} />
+      <FormGroup label="Definition" labelInfo="(required)" intent={!entry.definition ? 'danger' : undefined}>
+        <TextArea fill value={entry.definition} growVertically onChange={handleDefChange} />
       </FormGroup>
 
-      {[...concept.examples.entries()].map(([idx, item]) =>
+      {[...entry.examples.entries()].map(([idx, item]) =>
         <FormGroup
             key={`example-${idx}`}
             label={`EXAMPLE ${idx + 1}`}
@@ -296,7 +290,7 @@ const ConceptEdit: React.FC<{}> = function () {
         </FormGroup>
       )}
 
-      {[...concept.notes.entries()].map(([idx, item]) =>
+      {[...entry.notes.entries()].map(([idx, item]) =>
         <FormGroup
             key={`note-${idx}`}
             label={`NOTE ${idx + 1}`}
@@ -308,26 +302,25 @@ const ConceptEdit: React.FC<{}> = function () {
           <TextArea fill value={item} growVertically onChange={handleItemEdit('notes', idx)} />
         </FormGroup>
       )}
-
     </div>
   );
 
-  const isValid = auth ? ['retired', 'superseded'].indexOf(auth.entry_status) < 0 : undefined;
+  const isValid = props.entry
+    ? ['retired', 'superseded'].indexOf(props.entry.entry_status) < 0
+    : undefined;
 
   return (
-    <div className={`
-          ${styles.singleConcept}
-          ${styles.editConcept}
-        `}>
-      {!isValid && auth
+    <>
+      {!isValid && props.entry
         ? <Callout
               className={styles.editingNonValidEntry}
               icon="asterisk"
               intent="warning"
               title="Editing non-valid entry">
-            The designation or definition of this concept in {lang.available[lang.default]} have status <strong>{auth.entry_status}</strong>.
+            The designation or definition of this concept in {langCtx.available[props.lang]} has status <strong>{props.entry.entry_status}</strong>.
           </Callout>
         : null}
+
       {conceptForm}
 
       <ButtonGroup>
@@ -336,11 +329,47 @@ const ConceptEdit: React.FC<{}> = function () {
         <Button
             onClick={commitInProgress ? undefined : commitChanges}
             active={commitInProgress}
-            intent={concept && hasUncommittedChanges ? "success" : undefined}
-            disabled={ctx.isLoading || !concept || !hasUncommittedChanges}>
+            intent={entry && hasUncommittedChanges ? "success" : undefined}
+            disabled={props.isLoading || !entry || !hasUncommittedChanges}>
           Save version
         </Button>
       </ButtonGroup>
+    </>
+  );
+};
+
+const ConceptEditAuthoritative: React.FC<{}> = function () {
+  const lang = useContext(LangConfigContext);
+  const ctx = useContext(ConceptContext);
+  const active = ctx.active;
+
+  // Force switch to authoritative language
+  useEffect(() => {
+    if (lang.selected !== lang.default) {
+      lang.select(lang.default);
+    }
+  }, [lang.selected]);
+
+
+  const auth = active ? active[lang.default as keyof typeof availableLanguages] : undefined;
+
+  if (ctx.active === null) {
+    return <NonIdealState title="No concept is selected" />;
+  } else if (auth === undefined) {
+    return <NonIdealState icon="error" title="Concept is missing authoritative language entry" />;
+  }
+
+  return (
+    <div className={`
+          ${styles.singleConcept}
+          ${styles.editConcept}
+        `}>
+      <EntryEdit
+        concept={ctx.active}
+        key={auth.id}
+        entry={auth}
+        isLoading={ctx.isLoading}
+        lang={lang.default as keyof typeof availableLanguages} />
     </div>
   );
 };
@@ -618,7 +647,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     hotkey: 'c',
     title: "Edit",
     leftSidebar: [PANELS.system, PANELS.compareLineage, PANELS.sourceRollAuthoritative, PANELS.databases],
-    MainView: ConceptEdit,
+    MainView: ConceptEditAuthoritative,
     mainToolbar: [],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.changelog],
   },
