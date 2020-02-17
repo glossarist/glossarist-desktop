@@ -421,6 +421,7 @@ const Panel: React.FC<PanelProps> = function ({
         ${styles.panel}
         ${isCollapsible === true ? styles.panelCollapsible : ''}
         ${isCollapsible === true && isCollapsed === true ? styles.panelCollapsed : ''}`}>
+
       {title || TitleComponent || isCollapsible
         ? <div
               className={styles.panelTitleBar}
@@ -429,11 +430,13 @@ const Panel: React.FC<PanelProps> = function ({
             {TitleComponent ? <TitleComponent /> : title}
           </div>
         : null}
+
       {isCollapsible && isCollapsed
         ? null
         : <div className={styles.panelContents}>
             {children}
           </div>}
+
     </div>
   );
 };
