@@ -83,7 +83,7 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
 //   similarity: number
 // }
 
-type AuthoritativeSource = {
+export type AuthoritativeSource = {
   ref: StandardRef
   clause: StandardClause
   link: URL

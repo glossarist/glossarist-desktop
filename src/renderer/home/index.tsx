@@ -7,18 +7,16 @@ import Mousetrap from 'mousetrap';
 
 import {
   Classes,
-  H1,
-  Button,
-  Icon, IconName,
-  InputGroup, FormGroup, TextArea,
+  H1, Button,
+  Icon, IconName, InputGroup,
   NonIdealState,
-  Tree, ITreeNode, ButtonGroup, Callout,
+  Tree, ITreeNode, ButtonGroup, Callout, FormGroup, Toaster, Position,
  } from '@blueprintjs/core';
 
 import { callIPC } from 'coulomb/ipc/renderer';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
-import { MultiLanguageConcept, ConceptRef, Concept } from '../../models/concepts';
+import { MultiLanguageConcept, Concept, ConceptRef, AuthoritativeSource } from '../../models/concepts';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
@@ -27,7 +25,7 @@ import { app } from '../index';
 import { LangSelector } from '../lang';
 import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
 
-import { ConceptItem } from './concepts';
+import { ConceptItem, EntryEdit } from './concepts';
 import * as panels from './panels';
 import {
   SourceContext,
@@ -37,6 +35,8 @@ import {
 
 import styles from './styles.scss';
 
+
+const toaster = Toaster.create({ position: Position.TOP });
 
 const Window: React.FC<WindowComponentProps> = function () {
   const [activeModuleID, activateModule] = useState(MODULES[0]);
@@ -183,160 +183,7 @@ const ConceptDetails: React.FC<{}> = function () {
   );
 };
 
-// Editing terminological entries
-
-interface EntryEditProps {
-  concept: MultiLanguageConcept<any>
-  entry: Concept<any, any>
-  lang: keyof typeof availableLanguages
-  isLoading: boolean
-}
-const EntryEdit: React.FC<EntryEditProps> = function (props) {
-  const [entry, updateEntry] = useState<Concept<any, any>>(props.entry);
-  const [sanitized, updateSanitized] = useState<Concept<any, any>>(entry);
-  const [commitInProgress, setCommitInProgress] = useState(false);
-  const langCtx = useContext(LangConfigContext);
-
-  useEffect(() => {
-    // This will unset flag set in commitChanges.
-    setCommitInProgress(false);
-  }, [JSON.stringify(props.concept)])
-
-  useEffect(() => {
-    if (entry) {
-      updateSanitized({
-        ...entry,
-        notes: entry.notes.filter(i => i.trim() !== ''),
-        examples: entry.examples.filter(i => i.trim() !== ''),
-      })
-    }
-  }, [JSON.stringify(entry)]);
-
-  const commitChanges = async () => {
-    if (props.entry !== null && sanitized !== undefined) {
-      setCommitInProgress(true);
-
-      await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
-      ('model-concepts-update-one', {
-        objectID: props.concept.termid,
-        object: { ...props.concept, [props.lang]: sanitized },
-        commit: true,
-      });
-    }
-  };
-
-  function handleTermChange(evt: React.FormEvent<HTMLInputElement>) {
-    const val = (evt.target as HTMLInputElement).value;
-    updateEntry(e => ( e ? { ...e, term: val } : e));
-  }
-  function handleDefChange(evt: React.FormEvent<HTMLTextAreaElement>) {
-    const val = (evt.target as HTMLTextAreaElement).value;
-    updateEntry(e => ( e ? { ...e, definition: val } : e));
-  }
-  function handleItemAddition(field: 'notes' | 'examples') {
-    return () => {
-      updateEntry(e => ( e ? { ...e, [field]: [...e[field], ''] } : e));
-    };
-  }
-  function handleItemDeletion(field: 'notes' | 'examples', idx: number) {
-    return () => {
-      updateEntry(e => {
-        if (e) {
-          var items = [ ...e[field] ];
-          items.splice(idx, 1);
-          return { ...e, [field]: items };
-        }
-        return e;
-      });
-    };
-  }
-  function handleItemEdit(field: 'notes' | 'examples', idx: number) {
-    return (evt: React.FormEvent<HTMLTextAreaElement>) => {
-      evt.persist();
-      updateEntry(e => {
-        if (e) {
-          var items = [ ...e[field] ];
-          items[idx] = (evt.target as HTMLTextAreaElement).value;
-          return { ...e, [field]: items };
-        }
-        return e;
-      });
-    };
-  }
-
-  const conceptForm = (
-    <div className={props.lang === 'ara' ? Classes.RTL : undefined}>
-      <FormGroup label="Designation" labelInfo="(required)" intent={!entry.term ? 'danger' : undefined}>
-        <InputGroup large fill value={entry.term} onChange={handleTermChange} />
-      </FormGroup>
-
-      <FormGroup label="Definition" labelInfo="(required)" intent={!entry.definition ? 'danger' : undefined}>
-        <TextArea fill value={entry.definition} growVertically onChange={handleDefChange} />
-      </FormGroup>
-
-      {[...entry.examples.entries()].map(([idx, item]) =>
-        <FormGroup
-            key={`example-${idx}`}
-            label={`EXAMPLE ${idx + 1}`}
-            labelInfo={<Button minimal
-              title="Delete this example"
-              icon="cross" intent="danger"
-              onClick={handleItemDeletion('examples', idx)} />}
-            intent={item.trim() === '' ? 'danger' : undefined}>
-          <TextArea fill value={item} growVertically onChange={handleItemEdit('examples', idx)} />
-        </FormGroup>
-      )}
-
-      {[...entry.notes.entries()].map(([idx, item]) =>
-        <FormGroup
-            key={`note-${idx}`}
-            label={`NOTE ${idx + 1}`}
-            labelInfo={<Button minimal
-              title="Delete this note"
-              icon="cross" intent="danger"
-              onClick={handleItemDeletion('notes', idx)} />}
-            intent={item.trim() === '' ? 'danger' : undefined}>
-          <TextArea fill value={item} growVertically onChange={handleItemEdit('notes', idx)} />
-        </FormGroup>
-      )}
-    </div>
-  );
-
-  const hasUncommittedChanges = entry && props.entry &&
-    JSON.stringify(props.entry) !== JSON.stringify(sanitized);
-
-  const isValid = props.entry
-    ? ['retired', 'superseded'].indexOf(props.entry.entry_status) < 0
-    : undefined;
-
-  return (
-    <>
-      {!isValid && props.entry
-        ? <Callout
-              className={styles.editingNonValidEntry}
-              icon="asterisk"
-              intent="warning"
-              title="Editing non-valid entry">
-            The designation or definition of this concept in {langCtx.available[props.lang]} has status <strong>{props.entry.entry_status}</strong>.
-          </Callout>
-        : null}
-
-      {conceptForm}
-
-      <ButtonGroup>
-        <Button onClick={handleItemAddition('examples')}>Append an example</Button>
-        <Button onClick={handleItemAddition('notes')}>Append a note</Button>
-        <Button
-            onClick={commitInProgress ? undefined : commitChanges}
-            active={commitInProgress}
-            intent={entry && hasUncommittedChanges ? "success" : undefined}
-            disabled={props.isLoading || !entry || !hasUncommittedChanges}>
-          Save version
-        </Button>
-      </ButtonGroup>
-    </>
-  );
-};
+// Concept edit
 
 const ConceptEditAuthoritative: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
@@ -352,23 +199,152 @@ const ConceptEditAuthoritative: React.FC<{}> = function () {
 
   const auth = active ? active[lang.default as keyof typeof availableLanguages] : undefined;
 
-  if (ctx.active === null) {
+  if (active === null) {
     return <NonIdealState title="No concept is selected" />;
   } else if (auth === undefined) {
     return <NonIdealState icon="error" title="Concept is missing authoritative language entry" />;
   }
 
   return (
-    <div className={`
-          ${styles.singleConcept}
-          ${styles.editConcept}
-        `}>
+    <div className={styles.editConcept}>
       <EntryEdit
-        concept={ctx.active}
+        concept={active}
         key={auth.id}
         entry={auth}
-        isLoading={ctx.isLoading}
-        lang={lang.default as keyof typeof availableLanguages} />
+        isLoading={ctx.isLoading} />
+    </div>
+  );
+};
+
+// Concept edit non-authoritative versions
+
+const ConceptTranslate: React.FC<{}> = function () {
+  const lang = useContext(LangConfigContext);
+  const ctx = useContext(ConceptContext);
+
+  const active = ctx.active;
+  const entry = active ? active[lang.selected as keyof typeof availableLanguages] : undefined;
+
+  // Force switch to non-authoritative language
+  useEffect(() => {
+    if (lang.selected === lang.default) {
+      lang.select(Object.keys(lang.available).filter(id => id !== lang.default)[0]);
+    }
+  }, [lang.selected]);
+
+  const [proposedAuthSource, setProposedAuthSource] =
+    useState<undefined | AuthoritativeSource>
+    (entry?.authoritative_source);
+  const [authSourceDraft, updateAuthSourceDraft] =
+    useState<{ [K in keyof AuthoritativeSource]: string }>
+    (initializeAuthSourceDraft(entry?.authoritative_source));
+
+  useEffect(() => {
+    setProposedAuthSource(entry?.authoritative_source);
+    updateAuthSourceDraft(
+      initializeAuthSourceDraft(entry?.authoritative_source));
+  }, [lang.selected, active?.termid]);
+
+  if (active === null) {
+    return <NonIdealState title="No concept is selected" />;
+  }
+
+  function initializeAuthSourceDraft(authSource?: AuthoritativeSource) {
+    return {
+      ref: proposedAuthSource?.ref ||'',
+      clause: proposedAuthSource?.clause || '',
+      link: proposedAuthSource?.link?.toString() || '',
+    };
+  }
+
+  function handleAuthSourceStringPropertyChange(field: keyof AuthoritativeSource) {
+    return (evt: React.FormEvent<HTMLInputElement>) => {
+      evt.persist();
+      updateAuthSourceDraft(s => ({
+        ...s,
+        [field]: (evt.target as HTMLInputElement).value }));
+    };
+  }
+  function handleAcceptAuthSourceDraft() {
+    let link: URL;
+    try {
+      link = new URL(authSourceDraft.link);
+    } catch (e) {
+      toaster.show({
+        icon: "error",
+        intent: "danger",
+        message: "You seem to have specified an incorrect URL as authoritative source link.",
+      });
+      return;
+    }
+    setProposedAuthSource({
+      ref: authSourceDraft.ref,
+      clause: authSourceDraft.clause,
+      link: link,
+    });
+  }
+
+  let entryWithSource: Concept<any, any> | undefined
+  if (entry) {
+    entryWithSource = entry;
+  } else if (proposedAuthSource) {
+    entryWithSource = {
+      id: active?.termid,
+      language_code: lang.selected,
+      entry_status: 'proposed',
+      term: '',
+      definition: '',
+      notes: [],
+      examples: [],
+      authoritative_source: proposedAuthSource,
+    };
+  } else {
+    entryWithSource = undefined;
+  };
+
+  const authSourceForm = (
+    <Callout
+        title="Authoritative source"
+        key={`${active.termid}-${lang.selected}`}>
+      <p>
+        Please specify the authoritative source you will use for translating this concept to {lang.available[lang.selected]}.
+      </p>
+      <FormGroup label="Standard reference" labelInfo="(required)">
+        <InputGroup large fill required
+          type="text"
+          placeholder="ISO 1234:2345"
+          value={authSourceDraft.ref}
+          onChange={handleAuthSourceStringPropertyChange('ref')} />
+      </FormGroup>
+      <FormGroup label="Clause" labelInfo="(required)">
+        <InputGroup large fill required
+          type="text"
+          placeholder="3.4"
+          value={authSourceDraft.clause}
+          onChange={handleAuthSourceStringPropertyChange('clause')} />
+      </FormGroup>
+      <FormGroup label="Link" labelInfo="(must be a valid URL)">
+        <InputGroup large fill required
+          placeholder="http://example.com/"
+          type="text"
+          value={authSourceDraft.link}
+          onChange={handleAuthSourceStringPropertyChange('link')} />
+      </FormGroup>
+      <Button large intent="primary" onClick={handleAcceptAuthSourceDraft}>
+        Proceed to translation
+      </Button>
+    </Callout>
+  );
+
+  return (
+    <div className={styles.translateConcept}>
+      {entryWithSource
+        ? <EntryEdit
+            key={`${active.termid}-${lang.selected}`}
+            concept={active}
+            entry={entryWithSource}
+            isLoading={ctx.isLoading} />
+        : authSourceForm}
     </div>
   );
 };
@@ -676,11 +652,10 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.compareLanguage, PANELS.compareLineage],
   },
   translate: {
-    disabled: true,
     hotkey: 'l',
     title: "Translate",
-    leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRoll, PANELS.databases],
-    MainView: () => <NonIdealState title="Component not implemented" />,
+    leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRollTranslated, PANELS.databases],
+    MainView: ConceptTranslate,
     mainToolbar: [SelectTargetLanguage],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.changelog, PANELS.uses],
   },
