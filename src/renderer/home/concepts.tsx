@@ -231,9 +231,9 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
 
       {conceptForm}
 
-      <ButtonGroup>
-        <Button onClick={handleItemAddition('examples')}>Append an example</Button>
-        <Button onClick={handleItemAddition('notes')}>Append a note</Button>
+      <ButtonGroup large>
+        <Button onClick={handleItemAddition('examples')}>Append EXAMPLE</Button>
+        <Button onClick={handleItemAddition('notes')}>Append NOTE</Button>
         <Button
             onClick={commitInProgress ? undefined : commitChanges}
             active={commitInProgress}
