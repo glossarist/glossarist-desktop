@@ -13,17 +13,16 @@ import {
   Tree, ITreeNode, ButtonGroup, Callout, FormGroup, Toaster, Position,
  } from '@blueprintjs/core';
 
-import { callIPC } from 'coulomb/ipc/renderer';
-
 import { WindowComponentProps } from 'coulomb/config/renderer';
+import { callIPC } from 'coulomb/ipc/renderer';
+import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
 import { MultiLanguageConcept, Concept, ConceptRef, AuthoritativeSource } from '../../models/concepts';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { ObjectSource, availableLanguages } from '../../app';
-import { app } from '../index';
+import { app } from '..';
 import { LangSelector } from '../lang';
-import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
 
 import { ConceptItem, EntryDetails, EntryEdit } from './concepts';
 import * as panels from './panels';
