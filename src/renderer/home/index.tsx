@@ -12,7 +12,7 @@ import {
   Icon, IconName,
   InputGroup, FormGroup, TextArea,
   NonIdealState,
-  Tree, ITreeNode, ButtonGroup,
+  Tree, ITreeNode, ButtonGroup, Callout,
  } from '@blueprintjs/core';
 
 import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
@@ -253,11 +253,22 @@ const ConceptEdit: React.FC<{}> = function () {
     </div>
   );
 
+  const isValid = auth ? ['retired', 'superseded'].indexOf(auth.entry_status) < 0 : undefined;
+
   return (
     <div className={`
           ${styles.singleConcept}
           ${styles.editConcept}
         `}>
+      {!isValid && auth
+        ? <Callout
+              className={styles.editingNonValidEntry}
+              icon="asterisk"
+              intent="warning"
+              title="Editing non-valid entry">
+            The designation or definition of this concept in {lang.available[lang.default]} have status <strong>{auth.entry_status}</strong>.
+          </Callout>
+        : null}
       {conceptForm}
     </div>
   );

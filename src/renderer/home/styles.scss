@@ -279,6 +279,10 @@ html, body, #app {
 
   .editConcept {
     padding: 1rem;
+
+    .editingNonValidEntry {
+      margin-bottom: 2rem;
+    }
   }
 
   .examineConcept {
