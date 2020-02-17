@@ -304,6 +304,10 @@ html, body, #app {
     display: flex;
     overflow: hidden;
 
+    > :only-child {
+      width: 100%;
+    }
+
     > * {
       width: 50%;
     }
