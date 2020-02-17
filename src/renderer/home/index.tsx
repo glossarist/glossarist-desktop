@@ -114,7 +114,7 @@ const ConceptBrowser: React.FC<{}> = function () {
   } else {
     treeState = concepts.map(c => ({
       id: c.termid,
-      label: <ConceptItem lang={lang.default as keyof typeof availableLanguages} concept={c} />,
+      label: <ConceptItem lang={lang.selected as keyof typeof availableLanguages} concept={c} />,
       icon: <span className={styles.conceptID}>{c.termid}</span>,
       secondaryLabel: !c[lang.selected as keyof typeof availableLanguages]
         ? <Icon intent="warning" icon="translate" />
