@@ -60,6 +60,13 @@ export const conf: AppConfig = {
         dimensions: { width: 1200, height: 700, minWidth: 800, minHeight: 500 },
       },
     },
+    batchCommit: {
+      openerParams: {
+        title: 'ISO/TC 211 Geolexica Desktop: Commit changes',
+        frameless: false,
+        dimensions: { width: 800, height: 700, minWidth: 800, minHeight: 500 },
+      },
+    },
     settings: {
       openerParams: {
         title: 'ISO/TC 211 Geolexica Desktop Settings',

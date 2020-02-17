@@ -8,6 +8,7 @@ export const conf: RendererConfig<typeof appConf> = {
 
   windowComponents: {
     default: () => import('./home'),
+    batchCommit: () => import('./batch-commit'),
     settings: () => import('coulomb/settings/renderer'),
   },
 
