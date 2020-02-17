@@ -589,8 +589,8 @@ const PANELS: { [id: string]: PanelConfig<any> } = {
   status: { Contents: panels.StatusPanel, title: "Status" },
   currentReview: { Contents: panels.CurrentReviewPanel, title: "Current review" },
   uses: { Contents: panels.LineagePanel, title: "Lineage" },
-  changelog: { Contents: panels.Changelog, title: "Changelog" },
 
+  changelog: { Contents: () => <panels.PanelPlaceholder />, title: "Changelog" },
   relationships: { Contents: () => <panels.PanelPlaceholder />, title: "Relationships" },
   compareLineage: { Contents: () => <panels.PanelPlaceholder />, title: "Compare lineage" },
   compareLanguage: { Contents: () => <panels.PanelPlaceholder />, title: "Compare translation" },

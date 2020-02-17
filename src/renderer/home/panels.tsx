@@ -22,7 +22,6 @@ import { ConceptContextSpec, ConceptContext, SourceContext } from './contexts';
 import { ConceptItem } from './concepts';
 
 import styles from './styles.scss';
-import { useIPCValue } from 'coulomb/ipc/renderer';
 
 
 export const SystemPanel: React.FC<{}> = function () {
@@ -35,17 +34,6 @@ export const SystemPanel: React.FC<{}> = function () {
     </div>
   );
 };
-
-
-export const Changelog: React.FC<{}> = function () {
-  const concept = useContext(ConceptContext);
-
-  const hasUncommittedChanges = useIPCValue<{ objectID: number }, { modified: boolean }>
-  ('model-concepts-get-modified-status', { modified: false }, { objectID: concept.ref || -1 });
-
-  return <ObjectStorageStatus
-    hasUncommittedChanges={hasUncommittedChanges.value.modified} />
-}
 
 
 export const DatabasePanel: React.FC<{}> = function() {
