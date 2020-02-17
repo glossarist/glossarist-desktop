@@ -4,6 +4,7 @@ import { AppConfig } from 'coulomb/config/app';
 export const availableLanguages = {
   'eng': 'English',
   'fra': 'French',
+  'dan': 'Danish',
   'ara': 'Arabic',
   'ger': 'German',
   'kor': 'Korean',
