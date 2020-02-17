@@ -158,7 +158,7 @@ html, body, #app {
   }
 
   > .panelContents {
-    width: 18rem;
+    width: 17rem;
     flex: 1;
     display: flex;
     flex-flow: column nowrap;
@@ -278,14 +278,44 @@ html, body, #app {
   }
 
   .conceptEntryForm {
+    flex: 1;
+
     padding: 1rem;
+    display: flex;
+    flex-flow: column nowrap;
+
+    .entryFormFields {
+      flex: 1;
+    }
 
     .editingNonValidEntry {
       margin-bottom: 2rem;
     }
   }
 
-  .examineConcept {
+  .editConcept, .translateConcept, .examineConcept {
+    display: flex;
+  }
+
+  .translateConcept {
+    display: flex;
+    overflow: hidden;
+
+    > * {
+      width: 50%;
+    }
+
+    .entryDetails {
+      padding: 1rem 0;
+      box-shadow: $pt-elevation-shadow-1;
+      background: $panelLightBg;
+      > * {
+        transform: scale(0.9);
+      }
+    }
+  }
+
+  .entryDetails {
     padding: 2rem;
 
     .designation {

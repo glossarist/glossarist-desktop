@@ -64,7 +64,7 @@ export const EntryDetails: React.FC<{ isLoading?: boolean, entry: Concept<any, a
   const loadingClass = isLoading ? Classes.SKELETON : undefined;
 
   return (
-    <div className={entry.language_code === 'ara' ? Classes.RTL : undefined}>
+    <div className={`${styles.entryDetails} ${entry.language_code === 'ara' ? Classes.RTL : undefined}`}>
       <H2 className={`${styles.designation} ${loadingClass}`}>{entry?.term}</H2>
 
       <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
@@ -229,11 +229,16 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
           </Callout>
         : null}
 
-      {conceptForm}
+      <div className={styles.entryFormFields}> 
+        {conceptForm}
 
-      <ButtonGroup large>
-        <Button onClick={handleItemAddition('examples')}>Append EXAMPLE</Button>
-        <Button onClick={handleItemAddition('notes')}>Append NOTE</Button>
+        <ButtonGroup fill>
+          <Button onClick={handleItemAddition('examples')}>Append EXAMPLE</Button>
+          <Button onClick={handleItemAddition('notes')}>Append NOTE</Button>
+        </ButtonGroup>
+      </div>
+
+      <div className={styles.entryFormActions}>
         <Button
             onClick={commitInProgress ? undefined : commitChanges}
             active={commitInProgress}
@@ -245,7 +250,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
               !hasUncommittedChanges}>
           Save version
         </Button>
-      </ButtonGroup>
+      </div>
     </div>
   );
 };

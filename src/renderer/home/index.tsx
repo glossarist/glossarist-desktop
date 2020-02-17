@@ -321,8 +321,11 @@ const ConceptTranslate: React.FC<{}> = function () {
     </Callout>
   );
 
+  const authVersion = ctx.active ? ctx.active[lang.default as keyof typeof availableLanguages] : null;
+  const comparing = mod.opts.compareAuthoritative && authVersion;
+
   return (
-    <div className={styles.translateConcept}>
+    <div className={`${styles.translateConcept} ${comparing ? styles.translateConceptComparison : ''}`}>
       {entryWithSource
         ? <EntryEdit
             key={`${active.termid}-${lang.selected}`}
@@ -330,6 +333,9 @@ const ConceptTranslate: React.FC<{}> = function () {
             entry={entryWithSource}
             isLoading={ctx.isLoading} />
         : authSourceForm}
+      {comparing && authVersion
+        ? <EntryDetails entry={authVersion} />
+        : null}
     </div>
   );
 };
@@ -466,6 +472,16 @@ const SearchByText: ToolbarItem = function () {
     title="Search is performed across English designations and definitions, as well as concept identifiers."
     rightElement={<Button minimal icon="cross" onClick={() => setQuery('')} />}
   />;
+};
+
+const CompareAuthoritative: ToolbarItem = function () {
+  const modCtx = useContext(ModuleContext);
+  const compare = modCtx.opts.compareAuthoritative === true;
+
+  return <Button
+    icon="comparison"
+    active={compare}
+    onClick={() => { modCtx.setOpts({ compareAuthoritative: !compare }); }} />
 };
 
 const AddCollection: ToolbarItem = function () {
@@ -641,7 +657,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     title: "Translate",
     leftSidebar: [PANELS.system, PANELS.changelog, PANELS.sourceRollTranslated, PANELS.databases],
     MainView: ConceptTranslate,
-    mainToolbar: [SelectTargetLanguage],
+    mainToolbar: [CompareAuthoritative, SelectTargetLanguage],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.changelog, PANELS.uses],
   },
 };
