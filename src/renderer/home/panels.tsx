@@ -3,7 +3,7 @@ import React, { useMemo, useRef, useContext, useEffect } from 'react';
 import { ConceptCollection } from '../../models/concepts';
 
 import {
-  H5, Classes,
+  Classes,
   Switch, Button,
   FormGroup, InputGroup, TextArea,
   Text,

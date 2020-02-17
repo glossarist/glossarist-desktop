@@ -15,7 +15,7 @@ import {
   Tree, ITreeNode, ButtonGroup, Callout,
  } from '@blueprintjs/core';
 
-import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
+import { callIPC } from 'coulomb/ipc/renderer';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
 import { MultiLanguageConcept, ConceptRef, Concept } from '../../models/concepts';
