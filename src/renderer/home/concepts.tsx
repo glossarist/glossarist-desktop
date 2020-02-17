@@ -60,7 +60,7 @@ function ({ lang, concept, className }) {
 
 // Viewing terminological entries
 
-export const EntryDetails: React.FC<{ isLoading: boolean, entry: Concept<any, any> }> = function ({ isLoading, entry }) {
+export const EntryDetails: React.FC<{ isLoading?: boolean, entry: Concept<any, any> }> = function ({ isLoading, entry }) {
   const loadingClass = isLoading ? Classes.SKELETON : undefined;
 
   return (
