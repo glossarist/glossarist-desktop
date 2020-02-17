@@ -200,7 +200,10 @@ const ConceptEdit: React.FC<{}> = function () {
     // Make sure edit screen updates if user navigates to another concept while editing.
     // NOTE: This will cause unsaved changes to be lost.
     updateConcept(ctx.active?.eng || undefined);
-  }, [ctx.ref])
+
+    // This will unset flag set in commitChanges.
+    setCommitInProgress(false);
+  }, [JSON.stringify(ctx.active)])
 
   const commitChanges = async () => {
     if (active !== null && concept !== undefined) {
@@ -212,9 +215,6 @@ const ConceptEdit: React.FC<{}> = function () {
         object: { ...active, eng: concept },
         commit: true,
       });
-
-      setCommitInProgress(false);
-      setImmediate(() => { ctx.select(null); ctx.select(active.termid) });
     }
   };
 
@@ -247,7 +247,7 @@ const ConceptEdit: React.FC<{}> = function () {
           onClick={commitInProgress ? undefined : commitChanges}
           active={commitInProgress}
           intent={concept && hasUncommittedChanges ? "success" : undefined}
-          disabled={!concept || !hasUncommittedChanges}>
+          disabled={ctx.isLoading || !concept || !hasUncommittedChanges}>
         Save version
       </Button>
     </div>
@@ -589,9 +589,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
       ('concepts', { query: { inSource: activeSource }}).ids,
-    objects: useMemo(() => (
-      Object.values(_objs.objects).sort((a, b) => a.termid - b.termid)
-    ), [keys]),
+    objects: Object.values(_objs.objects).sort((a, b) => a.termid - b.termid),
   };
 
   // One-off collection migration call
