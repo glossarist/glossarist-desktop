@@ -53,10 +53,11 @@ class ConceptManager extends Manager<MultiLanguageConcept<any>, number, { onlyID
   }
 }
 
-function conceptMatchesQuery(q: string): (c: MultiLanguageConcept<any>) => boolean {
+function conceptMatchesQuery(_q: string): (c: MultiLanguageConcept<any>) => boolean {
+  const q = _q.toLowerCase();
   return (c) => {
-    return c.eng.term.indexOf(q) >= 0 ||
-      c.eng.definition.indexOf(q) >= 0 ||
+    return (c.eng.term || '').toLowerCase().indexOf(q) >= 0 ||
+      (c.eng.definition || '').toLowerCase().indexOf(q) >= 0 ||
       `${c.termid}`.indexOf(q) >= 0;
   }
 }
