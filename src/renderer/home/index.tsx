@@ -40,6 +40,7 @@ const toaster = Toaster.create({ position: Position.TOP });
 
 const Window: React.FC<WindowComponentProps> = function () {
   const [activeModuleID, activateModule] = useState(MODULES[0]);
+  const [moduleOptions, setModuleOptions] = useState<any>({});
 
   useEffect(() => {
     for (const moduleID of MODULES) {
@@ -51,6 +52,10 @@ const Window: React.FC<WindowComponentProps> = function () {
       }
     };
   }, []);
+
+  useEffect(() => {
+    setModuleOptions({});
+  }, [activeModuleID]);
 
   const module = MODULE_CONFIG[activeModuleID];
 
@@ -76,11 +81,13 @@ const Window: React.FC<WindowComponentProps> = function () {
         </ButtonGroup>
       </Panel>
 
-      <Module
-        leftSidebar={module.leftSidebar}
-        rightSidebar={module.rightSidebar}
-        MainView={module.MainView}
-        mainToolbar={module.mainToolbar} />
+      <ModuleContext.Provider value={{ opts: moduleOptions, setOpts: setModuleOptions }}>
+        <Module
+          leftSidebar={module.leftSidebar}
+          rightSidebar={module.rightSidebar}
+          MainView={module.MainView}
+          mainToolbar={module.mainToolbar} />
+      </ModuleContext.Provider>
     </div>
   );
 };
@@ -198,6 +205,7 @@ const ConceptEditAuthoritative: React.FC<{}> = function () {
 const ConceptTranslate: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
+  const mod = useContext(ModuleContext);
 
   const active = ctx.active;
   const entry = active ? active[lang.selected as keyof typeof availableLanguages] : undefined;
@@ -650,6 +658,11 @@ const MODULES: (keyof typeof MODULE_CONFIG)[] = [
 
 
 /* Modules */
+
+// Allows setting arbitrary view options for a module.
+const ModuleContext =
+  React.createContext<{ opts: any, setOpts: (opts: any) => void }>
+  ({ opts: {}, setOpts: () => {} });
 
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
 const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, MainView, mainToolbar }) {
