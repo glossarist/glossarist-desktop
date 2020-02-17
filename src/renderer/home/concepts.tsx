@@ -175,13 +175,13 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   }
 
   const conceptForm = (
-    <div className={entry.language_code === 'ara' ? Classes.RTL : undefined}>
+    <>
       <FormGroup label="Designation" labelInfo="(required)" intent={!entry.term ? 'danger' : undefined}>
         <InputGroup large fill value={entry.term} onChange={handleTermChange} />
       </FormGroup>
 
-      <FormGroup label="Definition" labelInfo="(required)" intent={!entry.definition ? 'danger' : undefined}>
-        <TextArea fill value={entry.definition} growVertically onChange={handleDefChange} />
+      <FormGroup className={styles.definition} label="Definition" labelInfo="(required)" intent={!entry.definition ? 'danger' : undefined}>
+        <TextArea fill value={entry.definition} onChange={handleDefChange} />
       </FormGroup>
 
       {[...entry.examples.entries()].map(([idx, item]) =>
@@ -209,7 +209,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
           <TextArea fill value={item} growVertically onChange={handleItemEdit('notes', idx)} />
         </FormGroup>
       )}
-    </div>
+    </>
   );
 
   const hasUncommittedChanges = entry && props.entry &&
@@ -229,7 +229,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
           </Callout>
         : null}
 
-      <div className={styles.entryFormFields}> 
+      <div className={`${styles.entryFormFields} ${entry.language_code === 'ara' ? Classes.RTL : undefined}`}> 
         {conceptForm}
 
         <ButtonGroup fill>

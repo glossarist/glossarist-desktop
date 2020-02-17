@@ -283,9 +283,12 @@ html, body, #app {
     padding: 1rem;
     display: flex;
     flex-flow: column nowrap;
+    overflow-y: auto;
 
     .entryFormFields {
       flex: 1;
+      display: flex;
+      flex-flow: column nowrap;
     }
 
     .editingNonValidEntry {
@@ -308,7 +311,8 @@ html, body, #app {
     .entryDetails {
       padding: 1rem 0;
       box-shadow: $pt-elevation-shadow-1;
-      background: $panelLightBg;
+      background: white;
+
       > * {
         transform: scale(0.9);
       }

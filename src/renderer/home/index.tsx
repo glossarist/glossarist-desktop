@@ -326,6 +326,9 @@ const ConceptTranslate: React.FC<{}> = function () {
 
   return (
     <div className={`${styles.translateConcept} ${comparing ? styles.translateConceptComparison : ''}`}>
+      {comparing && authVersion
+        ? <EntryDetails entry={authVersion} />
+        : null}
       {entryWithSource
         ? <EntryEdit
             key={`${active.termid}-${lang.selected}`}
@@ -333,9 +336,6 @@ const ConceptTranslate: React.FC<{}> = function () {
             entry={entryWithSource}
             isLoading={ctx.isLoading} />
         : authSourceForm}
-      {comparing && authVersion
-        ? <EntryDetails entry={authVersion} />
-        : null}
     </div>
   );
 };
@@ -480,6 +480,7 @@ const CompareAuthoritative: ToolbarItem = function () {
 
   return <Button
     icon="comparison"
+    title="Compare with authoritative language"
     active={compare}
     onClick={() => { modCtx.setOpts({ compareAuthoritative: !compare }); }} />
 };
