@@ -447,12 +447,25 @@ const SelectLanguage: ToolbarItem = function () {
 
 const CompareLanguage: ToolbarItem = function () {
   const concept = useContext(ConceptContext);
-  return <LangSelectorWide disableUnlessTranslated={true} value={concept.active || undefined} />;
+  return <LangSelectorWide
+    untranslatedProps={{ disabled: true }}
+    value={concept.active || undefined}
+  />;
 };
 
 const SelectTargetLanguage: ToolbarItem = function () {
-  const concept = useContext(ConceptContext);
-  return <LangSelectorWide value={concept.active || undefined} />;
+  const active = useContext(ConceptContext).active;
+  const lang = useContext(LangConfigContext);
+
+  return (
+    active !== null
+      ? <LangSelectorWide
+          untranslatedProps={{ intent: "primary" }}
+          exclude={[lang.default]}
+          value={active || undefined}
+        />
+      : null
+  );
 };
 
 const SortOrder: ToolbarItem = function () {
