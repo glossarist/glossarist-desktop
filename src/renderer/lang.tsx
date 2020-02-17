@@ -8,12 +8,6 @@ const LanguageMenu: React.FC<{}> = function () {
 
   return (
     <Menu>
-      <Menu.Item
-        key={lang.default}
-        active={lang.selected === lang.default}
-        text={lang.available[lang.default]}
-        labelElement={<Tag minimal>Default</Tag>}
-        onClick={() => lang.select(lang.default)} />
 
       <Menu.Divider title="Prefer translation" />
 
@@ -26,6 +20,15 @@ const LanguageMenu: React.FC<{}> = function () {
           text={langName}
           onClick={() => lang.select(langId)} />
       ))}
+
+      <Menu.Divider />
+
+      <Menu.Item
+        key={lang.default}
+        active={lang.selected === lang.default}
+        text={`${lang.available[lang.default]}`}
+        labelElement={<Tag minimal>Authoritative</Tag>}
+        onClick={() => lang.select(lang.default)} />
     </Menu>
   );
 };
