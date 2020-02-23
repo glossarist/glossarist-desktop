@@ -211,7 +211,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     </>
   );
 
-  const hasUncommittedChanges = entry && props.entry &&
+  const hasUncommittedChanges = sanitized && entry && props.entry &&
     JSON.stringify([props.entry.term, props.entry.definition, props.entry.notes, props.entry.examples]) !==
     JSON.stringify([sanitized?.term, sanitized?.definition, sanitized?.notes, sanitized?.examples]);
 
@@ -239,17 +239,27 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
       </div>
 
       <div className={styles.entryFormActions}>
-        <Button
-            onClick={commitInProgress ? undefined : commitChanges}
-            active={commitInProgress}
-            intent={(sanitized !== undefined && hasUncommittedChanges) ? "success" : undefined}
-            disabled={
-              sanitized === undefined ||
-              props.isLoading ||
-              !entry ||
-              !hasUncommittedChanges}>
-          Save version
-        </Button>
+        <ButtonGroup large>
+          <Button
+              onClick={commitInProgress ? undefined : commitChanges}
+              active={commitInProgress}
+              intent={(sanitized !== undefined && hasUncommittedChanges) ? "success" : undefined}
+              disabled={
+                sanitized === undefined ||
+                props.isLoading ||
+                !entry ||
+                !hasUncommittedChanges}>
+            Save version
+          </Button>
+          <Button
+              onClick={() => updateEntry(props.entry)}
+              disabled={
+                props.isLoading ||
+                !entry ||
+                !hasUncommittedChanges}>
+            Discard edits
+          </Button>
+        </ButtonGroup>
       </div>
     </div>
   );
