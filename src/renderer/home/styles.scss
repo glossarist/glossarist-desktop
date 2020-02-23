@@ -151,7 +151,7 @@ html, body, #app {
   flex-flow: row nowrap;
   background: $panelLightBg;
   box-shadow: $pt-elevation-shadow-2;
-  z-index: 2;
+  z-index: 4;
 
   &.panelCollapsed {
     width: auto;
