@@ -8,7 +8,7 @@ export const availableLanguages = {
   'ara': 'Arabic',
   'ger': 'German',
   'kor': 'Korean',
-  'msa': 'Malaysian',
+  'msa': 'Malay',
   'rus': 'Russian',
   'spa': 'Spanish',
   'swe': 'Swedish',
