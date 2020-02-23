@@ -288,6 +288,7 @@ const ConceptTranslate: React.FC<{}> = function () {
 
   const authSourceForm = (
     <Callout
+        intent="primary"
         title="Authoritative source"
         key={`${active.termid}-${lang.selected}`}>
       <p>
