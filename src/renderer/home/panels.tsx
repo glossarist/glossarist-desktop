@@ -69,7 +69,7 @@ const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function
   }
 
   let treeState: ITreeNode[];
-  if (source.isLoading) {
+  if (source.isLoading && concepts.length < 1) {
     treeState = [1, 2, 3, 4].map(id => ({
       id: id,
       label: <span className={Classes.SKELETON}>Loading…</span>,
