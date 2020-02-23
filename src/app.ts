@@ -7,6 +7,7 @@ export const availableLanguages = {
   'dan': 'Danish',
   'ara': 'Arabic',
   'ger': 'German',
+  'jpn': 'Japanese',
   'kor': 'Korean',
   'msa': 'Malay',
   'rus': 'Russian',
