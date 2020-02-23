@@ -692,8 +692,6 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
   ('concepts', { query: { inSource: activeSource, matchingText: textQuery }});
 
-  const keys = JSON.stringify(Object.keys(_objs.objects));
-
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
       ('concepts', { query: { inSource: activeSource }}).ids,
@@ -713,7 +711,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   // Hotkey navigation up/down concept roll
   const currentIndex = useMemo(() => (
     concepts.objects.findIndex((c) => c.termid === selectedConceptRef)
-  ), [keys, JSON.stringify(activeSource), selectedConceptRef]);
+  ), [JSON.stringify(concepts.ids), JSON.stringify(activeSource), selectedConceptRef]);
 
   useEffect(() => {
     function selectNext() {
@@ -744,7 +742,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
       Mousetrap.unbind('j');
       Mousetrap.unbind('k');
     };
-  }, [keys, currentIndex]);
+  }, [currentIndex]);
 
   const concept = selectedConceptRef
     ? (_objs.objects[selectedConceptRef] || null)
