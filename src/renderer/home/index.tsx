@@ -4,6 +4,8 @@ import { debounce } from 'throttle-debounce';
 import React, { useMemo, useRef, useContext, useState, useEffect } from 'react';
 
 import Mousetrap from 'mousetrap';
+// Import needed to define Mousetrap.bindGlobal() as a side-effect:
+import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 
 import {
   Classes,
@@ -449,6 +451,7 @@ const SortOrder: ToolbarItem = function () {
 
 const SearchByText: ToolbarItem = function () {
   const searchCtx = useContext(TextSearchContext);
+  const searchFieldRef = useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = useState(searchCtx.query || '' as string);
 
   const handleChange = function (evt: React.FormEvent<HTMLInputElement>) {
@@ -458,18 +461,35 @@ const SearchByText: ToolbarItem = function () {
 
   useEffect(() => {
     updateQuery(query);
-
     return function cleanup() {
       updateQuery.cancel();
     }
   }, [query]);
 
+  useEffect(() => {
+    searchFieldRef.current?.classList.add('mousetrap');
+
+    Mousetrap.bind('mod+f', () => searchFieldRef.current?.focus());
+
+    Mousetrap.bind('escape', () => {
+      if (searchFieldRef.current && document.activeElement === searchFieldRef.current) {
+        searchFieldRef.current.blur();
+      }
+    });
+
+    return function cleanup() {
+      Mousetrap.unbind('mod+f');
+      Mousetrap.unbind('escape');
+    }
+  }, []);
+
   return <InputGroup round
     value={query}
     onChange={handleChange}
+    inputRef={(ref: HTMLInputElement | null) => { searchFieldRef.current = ref }}
     leftIcon="search"
     placeholder="Type to search…"
-    title="Search is performed across English designations and definitions, as well as concept identifiers."
+    title="Search is performed across English designations and definitions, as well as concept identifiers. (mod+f)"
     rightElement={<Button minimal icon="cross" onClick={() => setQuery('')} />}
   />;
 };
