@@ -208,7 +208,7 @@ export const BasicsPanel: React.FC<{}> = function () {
               <TextArea
                 growVertically={true}
                 className={`${styles.definition} ${rtlClass} ${loadingClass}`}
-                value={localized.definition}
+                value={localized.definition || ''}
                 {...field} />
             </FormGroup>
 
