@@ -809,6 +809,7 @@ function makeStringOfLength(length: number) {
 
 const LOADING_TREE_STATE: ITreeNode[] = [...Array(3).keys()].map(id => ({
     id: id,
+    disabled: true,
     label: <span className={Classes.SKELETON}>
       {makeStringOfLength(getRandomInt(15, 60))}
     </span>,

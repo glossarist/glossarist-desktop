@@ -73,6 +73,7 @@ const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function
     treeState = [1, 2, 3, 4].map(id => ({
       id: id,
       label: <span className={Classes.SKELETON}>Loading…</span>,
+      disabled: true,
     }));
   } else {
     treeState = concepts.map(c => ({
