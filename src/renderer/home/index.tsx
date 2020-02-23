@@ -724,13 +724,13 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
       const ref = getPreviousRef(currentIndex);
       if (ref) { selectConceptRef(ref); }
     }
-    function getNextRef(idx: number| undefined): ConceptRef | undefined {
+    function getNextRef(idx?: number): ConceptRef | undefined {
       if (idx !== undefined && concepts.objects[idx + 1]) {
         return concepts.objects[idx + 1].termid;
       }
       return undefined;
     }
-    function getPreviousRef(idx: number| undefined): ConceptRef | undefined  {
+    function getPreviousRef(idx?: number): ConceptRef | undefined  {
       if (idx !== undefined && idx >= 1 && concepts.objects[idx - 1]) {
         return concepts.objects[idx - 1].termid;
       }
