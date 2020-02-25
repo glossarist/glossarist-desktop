@@ -26,7 +26,7 @@ import { ObjectSource, availableLanguages } from '../../app';
 import { app } from '..';
 import { LangSelector } from '../lang';
 
-import { ConceptItem, EntryDetails, EntryEdit } from './concepts';
+import { ConceptItem, EntryDetails, EntryEdit, EntryForm } from './concepts';
 import * as panels from './panels';
 import {
   SourceContext,
@@ -157,12 +157,7 @@ const ConceptDetails: React.FC<{}> = function () {
     conceptDetails = <EntryDetails isLoading={isLoading} entry={concept} />;
   }
   return (
-    <div className={`
-          ${styles.singleConcept}
-          ${styles.examineConcept}
-          ${concept === null ? styles.conceptNotLocalized : ''}
-          ${isLoading ? styles.conceptBeingLoaded : ''}
-        `}>
+    <div className={styles.backdrop}>
       {conceptDetails}
     </div>
   );
@@ -191,7 +186,7 @@ const ConceptEditAuthoritative: React.FC<{}> = function () {
   }
 
   return (
-    <div className={styles.editConcept}>
+    <div className={styles.backdrop}>
       <EntryEdit
         concept={active}
         key={auth.id}
@@ -210,6 +205,13 @@ const ConceptTranslate: React.FC<{}> = function () {
 
   const active = ctx.active;
   const entry = active ? active[lang.selected as keyof typeof availableLanguages] : undefined;
+
+  const authVersion = ctx.active ? ctx.active[lang.default as keyof typeof availableLanguages] : null;
+  const authIsValid: boolean | undefined = authVersion
+    ? ['retired', 'superseded'].indexOf(authVersion.entry_status) < 0
+    : undefined;
+
+  const comparing = mod.opts.compareAuthoritative && authVersion;
 
   // Force switch to non-authoritative language
   useEffect(() => {
@@ -290,11 +292,17 @@ const ConceptTranslate: React.FC<{}> = function () {
 
   const authSourceForm = (
     <Callout
-        intent="primary"
+        className={styles.authSourceCallout}
+        intent={authIsValid === true ? "primary" : "warning"}
         title="Authoritative source"
         key={`${active.termid}-${lang.selected}`}>
       <p>
-        Please specify the authoritative source you will use for translating this concept to {lang.available[lang.selected]}.
+        {authVersion && authIsValid === false
+          ? <>
+              Note: The authoritative language entry for this concept ({lang.available[authVersion.language_code]})
+              has status {authVersion.entry_status}. If you are sure, please </>
+          : <>Please </>}
+        specify the authoritative source you will use for translating this concept to {lang.available[lang.selected]}.
       </p>
       <FormGroup label="Standard reference" labelInfo="(required)">
         <InputGroup large fill required
@@ -317,94 +325,28 @@ const ConceptTranslate: React.FC<{}> = function () {
           value={authSourceDraft.link}
           onChange={handleAuthSourceStringPropertyChange('link')} />
       </FormGroup>
-      <Button large intent="primary" onClick={handleAcceptAuthSourceDraft}>
+      <Button large intent={authIsValid ? "primary" : undefined} onClick={handleAcceptAuthSourceDraft}>
         Proceed to translation
       </Button>
     </Callout>
   );
 
-  const authVersion = ctx.active ? ctx.active[lang.default as keyof typeof availableLanguages] : null;
-  const comparing = mod.opts.compareAuthoritative && authVersion;
-
   return (
-    <div className={`${styles.translateConcept} ${comparing ? styles.translateConceptComparison : ''}`}>
+    <div className={styles.backdrop}>
+
+      <div className={`${styles.translateConcept} ${comparing ? styles.translateConceptComparison : ''}`}>
+        {entryWithSource
+          ? <EntryEdit
+              key={`${active.termid}-${lang.selected}`}
+              concept={active}
+              entry={entryWithSource}
+              isLoading={ctx.isLoading} />
+          : authSourceForm}
+      </div>
+
       {comparing && authVersion
-        ? <EntryDetails entry={authVersion} />
+        ? <div className={styles.examineConcept}><EntryDetails entry={authVersion} /></div>
         : null}
-      {entryWithSource
-        ? <EntryEdit
-            key={`${active.termid}-${lang.selected}`}
-            concept={active}
-            entry={entryWithSource}
-            isLoading={ctx.isLoading} />
-        : authSourceForm}
-    </div>
-  );
-};
-
-
-/* Panels */
-
-interface PanelProps {
-  title?: string
-  TitleComponent?: React.FC<{}>
-  className?: string
-  iconCollapsed?: IconName
-  iconExpanded?: IconName
-  isCollapsible?: true
-  isCollapsedByDefault?: true
-  onToggle?: (state: boolean) => void
-}
-const Panel: React.FC<PanelProps> = function ({
-    className,
-    title, TitleComponent,
-    iconCollapsed, iconExpanded,
-    isCollapsible, isCollapsedByDefault,
-    onToggle,
-    children }) {
-  const state = useRef({ collapsed: (isCollapsedByDefault || false) as boolean});
-  const [isCollapsed, setCollapsedState] = useState(state.current.collapsed);
-
-  useEffect(() => {
-    onToggle ? onToggle(isCollapsed) : void 0;
-  }, [isCollapsed]);
-
-  function onCollapse() {
-    state.current.collapsed = true;
-    onToggle ? onToggle(true) : void 0;
-    setCollapsedState(true);
-  }
-  function onExpand() {
-    state.current.collapsed = false;
-    onToggle ? onToggle(false) : void 0;
-    setCollapsedState(false);
-  }
-
-  const toggleIcon: IconName = isCollapsed
-    ? (iconCollapsed || 'caret-right')
-    : (iconExpanded || 'caret-down');
-
-  return (
-    <div className={`
-        ${className || ''}
-        ${styles.panel}
-        ${isCollapsible === true ? styles.panelCollapsible : ''}
-        ${isCollapsible === true && isCollapsed === true ? styles.panelCollapsed : ''}`}>
-
-      {title || TitleComponent || isCollapsible
-        ? <div
-              className={styles.panelTitleBar}
-              onClick={(isCollapsible === true && isCollapsed === false) ? onCollapse : onExpand}>
-            <Icon className={styles.panelTriggerIcon} icon={isCollapsible ? toggleIcon : 'blank'} />
-            {TitleComponent ? <TitleComponent /> : title}
-          </div>
-        : null}
-
-      {isCollapsible && isCollapsed
-        ? null
-        : <div className={styles.panelContents}>
-            {children}
-          </div>}
 
     </div>
   );
@@ -467,11 +409,9 @@ const SearchByText: ToolbarItem = function () {
   }, [query]);
 
   useEffect(() => {
-    searchFieldRef.current?.classList.add('mousetrap');
-
     Mousetrap.bind('mod+f', () => searchFieldRef.current?.focus());
 
-    Mousetrap.bind('escape', () => {
+    Mousetrap.bindGlobal('escape', () => {
       if (searchFieldRef.current && document.activeElement === searchFieldRef.current) {
         searchFieldRef.current.blur();
       }
@@ -510,6 +450,71 @@ const AddCollection: ToolbarItem = function () {
 };
 
 
+/* Panels */
+
+interface PanelProps {
+  title?: string
+  TitleComponent?: React.FC<{}>
+  className?: string
+  iconCollapsed?: IconName
+  iconExpanded?: IconName
+  isCollapsible?: true
+  isCollapsedByDefault?: true
+  onToggle?: (state: boolean) => void
+}
+const Panel: React.FC<PanelProps> = function ({
+    className,
+    title, TitleComponent,
+    iconCollapsed, iconExpanded,
+    isCollapsible, isCollapsedByDefault,
+    onToggle,
+    children }) {
+  const [isCollapsed, setCollapsedState] = useState<boolean>(isCollapsedByDefault || false);
+
+  useEffect(() => {
+    onToggle ? onToggle(isCollapsed) : void 0;
+  }, [isCollapsed]);
+
+  function onCollapse() {
+    onToggle ? onToggle(true) : void 0;
+    setCollapsedState(true);
+  }
+  function onExpand() {
+    onToggle ? onToggle(false) : void 0;
+    setCollapsedState(false);
+  }
+
+  const toggleIcon: IconName = isCollapsed
+    ? (iconCollapsed || 'caret-right')
+    : (iconExpanded || 'caret-down');
+
+  return (
+    <div className={`
+        ${className || ''}
+        ${styles.panel}
+        ${isCollapsible === true ? styles.panelCollapsible : ''}
+        ${isCollapsible === true && isCollapsed === true ? styles.panelCollapsed : ''}`}>
+
+      {title || TitleComponent || isCollapsible
+        ? <div
+              className={styles.panelTitleBar}
+              onClick={(isCollapsible === true && isCollapsed === false) ? onCollapse : onExpand}>
+            <Icon className={styles.panelTriggerIcon} icon={isCollapsible ? toggleIcon : 'blank'} />
+            {TitleComponent ? <TitleComponent /> : title}
+          </div>
+        : null}
+
+      {isCollapsible && isCollapsed
+        ? null
+        : <div className={styles.panelContents}>
+            {children}
+          </div>}
+
+    </div>
+  );
+};
+
+
 /* Sidebars */ 
 
 const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = function ({ id, term, cfg }) {
@@ -527,6 +532,7 @@ const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = fu
 interface SidebarProps {
   position: 'left' | 'right'
   onToggle?: (state: boolean) => void
+  collapsed?: boolean
   panelSet: PanelConfig<any>[]
 }
 const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle }) {
@@ -789,6 +795,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
             isLoading: _objs.isUpdating,
           }}>
         <TextSearchContext.Provider value={{ query: textQuery, setQuery: setTextQuery }}>
+
           <div className={styles.moduleView}>
             {leftSidebar.length > 0
               ? <Sidebar key="left" position="left" panelSet={leftSidebar} />
@@ -806,6 +813,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
               ? <Sidebar key="right" position="right" panelSet={rightSidebar} />
               : null}
           </div>
+
         </TextSearchContext.Provider>
       </SourceContext.Provider>
     </ConceptContext.Provider>

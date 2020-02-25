@@ -2,12 +2,13 @@ import React, { useState, useRef, useContext, useEffect } from 'react';
 
 import {
   H2, ButtonGroup, Button,
-  Callout,
-  FormGroup, InputGroup, TextArea,
+  FormGroup, InputGroup,
   Classes,
+  Tooltip,
+  Intent,
+  IconName,
 } from '@blueprintjs/core';
 
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { callIPC } from 'coulomb/ipc/renderer';
 
 import {
@@ -17,6 +18,7 @@ import {
 
 import { availableLanguages } from '../../app';
 import { ConceptContext } from './contexts';
+import { AutoSizedTextArea } from './widgets';
 import styles from './styles.scss';
 
 
@@ -60,11 +62,16 @@ function ({ lang, concept, className }) {
 
 // Viewing terminological entries
 
-export const EntryDetails: React.FC<{ isLoading?: boolean, entry: Concept<any, any> }> = function ({ isLoading, entry }) {
+interface EntryDetailsProps {
+  isLoading?: boolean
+  entry: Concept<any, any>
+  className?: string
+}
+export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, entry, className }) {
   const loadingClass = isLoading ? Classes.SKELETON : undefined;
 
   return (
-    <div className={`${styles.entryDetails} ${entry.language_code === 'ara' ? Classes.RTL : undefined}`}>
+    <div className={`${styles.entryDetails} ${entry.language_code === 'ara' ? Classes.RTL : ''} ${className || ''}`}>
       <H2 className={`${styles.designation} ${loadingClass}`}>{entry?.term}</H2>
 
       <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
@@ -91,27 +98,119 @@ export const EntryDetails: React.FC<{ isLoading?: boolean, entry: Concept<any, a
 
 // Editing terminological entries
 
+interface EntryFormProps {
+  entry: Concept<any, any>
+  className?: string
+  onTermChange?: (newVal: string) => void
+  onDefinitionChange?: (newVal: string) => void
+  onNoteEdit?: (idx: number, newVal: string) => void
+  onNoteDeletion?: (idx: number) => void
+  onExampleEdit?: (idx: number, newVal: string) => void
+  onExampleDeletion?: (idx: number) => void
+}
+export const EntryForm: React.FC<EntryFormProps> = function (props) {
+  return (
+    <div className={styles.entryForm}>
+      <FormGroup
+          className={styles.designation}
+          label="Designation"
+          labelFor="designation"
+          labelInfo="(required)">
+        <InputGroup large fill
+          value={props.entry.term || ''}
+          id="designation"
+          intent={!props.entry.term ? 'danger' : undefined}
+          readOnly={!props.onTermChange}
+          onChange={(evt: React.FormEvent<HTMLInputElement>) =>
+            props.onTermChange
+              ? props.onTermChange((evt.target as HTMLInputElement).value)
+              : void 0} />
+      </FormGroup>
+
+      <FormGroup
+          className={styles.definition}
+          label="Definition"
+          labelFor="definition"
+          labelInfo="(required)">
+        <AutoSizedTextArea fill
+          value={props.entry.definition || ''}
+          id="definition"
+          disabled={!props.onDefinitionChange}
+          intent={!props.entry.definition ? 'danger' : undefined}
+          onChange={(evt: React.FormEvent<HTMLTextAreaElement>) =>
+            props.onDefinitionChange
+              ? props.onDefinitionChange((evt.target as HTMLTextAreaElement).value)
+              : void 0} />
+      </FormGroup>
+
+      {[...props.entry.examples.entries()].map(([idx, item]) =>
+        <FormGroup
+            key={`example-${idx}`}
+            label={`EXAMPLE ${idx + 1}`}
+            labelFor={`example-${idx}`}
+            labelInfo={props.onExampleDeletion
+              ? <Button small
+                  title="Delete this example"
+                  icon="cross"
+                  onClick={() => props.onExampleDeletion
+                    ? props.onExampleDeletion(idx)
+                    : void 0} />
+              : undefined}
+            intent={item.trim() === '' ? 'danger' : undefined}>
+          <AutoSizedTextArea fill
+            value={item}
+            id={`example-${idx}`}
+            growVertically
+            disabled={!props.onExampleEdit}
+            onChange={(evt: React.FormEvent<HTMLTextAreaElement>) => {
+              evt.persist();
+              props.onExampleEdit
+                ? props.onExampleEdit(idx, (evt.target as HTMLTextAreaElement).value)
+                : void 0}} />
+        </FormGroup>
+      )}
+
+      {[...props.entry.notes.entries()].map(([idx, item]) =>
+        <FormGroup
+            key={`note-${idx}`}
+            labelFor={`note-${idx}`}
+            label={`NOTE ${idx + 1}`}
+            labelInfo={props.onNoteDeletion
+              ? <Button small
+                  title="Delete this note"
+                  icon="cross"
+                  onClick={() => props.onNoteDeletion
+                    ? props.onNoteDeletion(idx)
+                    : void 0} />
+              : undefined}
+            intent={item.trim() === '' ? 'danger' : undefined}>
+          <AutoSizedTextArea fill
+            value={item}
+            growVertically
+            id={`note-${idx}`}
+            readOnly={!props.onNoteEdit}
+            onChange={(evt: React.FormEvent<HTMLTextAreaElement>) => {
+              evt.persist();
+              props.onNoteEdit
+                ? props.onNoteEdit(idx, (evt.target as HTMLTextAreaElement).value)
+                : void 0}} />
+        </FormGroup>
+      )}
+    </div>
+  );
+};
+
+
 interface EntryEditProps {
   concept: MultiLanguageConcept<any>
   entry: Concept<any, any>
   isLoading: boolean
+  className?: string
 }
 export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   const [entry, updateEntry] = useState(props.entry);
   const [sanitized, updateSanitized] = useState<Concept<any, any> | undefined>(undefined);
   const [commitInProgress, setCommitInProgress] = useState(false);
-  const langCtx = useContext(LangConfigContext);
-
-  function sanitizeEntry(entry: Concept<any, any>): Concept<any, any> | undefined {
-    if ((entry.term || '').trim() === '' || (entry.definition || '').trim() === '') {
-      return undefined;
-    }
-    return {
-      ...entry,
-      notes: entry.notes.filter(i => i.trim() !== ''),
-      examples: entry.examples.filter(i => i.trim() !== ''),
-    };
-  }
 
   useEffect(() => {
     updateSanitized(sanitizeEntry(entry));
@@ -134,12 +233,21 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     }
   };
 
-  function handleTermChange(evt: React.FormEvent<HTMLInputElement>) {
-    const val = (evt.target as HTMLInputElement).value;
+  function sanitizeEntry(entry: Concept<any, any>): Concept<any, any> | undefined {
+    if ((entry.term || '').trim() === '' || (entry.definition || '').trim() === '') {
+      return undefined;
+    }
+    return {
+      ...entry,
+      notes: entry.notes.filter(i => i.trim() !== ''),
+      examples: entry.examples.filter(i => i.trim() !== ''),
+    };
+  }
+
+  function handleTermChange(val: string) {
     updateEntry(e => ( e ? { ...e, term: val } : e));
   }
-  function handleDefChange(evt: React.FormEvent<HTMLTextAreaElement>) {
-    const val = (evt.target as HTMLTextAreaElement).value;
+  function handleDefChange(val: string) {
     updateEntry(e => ( e ? { ...e, definition: val } : e));
   }
   function handleItemAddition(field: 'notes' | 'examples') {
@@ -147,8 +255,8 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
       updateEntry(e => ( e ? { ...e, [field]: [...e[field], ''] } : e));
     };
   }
-  function handleItemDeletion(field: 'notes' | 'examples', idx: number) {
-    return () => {
+  function handleItemDeletion(field: 'notes' | 'examples') {
+    return (idx: number) => {
       updateEntry(e => {
         if (e) {
           var items = [ ...e[field] ];
@@ -159,13 +267,12 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
       });
     };
   }
-  function handleItemEdit(field: 'notes' | 'examples', idx: number) {
-    return (evt: React.FormEvent<HTMLTextAreaElement>) => {
-      evt.persist();
+  function handleItemEdit(field: 'notes' | 'examples') {
+    return (idx: number, val: string) => {
       updateEntry(e => {
         if (e) {
           var items = [ ...e[field] ];
-          items[idx] = (evt.target as HTMLTextAreaElement).value;
+          items[idx] = val;
           return { ...e, [field]: items };
         }
         return e;
@@ -174,41 +281,15 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   }
 
   const conceptForm = (
-    <>
-      <FormGroup label="Designation" labelInfo="(required)" intent={!entry.term ? 'danger' : undefined}>
-        <InputGroup large fill value={entry.term} onChange={handleTermChange} />
-      </FormGroup>
-
-      <FormGroup className={styles.definition} label="Definition" labelInfo="(required)" intent={!entry.definition ? 'danger' : undefined}>
-        <TextArea fill value={entry.definition} onChange={handleDefChange} />
-      </FormGroup>
-
-      {[...entry.examples.entries()].map(([idx, item]) =>
-        <FormGroup
-            key={`example-${idx}`}
-            label={`EXAMPLE ${idx + 1}`}
-            labelInfo={<Button minimal
-              title="Delete this example"
-              icon="cross" intent="danger"
-              onClick={handleItemDeletion('examples', idx)} />}
-            intent={item.trim() === '' ? 'danger' : undefined}>
-          <TextArea fill value={item} growVertically onChange={handleItemEdit('examples', idx)} />
-        </FormGroup>
-      )}
-
-      {[...entry.notes.entries()].map(([idx, item]) =>
-        <FormGroup
-            key={`note-${idx}`}
-            label={`NOTE ${idx + 1}`}
-            labelInfo={<Button minimal
-              title="Delete this note"
-              icon="cross" intent="danger"
-              onClick={handleItemDeletion('notes', idx)} />}
-            intent={item.trim() === '' ? 'danger' : undefined}>
-          <TextArea fill value={item} growVertically onChange={handleItemEdit('notes', idx)} />
-        </FormGroup>
-      )}
-    </>
+    <EntryForm
+      entry={entry}
+      onTermChange={handleTermChange}
+      onDefinitionChange={handleDefChange}
+      onExampleDeletion={handleItemDeletion('examples')}
+      onExampleEdit={handleItemEdit('examples')}
+      onNoteDeletion={handleItemDeletion('notes')}
+      onNoteEdit={handleItemEdit('notes')}
+    />
   );
 
   const hasUncommittedChanges = sanitized && entry && props.entry &&
@@ -217,50 +298,59 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
 
   const isValid = ['retired', 'superseded'].indexOf(props.entry.entry_status) < 0;
 
+  let saveIntent: Intent | undefined;
+  let saveIconSecondary: IconName | undefined;
+
+  if (!isValid) {
+    saveIntent = "warning";
+    saveIconSecondary = "warning-sign";
+  } else {
+    saveIntent = "success";
+    saveIconSecondary = undefined;
+  }
+
   return (
-    <div className={styles.conceptEntryForm}>
-      {!isValid
-        ? <Callout
-              className={styles.editingNonValidEntry}
-              icon="asterisk"
-              intent="warning"
-              title="Editing non-valid entry">
-            The designation or definition of this concept in {langCtx.available[entry.language_code]} has status <strong>{props.entry.entry_status}</strong>.
-          </Callout>
-        : null}
+    <div className={`${styles.conceptEntryForm} ${props.className || ''}`}>
 
-      <div className={`${styles.entryFormFields} ${entry.language_code === 'ara' ? Classes.RTL : undefined}`}> 
-        {conceptForm}
-
-        <ButtonGroup fill>
-          <Button onClick={handleItemAddition('examples')}>Append EXAMPLE</Button>
-          <Button onClick={handleItemAddition('notes')}>Append NOTE</Button>
+      <div className={styles.entryFormToolbar}>
+        <ButtonGroup>
+          <Button icon="add" onClick={handleItemAddition('examples')}>EXAMPLE</Button>
+          <Button icon="add" onClick={handleItemAddition('notes')}>NOTE</Button>
         </ButtonGroup>
-      </div>
 
-      <div className={styles.entryFormActions}>
-        <ButtonGroup large>
-          <Button
-              onClick={commitInProgress ? undefined : commitChanges}
-              active={commitInProgress}
-              intent={(sanitized !== undefined && hasUncommittedChanges) ? "success" : undefined}
-              disabled={
-                sanitized === undefined ||
-                props.isLoading ||
-                !entry ||
-                !hasUncommittedChanges}>
-            Save version
-          </Button>
+        <ButtonGroup>
           <Button
               onClick={() => updateEntry(props.entry)}
               disabled={
                 props.isLoading ||
                 !entry ||
                 !hasUncommittedChanges}>
-            Discard edits
+            Revert
           </Button>
+          <Tooltip
+              openOnTargetFocus={false}
+              interactionKind="hover"
+              intent={saveIntent}
+              disabled={!hasUncommittedChanges && isValid}
+              content={`Committing new version will make your changes visible to others. ${!isValid ? "NOTE: You are editing a non-valid entry." : ''}`}>
+            <Button
+                onClick={commitInProgress ? undefined : commitChanges}
+                active={commitInProgress}
+                icon="git-commit"
+                rightIcon={saveIconSecondary}
+                intent={saveIntent}
+                disabled={
+                  sanitized === undefined ||
+                  props.isLoading ||
+                  !entry ||
+                  !hasUncommittedChanges}>
+                Commit&nbsp;version
+            </Button>
+          </Tooltip>
         </ButtonGroup>
       </div>
+
+      {conceptForm}
     </div>
   );
 };

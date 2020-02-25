@@ -86,7 +86,6 @@ html, body, #app {
 
     .bp3-label {
       margin-bottom: 0;
-      padding-left: .25rem;
     }
 
     &.bp3-inline {
@@ -245,11 +244,10 @@ html, body, #app {
 
   > :first-child {
     flex: 1;
-    overflow-y: scroll;
   }
 
-  .moduleToolbar {
-    padding: .5rem;
+  > .moduleToolbar {
+    padding: $pt-grid-size;
     background: $light-gray2;
     display: flex;
     align-items: center;
@@ -277,54 +275,56 @@ html, body, #app {
     }
   }
 
-  .conceptEntryForm {
-    flex: 1;
+  .backdrop {
+    background: $pt-divider-black;
+    padding: 1.25rem;
 
-    padding: 1rem;
     display: flex;
-    flex-flow: column nowrap;
-    overflow-y: auto;
-
-    .entryFormFields {
-      flex: 1;
-      display: flex;
-      flex-flow: column nowrap;
-    }
-
-    .editingNonValidEntry {
-      margin-bottom: 2rem;
-    }
-  }
-
-  .editConcept, .translateConcept, .examineConcept {
-    display: flex;
-  }
-
-  .translateConcept {
-    display: flex;
+    flex-flow: row nowrap;
     overflow: hidden;
 
-    > :only-child {
-      width: 100%;
-    }
-
     > * {
-      width: 50%;
+      display: flex;
+      flex-flow: column nowrap;
+
+      overflow-y: scroll;
+      background: $pt-app-background-color;
+
+      border-radius: $pt-border-radius;
+      box-shadow: $pt-elevation-shadow-3;
     }
 
-    .entryDetails {
-      padding: 1rem 0;
-      box-shadow: $pt-elevation-shadow-1;
-      background: white;
-
-      > * {
-        transform: scale(0.9);
-      }
+    > * + * {
+      margin-left: 0.625rem;
+      border-radius: 0 $pt-border-radius $pt-border-radius 0;
     }
+
+    > :first-child {
+      flex: 1;
+      border-radius: $pt-border-radius 0 0 $pt-border-radius;
+    }
+
+    > :only-child {
+      border-radius: $pt-border-radius;
+    }
+  }
+
+  .examineConcept:nth-child(2) {
+    // When shown in translate side-by-side view
+    flex: .8;
+    background: white;
+    margin-right: -7%;
+    transform: scale(.85);
+    transform-origin: top left;
+  }
+
+  .authSourceCallout {
+    flex: 1;
   }
 
   .entryDetails {
     padding: 2rem;
+    background: white;
 
     .designation {
       font-weight: normal;
@@ -344,6 +344,78 @@ html, body, #app {
       font-size: 120%;
       margin-left: 1em;
       margin-bottom: 2rem;
+    }
+  }
+
+  .entryForm {
+    $padding: $pt-grid-size + $pt-border-radius;
+
+    display: flex;
+    flex-flow: column nowrap;
+    padding: $padding;
+
+    .designation {
+      :global .bp3-input {
+        font-weight: bold;
+      }
+    }
+
+    :global .bp3-form-group {
+      .bp3-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .bp3-form-content {
+        margin-left: -$padding;
+        margin-right: -$padding;
+      }
+      .bp3-input {
+        border-radius: 0;
+        box-shadow: none;
+        padding-left: $padding;
+      }
+    }
+  }
+
+  .conceptEntryForm {
+    flex: 1;
+
+    display: flex;
+    flex-flow: column nowrap;
+    overflow-y: auto;
+
+    .entryFormToolbar {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      padding: $pt-grid-size;
+      background: $light-gray2;
+
+      > * { flex: 1 }
+
+      > :last-child {
+        // The commit / revert button group
+        > :last-child {
+          // The save button
+          :global .bp3-button {
+            justify-content: flex-start;
+            flex: 1;
+
+            .bp3-button-text {
+              flex: 1;
+            }
+          }
+        }
+      }
+
+      :global .bp3-button-group {
+        overflow: hidden;
+      }
+    }
+
+    .entryForm {
+      flex: 1;
     }
   }
 }

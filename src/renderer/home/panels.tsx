@@ -5,7 +5,7 @@ import { ConceptCollection } from '../../models/concepts';
 import {
   Classes,
   Switch, Button,
-  FormGroup, InputGroup, TextArea,
+  FormGroup, InputGroup,
   Text,
   Tree, ITreeNode,
   IInputGroupProps,
@@ -22,6 +22,7 @@ import { ConceptContextSpec, ConceptContext, SourceContext } from './contexts';
 import { ConceptItem } from './concepts';
 
 import styles from './styles.scss';
+import { AutoSizedTextArea } from './widgets';
 
 
 export const SystemPanel: React.FC<{}> = function () {
@@ -206,7 +207,7 @@ export const BasicsPanel: React.FC<{}> = function () {
             <FormGroup
                 className={rtlClass}
                 key="definition">
-              <TextArea
+              <AutoSizedTextArea
                 growVertically={true}
                 className={`${styles.definition} ${rtlClass} ${loadingClass}`}
                 value={localized.definition || ''}
@@ -327,6 +328,7 @@ export const LineagePanel: React.FC<{}> = function () {
   treeState.push({
     id: 'auth-source',
     label: concept.authoritative_source.ref,
+    disabled: authURL === undefined,
     secondaryLabel: <>
       <Tag intent={authURL ? "primary" : undefined} title="Authoritative source">Auth. source</Tag>
     </>,
