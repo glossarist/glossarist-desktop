@@ -26,7 +26,7 @@ import { ObjectSource, availableLanguages } from '../../app';
 import { app } from '..';
 import { LangSelector } from '../lang';
 
-import { ConceptItem, EntryDetails, EntryEdit, EntryForm } from './concepts';
+import { ConceptItem, EntryDetails, EntryEdit } from './concepts';
 import * as panels from './panels';
 import {
   SourceContext,
