@@ -131,6 +131,21 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
           className={styles.definition}
           label="Definition"
           labelFor="definition"
+          intent={!props.entry.definition ? 'danger' : undefined}
+          helperText={<>
+            <p>
+              Use a single phrase specifying the concept and, if possible, reflecting the position of the concept in the concept system.
+            </p>
+            <p>
+              Refer to
+              {" "}
+              <a href="https://www.iso.org/standard/40362.html">ISO 10241-1:2011, 6.4</a>
+              {" "}
+              and
+              {" "}
+              <a href="https://www.iso.org/standard/38109.html">ISO 704:2009, 6.3</a> for more details about what constitutes a good definition.
+            </p>
+          </>}
           labelInfo="(required)">
         <AutoSizedTextArea fill
           value={props.entry.definition || ''}

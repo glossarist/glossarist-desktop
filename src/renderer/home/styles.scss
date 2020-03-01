@@ -369,6 +369,11 @@ html, body, #app {
       .bp3-form-content {
         margin-left: -$padding;
         margin-right: -$padding;
+
+        .bp3-form-helper-text {
+          margin-left: $padding;
+          margin-right: $padding;
+        }
       }
       .bp3-input {
         border-radius: 0;
