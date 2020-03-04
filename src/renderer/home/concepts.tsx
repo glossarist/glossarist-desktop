@@ -148,7 +148,7 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
               {" "}
               and
               {" "}
-              <a onClick={() => openHelpPage("https://www.iso.org/standard/38109.html")} >ISO 704:2009, 6.3</a> for more details about what constitutes a good definition.
+              <a onClick={() => openHelpPage("https://www.iso.org/standard/38109.html")}>ISO 704:2009, 6.3</a> for more details about what constitutes a good definition.
             </p>
           </>}
           labelInfo="(required)">
