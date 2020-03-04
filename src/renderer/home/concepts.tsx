@@ -20,6 +20,7 @@ import { availableLanguages } from '../../app';
 import { ConceptContext } from './contexts';
 import { AutoSizedTextArea } from './widgets';
 import styles from './styles.scss';
+import { remote } from 'electron';
 
 
 interface ConceptItemProps {
@@ -108,7 +109,12 @@ interface EntryFormProps {
   onExampleEdit?: (idx: number, newVal: string) => void
   onExampleDeletion?: (idx: number) => void
 }
-export const EntryForm: React.FC<EntryFormProps> = function (props) {
+const EntryForm: React.FC<EntryFormProps> = function (props) {
+
+  function openHelpPage(link: string) {
+    require('electron').shell.openExternal(link);
+  }
+
   return (
     <div className={styles.entryForm}>
       <FormGroup
@@ -139,11 +145,11 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
             <p>
               Refer to
               {" "}
-              <a href="https://www.iso.org/standard/40362.html">ISO 10241-1:2011, 6.4</a>
+              <a onClick={() => openHelpPage("https://www.iso.org/standard/40362.html")}>ISO 10241-1:2011, 6.4</a>
               {" "}
               and
               {" "}
-              <a href="https://www.iso.org/standard/38109.html">ISO 704:2009, 6.3</a> for more details about what constitutes a good definition.
+              <a onClick={() => openHelpPage("https://www.iso.org/standard/38109.html")} >ISO 704:2009, 6.3</a> for more details about what constitutes a good definition.
             </p>
           </>}
           labelInfo="(required)">
