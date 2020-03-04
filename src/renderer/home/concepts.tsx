@@ -20,7 +20,6 @@ import { availableLanguages } from '../../app';
 import { ConceptContext } from './contexts';
 import { AutoSizedTextArea } from './widgets';
 import styles from './styles.scss';
-import { remote } from 'electron';
 
 
 interface ConceptItemProps {
