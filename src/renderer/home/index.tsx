@@ -1,4 +1,3 @@
-import * as log from 'electron-log';
 import { debounce } from 'throttle-debounce';
 
 import React, { useMemo, useRef, useContext, useState, useEffect } from 'react';
@@ -8,11 +7,10 @@ import Mousetrap from 'mousetrap';
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 
 import {
-  Classes,
   H1, Button,
   Icon, IconName, InputGroup,
   NonIdealState,
-  Tree, ITreeNode, ButtonGroup, Callout, FormGroup, Toaster, Position,
+  ButtonGroup, Callout, FormGroup, Toaster, Position,
  } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
@@ -26,7 +24,7 @@ import { ObjectSource, availableLanguages } from '../../app';
 import { app } from '..';
 import { LangSelector } from '../lang';
 
-import { ConceptItem, EntryDetails, EntryEdit } from './concepts';
+import { ConceptList, EntryDetails, EntryEdit } from './concepts';
 import * as panels from './panels';
 import {
   SourceContext,
@@ -106,35 +104,21 @@ const ConceptBrowser: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   const lang = useContext(LangConfigContext);
 
-  function handleNodeClick(node: ITreeNode) {
-    const nodeData = node.nodeData as { conceptRef: number };
-    const ref = nodeData.conceptRef;
-    if (ref) {
-      concept.select(ref);
-    } else {
-      log.error("Missing concept ref on tree node", node.nodeData)
-    }
-  }
-
-  let treeState: ITreeNode[];
-  if (source.isLoading) {
-    treeState = LOADING_TREE_STATE;
-  } else {
-    treeState = concepts.map(c => ({
-      id: c.termid,
-      label: <ConceptItem lang={lang.selected as keyof typeof availableLanguages} concept={c} />,
-      icon: <span className={styles.conceptID}>{c.termid}</span>,
-      secondaryLabel: !c[lang.selected as keyof typeof availableLanguages]
-        ? <Icon intent="warning" icon="translate" />
-        : <Icon icon="blank" />,
-      nodeData: { conceptRef: c.termid },
-      isSelected: concept.ref === c.termid,
-    } as ITreeNode));
-  }
-
   return (
     <div className={styles.conceptBrowser}>
-      <Tree contents={treeState} onNodeClick={handleNodeClick} />
+      <ConceptList
+        lang={lang.selected as keyof typeof availableLanguages}
+        className={styles.conceptList}
+        concepts={concepts}
+        isItemSelected={(ref: ConceptRef) => concept.ref === ref}
+        onItemSelect={(ref: ConceptRef) => concept.select(ref)}
+        itemMarker={(c: MultiLanguageConcept<any>) =>
+          <span className={styles.conceptID}>{c.termid}</span>}
+        itemMarkerRight={(c: MultiLanguageConcept<any>) => 
+          !c[lang.selected as keyof typeof availableLanguages]
+            ? <Icon intent="warning" icon="translate" />
+            : <Icon icon="blank" />}
+      />
     </div>
   );
 };
@@ -520,7 +504,7 @@ const Panel: React.FC<PanelProps> = function ({
 const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = function ({ id, term, cfg }) {
   return (
     <Panel
-        className={styles.sidebarPanel}
+        className={`${styles.sidebarPanel} ${cfg.className || ''}`}
         isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
         TitleComponent={cfg.Title}
         title={cfg.title}>
@@ -602,6 +586,7 @@ interface PanelConfig<T = {}> {
   actions?: ToolbarItem[]
   Contents: React.FC<T>
   objectIndependent?: true
+  className?: string
   props?: T
   collapsed?: 'never' | 'by-default'
 }
@@ -609,8 +594,16 @@ interface PanelConfig<T = {}> {
 const PANELS: { [id: string]: PanelConfig<any> } = {
   system: { Contents: panels.SystemPanel, title: "System" },
   databases: { Contents: panels.DatabasePanel, title: "Repositories" },
-  sourceRollTranslated: { Contents: panels.PossiblyTranslatedSourceRoll, title: "Source", Title: SourceRollTitle },
-  sourceRollAuthoritative: { Contents: panels.AuthoritativeLanguageSourceRoll, title: "Source", Title: SourceRollTitle },
+  sourceRollTranslated: {
+    Contents: panels.PossiblyTranslatedSourceRoll,
+    className: styles.sourceRollPanel,
+    title: "Source",
+    Title: SourceRollTitle },
+  sourceRollAuthoritative: {
+    Contents: panels.AuthoritativeLanguageSourceRoll,
+    className: styles.sourceRollPanel,
+    title: "Source",
+    Title: SourceRollTitle },
   collections: { Contents: panels.CollectionsPanel, title: "Collections", actions: [AddCollection] },
   catalog: { Contents: panels.CatalogPanel, title: "Catalog" },
   basics: { Contents: panels.BasicsPanel, title: "Basics" },
@@ -819,26 +812,3 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
     </ConceptContext.Provider>
   );
 };
-
-
-function getRandomInt(min: number, max: number): number {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function makeStringOfLength(length: number) {
-   var result = '';
-   for (var i = 0; i < length; i++) {
-      result += '0';
-   }
-   return result;
-}
-
-const LOADING_TREE_STATE: ITreeNode[] = [...Array(3).keys()].map(id => ({
-    id: id,
-    disabled: true,
-    label: <span className={Classes.SKELETON}>
-      {makeStringOfLength(getRandomInt(15, 60))}
-    </span>,
-  } as ITreeNode))

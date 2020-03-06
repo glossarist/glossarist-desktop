@@ -200,6 +200,7 @@ html, body, #app {
         height: $titleBarHeight;
         flex-shrink: 0;
         padding-left: .5rem;
+
         display: flex;
         flex-flow: row nowrap;
         align-items: center;
@@ -264,15 +265,7 @@ html, body, #app {
   .conceptBrowser {
     display: flex;
     flex-flow: column nowrap;
-    overflow-y: auto;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-
-    .conceptID {
-      opacity: .4;
-      width: 2rem;
-      font-size: 80%;
-    }
+    overflow: hidden;
   }
 
   .backdrop {
@@ -425,6 +418,16 @@ html, body, #app {
   }
 }
 
+:local .conceptID {
+  opacity: .4;
+  width: 2rem;
+  font-size: 80%;
+}
+
+:local .conceptItem {
+  border-radius: 0 !important;
+}
+
 
 // Panels
 
@@ -436,6 +439,39 @@ html, body, #app {
 :local .sourceRollPanel {
   .sourceName {
     color: $pt-text-color-muted;
+  }
+  .panelContents {
+    overflow-y: hidden !important;
+    display: flex;
+    flex-flow: column nowrap;
+    height: 240px;
+
+    > * {
+      flex: 1;
+    }
+    .conceptItem {
+      font-size: 90%;
+    }
+  }
+}
+
+:local .lazyConceptList {
+  .lazyConceptListItem {
+    border-radius: 0 !important;
+
+    :global .bp3-button-text {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+    }
+
+    .itemMarker {
+      width: 2rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      margin-right: .5rem;
+    }
   }
 }
 

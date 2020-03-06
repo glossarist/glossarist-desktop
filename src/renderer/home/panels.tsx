@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useContext, useEffect } from 'react';
 
-import { ConceptCollection } from '../../models/concepts';
+import { ConceptCollection, ConceptRef } from '../../models/concepts';
 
 import {
   Classes,
@@ -19,7 +19,7 @@ import { DatabaseList } from 'coulomb/db/renderer/status';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { ConceptContextSpec, ConceptContext, SourceContext } from './contexts';
-import { ConceptItem } from './concepts';
+import { ConceptList } from './concepts';
 
 import styles from './styles.scss';
 import { AutoSizedTextArea } from './widgets';
@@ -61,32 +61,16 @@ const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function
   const concept = useContext(ConceptContext);
   const concepts = source.objects;
 
-  function handleNodeClick(node: ITreeNode) {
-    const nodeData = node.nodeData as { conceptRef: number };
-    const ref = nodeData.conceptRef;
-    if (ref) {
-      concept.select(ref);
-    }
-  }
-
-  let treeState: ITreeNode[];
-  if (source.isLoading && concepts.length < 1) {
-    treeState = [1, 2, 3, 4].map(id => ({
-      id: id,
-      label: <span className={Classes.SKELETON}>Loading…</span>,
-      disabled: true,
-    }));
-  } else {
-    treeState = concepts.map(c => ({
-      id: c.termid,
-      label: <ConceptItem lang={lang} concept={c} />,
-      nodeData: { conceptRef: c.termid },
-      isSelected: concept.ref === c.termid,
-    }));
-  }
-
   return (
-    <Tree contents={treeState} onNodeClick={handleNodeClick} />
+    <ConceptList
+      lang={lang}
+      itemHeight={24}
+      buttonProps={{ small: true }}
+      className={styles.conceptList}
+      concepts={concepts}
+      isItemSelected={(ref: ConceptRef) => concept.ref === ref}
+      onItemSelect={(ref: ConceptRef) => concept.select(ref)}
+    />
   );
 };
 
