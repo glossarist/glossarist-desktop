@@ -503,7 +503,7 @@ const Panel: React.FC<PanelProps> = function ({
 
 /* Sidebars */ 
 
-const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = function ({ id, term, cfg }) {
+const SPanel: React.FC<{ cfg: PanelConfig<any> }> = function ({ cfg }) {
   return (
     <Panel
         className={`${styles.sidebarPanel} ${cfg.className || ''}`}
@@ -544,18 +544,18 @@ const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle 
           ${position === 'left' ? styles.moduleSidebarLeft : styles.moduleSidebarRight}`}>
 
       <div className={styles.fixedPanel}>
-        <SPanel term={term} id="first" cfg={firstPanel} />
+        <SPanel cfg={firstPanel} />
       </div>
 
       <div className={styles.restOfPanels}>
         {[...restOfPanels.entries()].map(([idx, cfg]) =>
-          <SPanel key={idx} term={term} id={`${idx}`} cfg={cfg} />
+          <SPanel key={idx} cfg={cfg} />
         )}
       </div>
 
       {lastPanel
         ? <div className={styles.fixedPanel}>
-            <SPanel term={term} id="last" cfg={lastPanel} />
+            <SPanel cfg={lastPanel} />
           </div>
         : null}
 
