@@ -518,7 +518,6 @@ const SPanel: React.FC<{ id: string, term: string, cfg: PanelConfig<any> }> = fu
 interface SidebarProps {
   position: 'left' | 'right'
   onToggle?: (state: boolean) => void
-  collapsed?: boolean
   panelSet: PanelConfig<any>[]
 }
 const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle }) {
