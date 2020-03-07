@@ -59,6 +59,7 @@ function ({
   const listContainer = useRef<HTMLDivElement>(null);
   const CONTAINER_PADDINGS = paddings || 0;
   const ITEM_HEIGHT = itemHeight || 30;
+  const isRTL = lang === 'ara';
   const [listHeight, setListHeight] = useState<number>(CONTAINER_PADDINGS);
 
   useEffect(() => {
@@ -107,6 +108,7 @@ function ({
     <div ref={listContainer} className={className}>
       <List
           className={styles.lazyConceptList}
+          direction={isRTL ? "rtl" : undefined}
           itemCount={concepts.length}
           width="100%"
           height={listHeight - CONTAINER_PADDINGS}
@@ -145,7 +147,6 @@ function ({ lang, concept, className }) {
   return (
     <span
         className={`
-          ${lang === 'ara' ? Classes.RTL : ''}
           ${styles.conceptItem} ${className || ''}
           ${designationValidityClass}
         `}
