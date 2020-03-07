@@ -56,10 +56,11 @@ function ({
     itemHeight,
     isItemSelected }) {
 
-  const listContainer = useRef<HTMLDivElement>(null);
   const CONTAINER_PADDINGS = paddings || 0;
   const ITEM_HEIGHT = itemHeight || 30;
   const isRTL = lang === 'ara';
+
+  const listContainer = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState<number>(CONTAINER_PADDINGS);
 
   useEffect(() => {
