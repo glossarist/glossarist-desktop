@@ -63,7 +63,6 @@ function ({
 
   useEffect(() => {
     const updateListHeight = debounce(100, () => {
-      console.debug(listContainer.current?.parentElement?.offsetHeight);
       setListHeight(listContainer.current?.parentElement?.offsetHeight || CONTAINER_PADDINGS);
     });
 
