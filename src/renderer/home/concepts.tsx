@@ -63,6 +63,9 @@ function ({
   const listContainer = useRef<HTMLDivElement>(null);
   const [listHeight, setListHeight] = useState<number>(CONTAINER_PADDINGS);
 
+  const conceptCtx = useContext(ConceptContext);
+  const listEl = useRef<List>(null);
+
   useEffect(() => {
     const updateListHeight = debounce(100, () => {
       setListHeight(listContainer.current?.parentElement?.offsetHeight || CONTAINER_PADDINGS);
@@ -76,6 +79,14 @@ function ({
       window.removeEventListener('resize', updateListHeight);
     }
   }, [listContainer.current]);
+
+  useEffect(() => {
+    if (listEl && listEl.current) {
+      listEl.current.scrollToItem(
+        concepts.findIndex(c => c.termid === conceptCtx.ref),
+        'smart');
+    }
+  }, [conceptCtx.ref]);
 
   const Row = ({ index, style }: { index: number, style: object }) => {
     const c = concepts[index];
@@ -108,6 +119,7 @@ function ({
   return (
     <div ref={listContainer} className={className}>
       <List
+          ref={listEl}
           className={styles.lazyConceptList}
           direction={isRTL ? "rtl" : undefined}
           itemCount={concepts.length}
@@ -128,16 +140,6 @@ interface ConceptItemProps {
 }
 export const ConceptItem: React.FC<ConceptItemProps> =
 function ({ lang, concept, className }) {
-  const conceptCtx = useContext(ConceptContext);
-  const el = useRef<HTMLDivElement>(null);
-
-  const active = conceptCtx.ref === concept.termid;
-
-  useEffect(() => {
-    if (active && el && el.current) {
-      el.current.scrollIntoViewIfNeeded();
-    }
-  }, [active]);
 
   const c = concept[lang as keyof typeof availableLanguages] || concept.eng;
 
@@ -150,8 +152,7 @@ function ({ lang, concept, className }) {
         className={`
           ${styles.conceptItem} ${className || ''}
           ${designationValidityClass}
-        `}
-        ref={el}>
+        `}>
       {designation}
     </span>
   );
