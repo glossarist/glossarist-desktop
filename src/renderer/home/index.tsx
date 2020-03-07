@@ -10,7 +10,7 @@ import {
   H1, Button,
   Icon, IconName, InputGroup,
   NonIdealState,
-  ButtonGroup, Callout, FormGroup, Toaster, Position,
+  ButtonGroup, Callout, FormGroup, Toaster, Position, Tooltip,
  } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
