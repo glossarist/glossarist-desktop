@@ -116,7 +116,9 @@ const ConceptBrowser: React.FC<{}> = function () {
           <span className={styles.conceptID}>{c.termid}</span>}
         itemMarkerRight={(c: MultiLanguageConcept<any>) => 
           !c[lang.selected as keyof typeof availableLanguages]
-            ? <Icon intent="warning" icon="translate" />
+            ? <Tooltip content={`Missing entry in ${lang.available[lang.selected]}`}>
+                <Icon intent="warning" icon="translate" />
+              </Tooltip>
             : <Icon icon="blank" />}
       />
     </div>
