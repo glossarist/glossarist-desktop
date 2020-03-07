@@ -458,14 +458,24 @@ html, body, #app {
 :local .lazyConceptList {
   .lazyConceptListItem {
     border-radius: 0 !important;
+    overflow: hidden;
 
     :global .bp3-button-text {
       display: flex;
       flex-flow: row nowrap;
+
+      overflow: hidden;
       align-items: center;
+      white-space: nowrap;
+    }
+
+    .conceptItem {
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     .itemMarker {
+      flex-shrink: 0;
       width: 2rem;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -475,6 +485,7 @@ html, body, #app {
     }
 
     .itemMarkerRight {
+      flex-shrink: 0;
       margin-left: 1rem;
       margin-right: 1rem;
     }

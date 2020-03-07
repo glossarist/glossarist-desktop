@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useContext, useEffect } from 'react';
 
-import { ConceptCollection, ConceptRef } from '../../models/concepts';
+import { ConceptCollection, ConceptRef, MultiLanguageConcept } from '../../models/concepts';
 
 import {
   Classes,
@@ -68,6 +68,8 @@ const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function
       buttonProps={{ small: true }}
       className={styles.conceptList}
       concepts={concepts}
+      itemMarker={(c: MultiLanguageConcept<any>) =>
+        <span className={styles.conceptID}>{c.termid}</span>}
       isItemSelected={(ref: ConceptRef) => concept.ref === ref}
       onItemSelect={(ref: ConceptRef) => concept.select(ref)}
     />
