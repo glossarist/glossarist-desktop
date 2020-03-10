@@ -583,10 +583,7 @@ interface SidebarProps {
   panelSet: PanelConfig<any>[]
 }
 const Sidebar: React.FC<SidebarProps> = function({ position, panelSet, onToggle }) {
-  const concept = useContext(ConceptContext);
   const [firstPanel, ...restOfPanels] = panelSet;
-
-  const term = `${concept.activeLocalized?.id}`;
 
   let lastPanel: PanelConfig | null;
   if (panelSet.length > 1) {
