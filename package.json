@@ -95,6 +95,7 @@
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
     "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.1.7-gitpkg",
+    "cytoscape": "3",
     "electron-log": "^4.0.6",
     "fs-extra": "^8.1.0",
     "immer": "^5.0.0",
@@ -102,6 +103,7 @@
     "mousetrap": "^1.6.5",
     "node-fetch": "^2.6.0",
     "react": "^16.11.0",
+    "react-cytoscapejs": "^1.2.1",
     "react-dom": "^16.11.0",
     "react-transition-group": "^4.3.0",
     "react-window": "^1.8.5",
@@ -110,6 +112,7 @@
   },
   "devDependencies": {
     "@types/async-lock": "^1.1.1",
+    "@types/cytoscape": "^3.14.0",
     "@types/fs-extra": "^8.0.0",
     "@types/mousetrap": "^1.6.3",
     "@types/node": "^12.12.7",
