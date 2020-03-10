@@ -2,6 +2,9 @@ import { debounce } from 'throttle-debounce';
 
 import React, { useMemo, useRef, useContext, useState, useEffect } from 'react';
 
+import CytoscapeComponent from 'react-cytoscapejs';
+import { Core as Cy, NodeSingular as CyNode } from 'cytoscape';
+
 import Mousetrap from 'mousetrap';
 // Import needed to define Mousetrap.bindGlobal() as a side-effect:
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
@@ -339,6 +342,65 @@ const ConceptTranslate: React.FC<{}> = function () {
 };
 
 
+const ConceptMap: React.FC<{}> = function () {
+  const ctx = useContext(ConceptContext);
+  const cyRef = useRef<Cy | null>(null);
+  const lang = useContext(LangConfigContext);
+  const source = useContext(SourceContext);
+  const concepts = source.objects;
+
+  useEffect(() => {
+    function onSelect(evt: { target: CyNode }) {
+      const node = evt.target;
+      ctx.select(parseInt(node.id(), 10));
+    }
+    if (cyRef.current) {
+      cyRef.current.on('tap', 'node', onSelect);
+      cyRef.current.$('*').lock();
+    }
+    return function cleanup() {
+      cyRef.current?.off('tap', 'node', onSelect);
+    }
+  }, [cyRef.current]);
+
+  useEffect(() => {
+    cyRef.current?.$(':selected').unselect();
+    cyRef.current?.getElementById(`${ctx.ref}`).select();
+  }, [ctx.ref]);
+
+  const elements = concepts.map(c => (
+    { data: { id: c.termid, label: c[lang.selected as keyof typeof availableLanguages]?.term || c[lang.default as keyof typeof availableLanguages]?.term, selected: c.termid == ctx.ref }}
+  ));
+
+  const elementStyles = [
+    {
+      selector: 'node',
+      style: {
+        boundsExpansion: 10,
+        label: 'data(label)',
+        textWrap: 'ellipsis',
+        textMaxWidth: 150,
+      },
+    },
+    {
+      selector: 'edge',
+      style: {
+        width: 15,
+      },
+    },
+  ];
+
+  return (
+    <CytoscapeComponent
+      cy={cy => cyRef.current = cy}
+      elements={elements}
+      style={{ width: window.innerWidth, height: window.innerHeight }}
+      stylesheet={elementStyles}
+      layout={{ name: 'grid', nodeDimensionsIncludeLabels: true }} />
+  );
+};
+
+
 /* Toolbar */
 
 const SelectLanguage: ToolbarItem = function () {
@@ -664,6 +726,14 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     mainToolbar: [],
     rightSidebar: [PANELS.status, PANELS.currentReview, PANELS.relationships, PANELS.changelog],
   },
+  map: {
+    hotkey: 'm',
+    title: "Map",
+    leftSidebar: [PANELS.system, PANELS.sourceRollTranslated, PANELS.databases],
+    MainView: ConceptMap,
+    mainToolbar: [],
+    rightSidebar: [PANELS.status, PANELS.relationships],
+  },
   review: {
     disabled: true,
     hotkey: 'x',
@@ -691,6 +761,7 @@ const MODULES: (keyof typeof MODULE_CONFIG)[] = [
   'review',
   'translate',
   'propose',
+  'map',
 ]
 
 
