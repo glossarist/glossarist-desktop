@@ -358,14 +358,21 @@ const ConceptMap: React.FC<{}> = function () {
       cyRef.current.on('tap', 'node', onSelect);
       cyRef.current.$('*').lock();
     }
+
+    reflectSelection();
+
     return function cleanup() {
       cyRef.current?.off('tap', 'node', onSelect);
     }
   }, [cyRef.current]);
 
-  useEffect(() => {
+  function reflectSelection() {
     cyRef.current?.$(':selected').unselect();
     cyRef.current?.getElementById(`${ctx.ref}`).select();
+  }
+
+  useEffect(() => {
+    reflectSelection();
   }, [ctx.ref]);
 
   const elements = concepts.map(c => (
