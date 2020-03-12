@@ -30,7 +30,7 @@ class ConceptManager extends Manager<MultiLanguageConcept<any>, number, { onlyID
         const idsInCollection = ids.filter(id => collectionItemIDs.includes(id));
         return idsInCollection;
       } else {
-        log.error("Glossarist: Invalid concept source", src)
+        log.error("Glossarist: Invalid concept source", src);
         throw new Error("Invalid source in query");
       }
     } else {
