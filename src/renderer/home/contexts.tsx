@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
-import { MultiLanguageConcept, ConceptRef, Concept } from '../../models/concepts';
+import { MultiLanguageConcept, ConceptRef, Concept, ConceptRelation, IncomingConceptRelation } from '../../models/concepts';
 import { ObjectSource } from '../../app';
+import { useIPCValue } from 'coulomb/ipc/renderer';
 
 
 export interface TextSearchContextSpec {
@@ -48,3 +49,29 @@ export const ConceptContext = React.createContext<ConceptContextSpec>({
   ref: null,
   select: () => {},
 })
+
+
+interface ConceptRelationshipsContextSpec {
+  linksTo: ConceptRelation[]
+  linkedFrom: IncomingConceptRelation[]
+}
+export const ConceptRelationshipsContext = React.createContext<ConceptRelationshipsContextSpec>({
+  linksTo: [],
+  linkedFrom: [],
+});
+
+export const ConceptRelationshipsContextProvider: React.FC<{}> = function ({ children }) {
+  const ctx = useContext(ConceptContext);
+
+  const linksTo = ctx.active?.relations || [];
+  const _linkedFrom = useIPCValue
+    <{ objID: ConceptRef | null }, { relations: IncomingConceptRelation[] }>
+    ('model-concepts-find-incoming-relations', { relations: [] }, { objID: ctx.ref });
+  const linkedFrom = _linkedFrom.isUpdating ? [] : _linkedFrom.value.relations;
+
+  return (
+    <ConceptRelationshipsContext.Provider value={{ linksTo, linkedFrom }}>
+      {children}
+    </ConceptRelationshipsContext.Provider>
+  );
+};

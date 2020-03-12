@@ -420,7 +420,6 @@ html, body, #app {
 
 :local .conceptID {
   opacity: .4;
-  width: 2rem;
   font-size: 80%;
 }
 
@@ -455,7 +454,18 @@ html, body, #app {
   }
 }
 
+:local .relationshipsPanel {
+  .conceptID {
+    margin-right: .5em;
+  }
+}
+
 :local .lazyConceptList {
+  .conceptID {
+    width: 1.5em;
+    margin-right: .5em;
+  }
+
   .lazyConceptListItem {
     border-radius: 0 !important;
     overflow: hidden;
@@ -478,7 +488,6 @@ html, body, #app {
       flex-shrink: 0;
       width: 2rem;
       overflow: hidden;
-      text-overflow: ellipsis;
       display: inline-block;
       margin-left: .5rem;
       margin-right: .5rem;

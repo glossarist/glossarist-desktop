@@ -4,8 +4,11 @@ import { StandardRef, StandardClause } from './standards';
 // import { ReviewRef } from './reviews';
 
 
-type ConceptRelation =
-  { type: 'relates', ref: ConceptRef };
+export type ConceptRelation =
+  { type: string, to: ConceptRef };
+
+export type IncomingConceptRelation =
+  { type: string, from: ConceptRef };
 
 
 export type MultiLanguageConcept<Ref extends ConceptRef> = {

@@ -3,7 +3,7 @@ import { debounce } from 'throttle-debounce';
 import React, { useMemo, useRef, useContext, useState, useEffect } from 'react';
 
 import CytoscapeComponent from 'react-cytoscapejs';
-import { Core as Cy, NodeSingular as CyNode } from 'cytoscape';
+import { Core as Cy, NodeSingular as CyNode, ElementDefinition } from 'cytoscape';
 
 import Mousetrap from 'mousetrap';
 // Import needed to define Mousetrap.bindGlobal() as a side-effect:
@@ -17,7 +17,7 @@ import {
  } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
-import { callIPC } from 'coulomb/ipc/renderer';
+import { useIPCValue } from 'coulomb/ipc/renderer';
 import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
 import { MultiLanguageConcept, Concept, ConceptRef, AuthoritativeSource } from '../../models/concepts';
 
@@ -33,6 +33,8 @@ import {
   SourceContext,
   ConceptContext,
   TextSearchContext,
+  ConceptRelationshipsContext,
+  ConceptRelationshipsContextProvider,
  } from './contexts';
 
 import styles from './styles.scss';
@@ -343,41 +345,111 @@ const ConceptTranslate: React.FC<{}> = function () {
 
 
 const ConceptMap: React.FC<{}> = function () {
+  return (
+    <ConceptRelationshipsContextProvider>
+      <ConceptNeighborhood />
+    </ConceptRelationshipsContextProvider>
+  );
+};
+
+
+const ConceptNeighborhood: React.FC<{}> = function () {
   const ctx = useContext(ConceptContext);
+  const relationCtx = useContext(ConceptRelationshipsContext);
+
   const cyRef = useRef<Cy | null>(null);
   const lang = useContext(LangConfigContext);
   const source = useContext(SourceContext);
   const concepts = source.objects;
+
+  const linksTo = relationCtx.linksTo;
+  const linkedFrom = relationCtx.linkedFrom;
+
+  function label(c: MultiLanguageConcept<any>) {
+    return (
+      c[lang.selected as keyof typeof availableLanguages]?.term ||
+      c[lang.default as keyof typeof availableLanguages]?.term
+    );
+  }
+
+  const elements: ElementDefinition[] = [
+    ...(
+      ctx.ref && ctx.active
+        ? [{
+          data: {
+            id: `${ctx.ref}`,
+            label: label(ctx.active) || '-',
+            selected: true,
+          }
+        }]
+        : []
+    ),
+    ...linksTo.map(r => ({
+      data: {
+        id: `${r.to}`,
+        label: label(concepts[r.to]) || '-',
+      },
+    })),
+    ...linkedFrom.map(ir => ({
+      data: {
+        id: `${ir.from}`,
+        label: label(concepts[ir.from]) || '-',
+      },
+    })),
+    ...linksTo.map(r => ({
+      data: {
+        source: ctx.ref,
+        target: `${r.to}`,
+        label: r.type,
+      },
+    })),
+    ...linkedFrom.map(ir => ({
+      data: {
+        source: `${ir.from}`,
+        target: ctx.ref,
+        label: ir.type,
+      },
+    })),
+  ];
+
+  const divRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function onSelect(evt: { target: CyNode }) {
       const node = evt.target;
       ctx.select(parseInt(node.id(), 10));
     }
+
     if (cyRef.current) {
       cyRef.current.on('tap', 'node', onSelect);
-      cyRef.current.$('*').lock();
+      //cyRef.current.$('*').lock();
+    } else {
+      console.error("No Cytoscape found :(");
     }
-
-    reflectSelection();
 
     return function cleanup() {
       cyRef.current?.off('tap', 'node', onSelect);
     }
-  }, [cyRef.current]);
-
-  function reflectSelection() {
-    cyRef.current?.$(':selected').unselect();
-    cyRef.current?.getElementById(`${ctx.ref}`).select();
-  }
+  }, []);
 
   useEffect(() => {
-    reflectSelection();
-  }, [ctx.ref]);
-
-  const elements = concepts.map(c => (
-    { data: { id: c.termid, label: c[lang.selected as keyof typeof availableLanguages]?.term || c[lang.default as keyof typeof availableLanguages]?.term, selected: c.termid == ctx.ref }}
-  ));
+    if (cyRef.current) {
+      const layout = cyRef.current.elements().layout({
+        name: 'circle',
+        nodeDimensionsIncludeLabels: true,
+      });
+      layout.run();
+    }
+    setTimeout(() => {
+      if (cyRef.current) {
+        cyRef.current.center();
+        cyRef.current.$(':selected').unselect();
+        cyRef.current.getElementById(`${ctx.ref}`).select();
+      } else {
+        console.error("No Cytoscape found :(");
+      }
+    }, 100);
+  }, [ctx.ref, cyRef.current]);
 
   const elementStyles = [
     {
@@ -398,12 +470,14 @@ const ConceptMap: React.FC<{}> = function () {
   ];
 
   return (
-    <CytoscapeComponent
-      cy={cy => cyRef.current = cy}
-      elements={elements}
-      style={{ width: window.innerWidth, height: window.innerHeight }}
-      stylesheet={elementStyles}
-      layout={{ name: 'grid', nodeDimensionsIncludeLabels: true }} />
+    <div ref={divRef}>
+      <CytoscapeComponent
+        cy={cy => cyRef.current = cy}
+        elements={elements}
+        style={{ width: divRef.current?.offsetWidth || 0, height: divRef.current?.offsetHeight }}
+        stylesheet={elementStyles}
+        layout={{ name: 'circle', nodeDimensionsIncludeLabels: true }} />
+    </div>
   );
 };
 
@@ -679,8 +753,12 @@ const PANELS: { [id: string]: PanelConfig<any> } = {
   currentReview: { Contents: panels.CurrentReviewPanel, title: "Current review" },
   uses: { Contents: panels.LineagePanel, title: "Lineage" },
 
+  relationships: {
+    Contents: panels.RelationshipsPanel,
+    title: "Relationships",
+    className: styles.relationshipsPanel },
+
   changelog: { Contents: () => <panels.PanelPlaceholder />, title: "Changelog" },
-  relationships: { Contents: () => <panels.PanelPlaceholder />, title: "Relationships" },
   compareLineage: { Contents: () => <panels.PanelPlaceholder />, title: "Compare lineage" },
   compareLanguage: { Contents: () => <panels.PanelPlaceholder />, title: "Compare translation" },
 };

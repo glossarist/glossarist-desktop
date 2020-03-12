@@ -1,12 +1,14 @@
 import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 
-import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
+import { MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRelation } from '../models/concepts';
 import { ObjectSource } from '../app';
 import { app } from '.';
+import { listen } from 'coulomb/ipc/main';
 
 
-class ConceptManager extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSource?: ObjectSource }> {
+class ConceptManager
+extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSource?: ObjectSource }> {
   protected getDBRef(objID: number) {
     return super.getDBRef(`concept-${objID}`);
   }
@@ -38,6 +40,24 @@ class ConceptManager extends Manager<MultiLanguageConcept<any>, number, { onlyID
     }
   }
 
+  public async findIncomingRelations(ref: ConceptRef | null):
+  Promise<IncomingConceptRelation[]> {
+    if (ref === null) { return []; }
+
+    const all = await this.readAll();
+
+    const incomingRelations = Object.values(all).
+      filter(c => (c.relations || []).find(r => r.to === ref) !== undefined).
+      map(c => (c.relations || []).map(r => ({ type: r.type, from: c.termid }))).
+      flat().
+      filter(function (item, idx, self) {
+        // Deduplicate
+        return idx === self.findIndex(i => i.from === item.from);
+      });
+
+    return incomingRelations;
+  }
+
   public async readAll(query?: { inSource: ObjectSource, matchingText?: string }) {
     const ids = await this.listIDs(query);
     var objects = (await super.readAll({ onlyIDs: ids }));
@@ -50,6 +70,16 @@ class ConceptManager extends Manager<MultiLanguageConcept<any>, number, { onlyID
     }
 
     return objects;
+  }
+
+  setUpIPC(modelName: string) {
+    super.setUpIPC(modelName);
+    const prefix = `model-${modelName}`;
+
+    listen<{ objID: ConceptRef }, { relations: IncomingConceptRelation[] }>
+    (`${prefix}-find-incoming-relations`, async ({ objID }) => {
+      return { relations: await this.findIncomingRelations(objID) };
+    });
   }
 }
 
