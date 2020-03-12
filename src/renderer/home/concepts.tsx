@@ -15,6 +15,8 @@ import { FixedSizeList as List } from 'react-window';
 
 import { callIPC } from 'coulomb/ipc/renderer';
 
+import { app } from '../index';
+
 import {
   Concept,
   MultiLanguageConcept,
@@ -168,6 +170,32 @@ function ({ lang, concept, className }) {
       {designation}
     </span>
   );
+};
+
+
+interface LazyConceptItemProps {
+  conceptRef: ConceptRef
+  lang: keyof typeof availableLanguages
+  className?: string
+}
+export const LazyConceptItem: React.FC<LazyConceptItemProps> = function ({ conceptRef, lang, className }) {
+  /* Fetches concept data from backend, defers display to ConceptItem.
+     NOTE: Should not be used in large lists, too slow.
+     For large lists, fetch all concepts in one request and use LazyConceptList.
+  */
+  const concept = app.useOne<MultiLanguageConcept<any>, ConceptRef>('concepts', conceptRef);
+
+  if (concept.object) {
+    return <ConceptItem
+      concept={concept.object}
+      lang={lang}
+      className={className}
+    />;
+  } else {
+    return <span className={`${Classes.SKELETON} ${styles.conceptItem} ${className || ''}`}>
+      Loading…
+    </span>
+  }
 };
 
 
