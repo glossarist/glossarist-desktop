@@ -359,37 +359,42 @@ const ConceptNeighborhood: React.FC<{}> = function () {
   const cyRef = useRef<Cy | null>(null);
   const lang = useContext(LangConfigContext);
   const source = useContext(SourceContext);
-  const concepts = source.objects;
+  const concepts = source.index;
 
   const linksTo = relationCtx.linksTo;
   const linkedFrom = relationCtx.linkedFrom;
 
-  function label(c: MultiLanguageConcept<any>) {
-    return (
-      c[lang.selected as keyof typeof availableLanguages]?.term ||
-      c[lang.default as keyof typeof availableLanguages]?.term
-    );
+  function label(c: MultiLanguageConcept<any> | undefined) {
+    if (c !== undefined) {
+      return (
+        c[lang.selected as keyof typeof availableLanguages]?.term ||
+        c[lang.default as keyof typeof availableLanguages]?.term
+      );
+    } else {
+      // Concept with this ID does not exist
+      return "(concept not found)";
+    }
   }
 
   const elements: ElementDefinition[] = [
-    ...(
-      ctx.ref && ctx.active
-        ? [{
-          data: {
-            id: `${ctx.ref}`,
-            label: label(ctx.active) || '-',
-            selected: true,
-          }
-        }]
-        : []
-    ),
+    ...(ctx.ref && ctx.active
+      ? [{
+        data: {
+          id: `${ctx.ref}`,
+          label: label(ctx.active) || '-',
+          selected: true,
+        }
+      }]
+      : []),
     ...linksTo.map(r => ({
+      selectable: concepts[r.to] !== undefined,
       data: {
         id: `${r.to}`,
         label: label(concepts[r.to]) || '-',
       },
     })),
     ...linkedFrom.map(ir => ({
+      selectable: concepts[ir.from] !== undefined,
       data: {
         id: `${ir.from}`,
         label: label(concepts[ir.from]) || '-',
@@ -416,7 +421,11 @@ const ConceptNeighborhood: React.FC<{}> = function () {
   useEffect(() => {
     function onSelect(evt: { target: CyNode }) {
       const node = evt.target;
-      ctx.select(parseInt(node.id(), 10));
+      const conceptID = parseInt(node.id(), 10);
+
+      if (concepts[conceptID] !== undefined) {
+        ctx.select(conceptID);
+      }
     }
 
     if (cyRef.current) {
@@ -448,25 +457,7 @@ const ConceptNeighborhood: React.FC<{}> = function () {
         console.error("No Cytoscape found :(");
       }
     }, 100);
-  }, [ctx.ref, cyRef.current]);
-
-  const elementStyles = [
-    {
-      selector: 'node',
-      style: {
-        boundsExpansion: 10,
-        label: 'data(label)',
-        textWrap: 'ellipsis',
-        textMaxWidth: 150,
-      },
-    },
-    {
-      selector: 'edge',
-      style: {
-        width: 15,
-      },
-    },
-  ];
+  }, [ctx.ref, cyRef.current, JSON.stringify(linkedFrom)]);
 
   return (
     <div ref={divRef}>
@@ -474,7 +465,7 @@ const ConceptNeighborhood: React.FC<{}> = function () {
         cy={cy => cyRef.current = cy}
         elements={elements}
         style={{ width: divRef.current?.offsetWidth || 0, height: divRef.current?.offsetHeight }}
-        stylesheet={elementStyles}
+        stylesheet={CONCEPT_MAP_ELEMENT_STYLES}
         layout={{ name: 'circle', nodeDimensionsIncludeLabels: true }} />
     </div>
   );
@@ -939,6 +930,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
             select: selectSource,
             refs: concepts.ids,
             objects: concepts.objects,
+            index: _objs.objects,
             isLoading: _objs.isUpdating,
           }}>
         <TextSearchContext.Provider value={{ query: textQuery, setQuery: setTextQuery }}>
@@ -966,3 +958,21 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
     </ConceptContext.Provider>
   );
 };
+
+const CONCEPT_MAP_ELEMENT_STYLES = [
+  {
+    selector: 'node',
+    style: {
+      boundsExpansion: 10,
+      label: 'data(label)',
+      textWrap: 'ellipsis',
+      textMaxWidth: 150,
+    },
+  },
+  {
+    selector: 'edge',
+    style: {
+      width: 15,
+    },
+  },
+];

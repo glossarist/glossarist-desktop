@@ -20,12 +20,14 @@ export interface ObjectSourceContextSpec {
   isLoading: boolean
   refs: ConceptRef[]
   objects: MultiLanguageConcept<any>[]
+  index: { [ref: number]: MultiLanguageConcept<any> }
   select: (source: ObjectSource) => void
 }
 export const SourceContext = React.createContext<ObjectSourceContextSpec>({
   active: { type: 'catalog-preset', presetName: 'all' },
   isLoading: false,
   objects: [],
+  index: {},
   refs: [],
   select: () => {},
 });
