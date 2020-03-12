@@ -873,13 +873,13 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
   };
 
   // One-off collection migration call
-  const collectionsMigrated = useRef({ yes: false });
-  useEffect(() => {
-    if (concepts.ids.length > 0 && collectionsMigrated.current.yes !== true) {
-      callIPC('initialize-standards-collections');
-      collectionsMigrated.current.yes = true;
-    }
-  }, [concepts.ids.length]);
+  //const collectionsMigrated = useRef({ yes: false });
+  //useEffect(() => {
+  //  if (concepts.ids.length > 0 && collectionsMigrated.current.yes !== true) {
+  //    callIPC('initialize-standards-collections');
+  //    collectionsMigrated.current.yes = true;
+  //  }
+  //}, [concepts.ids.length]);
 
 
   // Hotkey navigation up/down concept roll
