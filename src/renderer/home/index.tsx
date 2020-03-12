@@ -17,7 +17,6 @@ import {
  } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
-import { useIPCValue } from 'coulomb/ipc/renderer';
 import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
 import { MultiLanguageConcept, Concept, ConceptRef, AuthoritativeSource } from '../../models/concepts';
 
