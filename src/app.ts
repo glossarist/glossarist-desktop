@@ -1,6 +1,9 @@
 import { AppConfig } from 'coulomb/config/app';
 
 
+export const defaultLanguage = 'eng';
+
+
 export const availableLanguages = {
   'eng': 'English',
   'fra': 'French',

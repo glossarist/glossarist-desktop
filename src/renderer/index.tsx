@@ -1,6 +1,6 @@
 import { RendererConfig } from 'coulomb/config/renderer';
 import { renderApp } from 'coulomb/app/renderer';
-import { conf as appConf, availableLanguages } from '../app';
+import { conf as appConf, availableLanguages, defaultLanguage } from '../app';
 
 
 export const conf: RendererConfig<typeof appConf> = {
@@ -20,8 +20,8 @@ export const conf: RendererConfig<typeof appConf> = {
     cls: () => import('coulomb/localizer/renderer/context-provider'),
     getProps: () => ({
       available: availableLanguages,
-      selected: 'eng',
-      default: 'eng',
+      selected: defaultLanguage,
+      default: defaultLanguage,
       // NOTE: Default language is treated as authoritative language.
       // TODO: Support more than one authoritative language.
     }),
