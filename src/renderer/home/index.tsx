@@ -671,6 +671,7 @@ const PANELS: { [id: string]: PanelConfig<any> } = {
     className: styles.sourceRollPanel,
     title: "Source",
     Title: SourceRollTitle },
+
   collections: { Contents: panels.CollectionsPanel, title: "Collections", actions: [AddCollection] },
   catalog: { Contents: panels.CatalogPanel, title: "Catalog" },
   basics: { Contents: panels.BasicsPanel, title: "Basics" },
