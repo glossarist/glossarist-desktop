@@ -39,10 +39,10 @@ import {
 import styles from './styles.scss';
 
 
-interface BrandingConfig {
-  orgTitle?: string
-  pathToSymbolImage?: string
-}
+// interface BrandingConfig {
+//   orgTitle?: string
+//   pathToSymbolImage?: string
+// }
 
 
 const toaster = Toaster.create({ position: Position.TOP });
