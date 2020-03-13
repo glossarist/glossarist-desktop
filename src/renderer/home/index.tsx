@@ -13,7 +13,7 @@ import {
   H1, Button,
   Icon, IconName, InputGroup,
   NonIdealState,
-  ButtonGroup, Callout, FormGroup, Toaster, Position, Tooltip,
+  ButtonGroup, Callout, FormGroup, Toaster, Position, Tooltip, Tag,
  } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
@@ -39,11 +39,20 @@ import {
 import styles from './styles.scss';
 
 
+interface BrandingConfig {
+  orgTitle?: string
+  pathToSymbolImage?: string
+}
+
+
 const toaster = Toaster.create({ position: Position.TOP });
 
 const Window: React.FC<WindowComponentProps> = function () {
   const [activeModuleID, activateModule] = useState(MODULES[0]);
   const [moduleOptions, setModuleOptions] = useState<any>({});
+
+  // const branding = useIPCValue<{}, BrandingConfig>('db-default-read', {}, { objID: 'tc211-termbase.meta' });
+  // console.debug(branding.value);
 
   useEffect(() => {
     for (const moduleID of MODULES) {
@@ -356,10 +365,14 @@ const ConceptNeighborhood: React.FC<{}> = function () {
   const ctx = useContext(ConceptContext);
   const relationCtx = useContext(ConceptRelationshipsContext);
 
+  const mod = useContext(ModuleContext);
+  const showGlobal = mod.opts.mapShowGlobal;
+
   const cyRef = useRef<Cy | null>(null);
   const lang = useContext(LangConfigContext);
   const source = useContext(SourceContext);
-  const concepts = source.index;
+  const conceptIndex = source.index;
+  const conceptList = source.objects;
 
   const linksTo = relationCtx.linksTo;
   const linkedFrom = relationCtx.linkedFrom;
@@ -376,97 +389,152 @@ const ConceptNeighborhood: React.FC<{}> = function () {
     }
   }
 
-  const elements: ElementDefinition[] = [
-    ...(ctx.ref && ctx.active
-      ? [{
-        data: {
-          id: `${ctx.ref}`,
-          label: label(ctx.active) || '-',
-          selected: true,
-        }
-      }]
-      : []),
-    ...linksTo.map(r => ({
-      selectable: concepts[r.to] !== undefined,
-      data: {
-        id: `${r.to}`,
-        label: label(concepts[r.to]) || '-',
-      },
-    })),
-    ...linkedFrom.map(ir => ({
-      selectable: concepts[ir.from] !== undefined,
-      data: {
-        id: `${ir.from}`,
-        label: label(concepts[ir.from]) || '-',
-      },
-    })),
-    ...linksTo.map(r => ({
-      data: {
-        source: ctx.ref,
-        target: `${r.to}`,
-        label: r.type,
-      },
-    })),
-    ...linkedFrom.map(ir => ({
-      data: {
-        source: `${ir.from}`,
-        target: ctx.ref,
-        label: ir.type,
-      },
-    })),
-  ];
+  const [elements, setElements] = useState<ElementDefinition[]>([]);
 
   const divRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    mod.setOpts({ ...mod.opts, fitMap: () => {
+      cyRef.current?.fit();
+    }});
+  }, [cyRef, showGlobal]);
 
   useEffect(() => {
     function onSelect(evt: { target: CyNode }) {
       const node = evt.target;
       const conceptID = parseInt(node.id(), 10);
 
-      if (concepts[conceptID] !== undefined) {
+      if (conceptIndex[conceptID] !== undefined) {
         ctx.select(conceptID);
       }
     }
 
     if (cyRef.current) {
       cyRef.current.on('tap', 'node', onSelect);
-      //cyRef.current.$('*').lock();
     } else {
       console.error("No Cytoscape found :(");
     }
 
     return function cleanup() {
       cyRef.current?.off('tap', 'node', onSelect);
+      cyRef.current?.destroy();
     }
   }, []);
 
   useEffect(() => {
+    if (ctx.ref && ctx.active && !ctx.isLoading && !source.isLoading) {
+      let concepts: ElementDefinition[];
+      let relations: ElementDefinition[];
+
+      const selectedConceptRelations = [
+        ...linksTo.
+          map(r => getEdge(ctx.ref!, r.to, r.type, showGlobal)).
+          filter(v => v !== undefined) as ElementDefinition[],
+        ...linkedFrom.
+          map(ir => getEdge(ir.from, ctx.ref!, ir.type, showGlobal)).
+          filter(v => v !== undefined) as ElementDefinition[],
+      ];
+
+      if (showGlobal) {
+        concepts = conceptList.map(c => ({
+          selected: c.termid == ctx.ref,
+          data: {
+            id: c.termid,
+            label: label(c),
+          },
+        }));
+
+        // TODO: Show all concept relations
+        relations = selectedConceptRelations;
+      } else {
+        concepts = [
+          {
+            data: {
+              id: `${ctx.ref}`,
+              label: label(ctx.active) || '-',
+              selected: true,
+            }
+          },
+          ...linksTo.map(r => ({
+            selectable: conceptIndex[r.to] !== undefined,
+            data: {
+              id: `${r.to}`,
+              label: label(conceptIndex[r.to]) || '-',
+            },
+          })),
+          ...linkedFrom.map(ir => ({
+            selectable: conceptIndex[ir.from] !== undefined,
+            data: {
+              id: `${ir.from}`,
+              label: label(conceptIndex[ir.from]) || '-',
+            },
+          })),
+        ];
+        relations = selectedConceptRelations;
+      }
+
+      setElements([
+        ...concepts,
+        ...relations,
+      ]);
+    }
+  }, [source.isLoading, showGlobal, ctx.ref, JSON.stringify(linkedFrom)]);
+
+  useEffect(() => {
     if (cyRef.current) {
+      const zoom = cyRef.current.zoom();
+
+      // Causes layout to break. Supposedly since elements become locked.
+      // However, this also breaks layout when called after layout.run().
+      //cyRef.current.$('*').lock();
+
       const layout = cyRef.current.elements().layout({
-        name: 'circle',
+        name: 'grid',
         nodeDimensionsIncludeLabels: true,
       });
+
       layout.run();
+
+      setImmediate(() => {
+        if (showGlobal) {
+          // Restore zoom after layout.run() resets it
+          cyRef.current.zoom(zoom);
+        } else {
+          cyRef.current?.fit();
+          cyRef.current?.center();
+        }
+      });
+
+      cyRef.current.$(':selected').unselect();
+      cyRef.current.getElementById(`${ctx.ref}`).select();
+    } else {
+      console.error("No Cytoscape found :(");
     }
-    setTimeout(() => {
-      if (cyRef.current) {
-        cyRef.current.center();
-        cyRef.current.$(':selected').unselect();
-        cyRef.current.getElementById(`${ctx.ref}`).select();
-      } else {
-        console.error("No Cytoscape found :(");
+  }, [!showGlobal ? JSON.stringify(elements) : elements.length]);
+
+  function getEdge(from: ConceptRef, to: ConceptRef, label: string, onlyExisting?: boolean) {
+    return onlyExisting !== true || conceptIndex[to] !== undefined
+      ? {
+        data: {
+          source: `${from}`,
+          target: `${to}`,
+          label: label,
+        },
       }
-    }, 100);
-  }, [ctx.ref, cyRef.current, JSON.stringify(linkedFrom)]);
+      : undefined;
+  }
 
   return (
     <div ref={divRef}>
       <CytoscapeComponent
         cy={cy => cyRef.current = cy}
         elements={elements}
-        style={{ width: divRef.current?.offsetWidth || 0, height: divRef.current?.offsetHeight }}
+        style={{
+          width: divRef.current?.offsetWidth || 0,
+          height: divRef.current?.offsetHeight,
+        }}
         stylesheet={CONCEPT_MAP_ELEMENT_STYLES}
-        layout={{ name: 'circle', nodeDimensionsIncludeLabels: true }} />
+        layout={{ name: 'grid', nodeDimensionsIncludeLabels: true }} />
     </div>
   );
 };
@@ -484,6 +552,30 @@ const CompareLanguage: ToolbarItem = function () {
     untranslatedProps={{ disabled: true }}
     value={concept.active || undefined}
   />;
+};
+
+const ShowGlobalMap: ToolbarItem = function () {
+  const modCtx = useContext(ModuleContext);
+  const globalMap = modCtx.opts.mapShowGlobal === true;
+
+  return (
+    <Button
+        icon="layout"
+        title="Show all concepts"
+        active={globalMap}
+        onClick={() => { modCtx.setOpts({ ...modCtx.opts, mapShowGlobal: !globalMap }); }}>
+      <Tag minimal>alpha</Tag>
+    </Button>
+  );
+};
+
+const FitMap: ToolbarItem = function () {
+  const modCtx = useContext(ModuleContext);
+
+  return <Button
+    icon="zoom-to-fit"
+    title="Fit map to viewport"
+    onClick={() => modCtx.opts.fitMap ? modCtx.opts.fitMap() : console.debug("No fitMap") } />;
 };
 
 const SelectTargetLanguage: ToolbarItem = function () {
@@ -561,7 +653,7 @@ const CompareAuthoritative: ToolbarItem = function () {
     icon="comparison"
     title="Compare with authoritative language"
     active={compare}
-    onClick={() => { modCtx.setOpts({ compareAuthoritative: !compare }); }} />
+    onClick={() => { modCtx.setOpts({ ...modCtx.opts, compareAuthoritative: !compare }); }} />
 };
 
 const AddCollection: ToolbarItem = function () {
@@ -804,7 +896,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
     title: "Map",
     leftSidebar: [PANELS.system, PANELS.sourceRollTranslated, PANELS.databases],
     MainView: ConceptMap,
-    mainToolbar: [],
+    mainToolbar: [ShowGlobalMap, FitMap],
     rightSidebar: [PANELS.status, PANELS.relationships],
   },
   review: {
