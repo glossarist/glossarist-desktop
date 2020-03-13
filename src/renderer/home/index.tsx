@@ -498,7 +498,7 @@ const ConceptNeighborhood: React.FC<{}> = function () {
       setImmediate(() => {
         if (showGlobal) {
           // Restore zoom after layout.run() resets it
-          cyRef.current.zoom(zoom);
+          cyRef.current?.zoom(zoom);
         } else {
           cyRef.current?.fit();
           cyRef.current?.center();
