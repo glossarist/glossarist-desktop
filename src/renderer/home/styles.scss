@@ -105,6 +105,13 @@ html, body, #app {
 :local .topPanel {
   overflow: hidden;
 
+  .headerAndSettings {
+    display: flex;
+    align-items: baseline;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
   .appTitle {
     padding-left: 1rem;
     font-size: 160%;
@@ -112,6 +119,11 @@ html, body, #app {
     text-transform: uppercase;
     letter-spacing: -.05em;
     line-height: 1;
+    top: 10px;
+  }
+
+  .settingsButton {
+    margin-left: 0.3 rem;
   }
 
   .panelContents {

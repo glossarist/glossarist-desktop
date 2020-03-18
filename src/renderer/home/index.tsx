@@ -1,3 +1,4 @@
+import {callIPC} from "coulomb/ipc/renderer";
 import { debounce } from 'throttle-debounce';
 
 import React, { useMemo, useRef, useContext, useState, useEffect } from 'react';
@@ -71,6 +72,10 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   const module = MODULE_CONFIG[activeModuleID];
 
+  const openSettingsWindow = () => {
+    callIPC("open-predefined-window", {id: "settings"});
+  };
+
   return (
     <div className={styles.homeWindowLayout}>
       <Panel
@@ -78,7 +83,16 @@ const Window: React.FC<WindowComponentProps> = function () {
           className={styles.topPanel}
           iconCollapsed="caret-down"
           iconExpanded="caret-up">
-        <H1 className={styles.appTitle}>Glossarist</H1>
+        <div className={styles.headerAndSettings}>
+          <H1 className={styles.appTitle}>Glossarist</H1>
+          <Button
+             icon="settings"
+             title="Settings"
+             onClick={openSettingsWindow}
+             className={styles.settingsButton}
+             minimal={true}
+             />
+        </div>
 
         <ButtonGroup large className={styles.moduleSelector}>
           {MODULES.map(moduleID =>
@@ -127,7 +141,7 @@ const ConceptBrowser: React.FC<{}> = function () {
         onItemSelect={(ref: ConceptRef) => concept.select(ref)}
         itemMarker={(c: MultiLanguageConcept<any>) =>
           <span className={styles.conceptID}>{c.termid}</span>}
-        itemMarkerRight={(c: MultiLanguageConcept<any>) => 
+        itemMarkerRight={(c: MultiLanguageConcept<any>) =>
           !c[lang.selected as keyof typeof availableLanguages]
             ? <Tooltip content={`Missing entry in ${lang.available[lang.selected]}`}>
                 <Icon intent="warning" icon="translate" />
@@ -726,7 +740,7 @@ const Panel: React.FC<PanelProps> = function ({
 };
 
 
-/* Sidebars */ 
+/* Sidebars */
 
 const SPanel: React.FC<{ cfg: PanelConfig<any> }> = function ({ cfg }) {
   return (
@@ -1002,7 +1016,7 @@ const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, Mai
 
   const concept = selectedConceptRef
     ? (_objs.objects[selectedConceptRef] || null)
-    : null; 
+    : null;
   const localizedConcept = concept
     ? (concept[lang.selected as keyof typeof availableLanguages] || null)
     : undefined;
