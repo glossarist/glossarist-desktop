@@ -9,10 +9,6 @@ import { Sidebar } from './module-sidebar';
 import styles from './styles.scss';
 
 
-/* Modules */
-
-// Allows setting arbitrary view options for a module.
-
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
 export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, MainView, mainToolbar }) {
   const lang = useContext(LangConfigContext);
