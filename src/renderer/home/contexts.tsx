@@ -5,6 +5,11 @@ import { ObjectSource } from '../../app';
 import { useIPCValue } from 'coulomb/ipc/renderer';
 
 
+export const ModuleContext =
+  React.createContext<{ opts: any, setOpts: (opts: any) => void }>
+  ({ opts: {}, setOpts: () => {} });
+
+
 export interface TextSearchContextSpec {
   query: string
   setQuery: (newQuery: string) => void

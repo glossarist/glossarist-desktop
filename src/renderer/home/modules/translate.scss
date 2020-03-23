@@ -1,0 +1,13 @@
+:local .authSourceCallout {
+  flex: 1;
+}
+
+
+:local .examineConcept:nth-child(2) {
+  // When shown in translate side-by-side view
+  flex: .8;
+  background: white;
+  margin-right: -7%;
+  transform: scale(.85);
+  transform-origin: top left;
+}

@@ -27,8 +27,6 @@ html, body, #app {
   }
 }
 
-
-
 :local .panel .panelContents {
   padding: $panelPadding;
 }
@@ -262,12 +260,6 @@ html, body, #app {
     }
   }
 
-  .conceptBrowser {
-    display: flex;
-    flex-flow: column nowrap;
-    overflow: hidden;
-  }
-
   .backdrop {
     background: $pt-divider-black;
     padding: 1.25rem;
@@ -300,19 +292,6 @@ html, body, #app {
     > :only-child {
       border-radius: $pt-border-radius;
     }
-  }
-
-  .examineConcept:nth-child(2) {
-    // When shown in translate side-by-side view
-    flex: .8;
-    background: white;
-    margin-right: -7%;
-    transform: scale(.85);
-    transform-origin: top left;
-  }
-
-  .authSourceCallout {
-    flex: 1;
   }
 
   .entryDetails {
@@ -427,39 +406,6 @@ html, body, #app {
   border-radius: 0 !important;
 }
 
-
-// Panels
-
-
-:local .panelPlaceholder {
-  padding: .25rem;
-}
-
-:local .sourceRollPanel {
-  .sourceName {
-    color: $pt-text-color-muted;
-  }
-  .panelContents {
-    overflow-y: hidden !important;
-    display: flex;
-    flex-flow: column nowrap;
-    height: 240px;
-
-    > * {
-      flex: 1;
-    }
-    .conceptItem {
-      font-size: 90%;
-    }
-  }
-}
-
-:local .relationshipsPanel {
-  .conceptID {
-    margin-right: .5em;
-  }
-}
-
 :local .lazyConceptList {
   .conceptID {
     width: 1.5em;
@@ -501,23 +447,31 @@ html, body, #app {
   }
 }
 
-:local .basicsPanel {
-  :global .bp3-rtl {
-    .bp3-input {
-      direction: rtl;
+
+/* Specific panels */
+
+:local .sourceRollPanel {
+  .sourceName {
+    color: $pt-text-color-muted;
+  }
+
+  .panelContents {
+    overflow-y: hidden !important;
+    display: flex;
+    flex-flow: column nowrap;
+    height: 240px;
+
+    > * {
+      flex: 1;
+    }
+    .conceptItem {
+      font-size: 90%;
     }
   }
-  .designation {
-    :global .bp3-input {
-      font-family: Georgia, serif;
-      font-weight: bold;
-    }
-  }
-  .note {
-    font-size: 90%;
-  }
-  .example {
-    font-size: 90%;
-    font-style: italic;
+}
+
+:local .languagesPanel {
+  .panelContents {
+    height: 140px;
   }
 }
