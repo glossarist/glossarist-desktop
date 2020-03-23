@@ -10,7 +10,6 @@ import {
  } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { LangSelector as LangSelectorWide } from 'coulomb/localizer/renderer/widgets';
 
 import { AuthoritativeSource, Concept } from 'models/concepts';
 import { availableLanguages } from 'app';
@@ -191,22 +190,6 @@ const CompareAuthoritative: ToolbarItem = function () {
     title="Compare with authoritative language"
     active={compare}
     onClick={() => { modCtx.setOpts({ ...modCtx.opts, compareAuthoritative: !compare }); }} />
-};
-
-
-const SelectTargetLanguage: ToolbarItem = function () {
-  const active = useContext(ConceptContext).active;
-  const lang = useContext(LangConfigContext);
-
-  return (
-    active !== null
-      ? <LangSelectorWide
-          untranslatedProps={{ intent: "primary" }}
-          exclude={[lang.default]}
-          value={active || undefined}
-        />
-      : null
-  );
 };
 
 

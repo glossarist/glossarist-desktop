@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react';
-import { Text, Tree, ITreeNode } from '@blueprintjs/core';
+import { Tree, ITreeNode } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { availableLanguages } from 'app';
 import { ConceptContext } from '../contexts';
