@@ -8,7 +8,7 @@ import { H1, Button, ButtonGroup } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
 
-import {callIPC} from "coulomb/ipc/renderer";
+import { callIPC } from 'coulomb/ipc/renderer';
 
 import { ModuleContext } from './contexts';
 import { ModuleConfig } from './module-config';
