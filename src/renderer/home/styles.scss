@@ -110,7 +110,19 @@ html, body, #app {
     text-transform: uppercase;
     letter-spacing: -.05em;
     line-height: 1;
+    top: 10px;
   }
+
+  .headerAndSettings {
+     display: flex;
+     align-items: baseline;
+     flex-direction: row;
+     justify-content: flex-end;
+   }
+
+   .settingsButton {
+     margin-left: 0.3rem;
+   }
 
   .panelContents {
     height: 3.75rem;

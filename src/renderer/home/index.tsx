@@ -8,6 +8,8 @@ import { H1, Button, ButtonGroup } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
 
+import { callIPC } from 'coulomb/ipc/renderer';
+
 import { ModuleContext } from './contexts';
 import { ModuleConfig } from './module-config';
 import { Panel } from './panel';
@@ -66,6 +68,11 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   const module = MODULE_CONFIG[activeModuleID];
 
+  const openSettingsWindow = () => {
+    callIPC("open-predefined-window", {id: "settings"});
+  };
+
+
   return (
     <div className={styles.homeWindowLayout}>
       <Panel
@@ -73,7 +80,16 @@ const Window: React.FC<WindowComponentProps> = function () {
           className={styles.topPanel}
           iconCollapsed="caret-down"
           iconExpanded="caret-up">
-        <H1 className={styles.appTitle}>Glossarist</H1>
+          <div className={styles.headerAndSettings}>
+            <H1 className={styles.appTitle}>Glossarist</H1>
+            <Button
+              icon="settings"
+              title="Settings"
+              onClick={openSettingsWindow}
+              className={styles.settingsButton}
+              minimal={true}
+            />
+          </div>
 
         <ButtonGroup large className={styles.moduleSelector}>
           {MODULES.map(moduleID =>
