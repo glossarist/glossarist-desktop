@@ -88,7 +88,7 @@ const Window: React.FC<WindowComponentProps> = function () {
               onClick={openSettingsWindow}
               className={styles.settingsButton}
               minimal={true}
-              />
+            />
           </div>
 
         <ButtonGroup large className={styles.moduleSelector}>
