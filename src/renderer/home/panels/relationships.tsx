@@ -221,9 +221,11 @@ function ({ onRemoveOutgoingLink, onConceptSelect }) {
     });
   }
 
-  function handleNodeClick(nodeData: ITreeNode) {
-    const data = nodeData.nodeData as { ref: ConceptRef };
-    onConceptSelect(data.ref);
+  function handleNodeClick(node: ITreeNode) {
+    const data = node?.nodeData as { ref: ConceptRef } | undefined;
+    if (data) {
+      onConceptSelect(data.ref);
+    }
   }
 
   return (
