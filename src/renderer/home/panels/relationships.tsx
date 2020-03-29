@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { InputGroup, Button, ITreeNode, Tree } from '@blueprintjs/core';
 import { callIPC } from 'coulomb/ipc/renderer';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
@@ -13,6 +13,7 @@ import {
 import { LazyConceptItem } from '../concepts';
 import { availableLanguages } from 'app';
 import { PanelConfig } from '../panel-config';
+import { PanelContext } from '../panel';
 
 import styles from './relationships.scss';
 import sharedStyles from '../styles.scss';
@@ -24,9 +25,15 @@ const DEFAULT_RELATIONSHIP_TYPE = 'related';
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
 
+  const panel = useContext(PanelContext)
+  const panelState = panel.state as { addingLink?: boolean };
+  const addingLink = panelState.addingLink || false;
+  function toggleAddingLink(state: boolean) {
+    panel.setState({ addingLink: state });
+  }
+
   const [newLinkTarget, setNewLinkTarget] = useState<string>('');
   const [newLinkType, setNewLinkType] = useState<string>(DEFAULT_RELATIONSHIP_TYPE);
-  const [addingLink, toggleAddingLink] = useState(false);
   const [commitInProgress, setCommitInProgress] = useState(false);
 
   function handleNewLinkChange(evt: React.FormEvent<HTMLInputElement>) {
@@ -104,23 +111,13 @@ const Panel: React.FC<{}> = function () {
                   disabled={newLinkTarget.trim() === ''}
                   onClick={addNewLink}
                   title="Commit new outgoing link" />
-                <Button
-                  small minimal
-                  icon="cross"
-                  onClick={() => toggleAddingLink(false)}
-                  title="Cancel" />
               </>
             }
             onChange={handleNewLinkChange}
             value={newLinkTarget}
             placeholder="ID of concept to link"
           />
-        : <Button
-            small minimal fill
-            icon="add"
-            alignText="left"
-            disabled={!concept.active}
-            onClick={() => toggleAddingLink(true)}>Add link…</Button>}
+        : null}
 
       <ConceptRelationshipsContextProvider>
         <ConceptRelations
@@ -128,6 +125,33 @@ const Panel: React.FC<{}> = function () {
           onConceptSelect={(ref: ConceptRef) => concept.select(ref)}/>
       </ConceptRelationshipsContextProvider>
     </>
+  );
+};
+
+
+const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isCollapsed }) {
+  const concept = useContext(ConceptContext);
+  const panel = useContext(PanelContext);
+  const panelState = panel.state as { addingLink?: boolean };
+  const addingLink = panelState.addingLink || false;
+
+  useEffect(() => {
+    toggleAddingLink(false);
+  }, [isCollapsed]);
+
+  function toggleAddingLink(state: boolean) {
+    panel.setState({ addingLink: state });
+  }
+  return (
+    <Button
+        small minimal
+        icon="add"
+        disabled={!concept.active}
+        active={addingLink}
+        onClick={(evt: React.MouseEvent<HTMLElement>) => {
+          evt.stopPropagation();
+          toggleAddingLink(!addingLink);
+        }} />
   );
 };
 
@@ -211,4 +235,5 @@ function ({ onRemoveOutgoingLink, onConceptSelect }) {
 export default {
   Contents: Panel,
   title: "Relationships",
+  TitleComponentSecondary: PanelTitleSecondary,
 } as PanelConfig;
