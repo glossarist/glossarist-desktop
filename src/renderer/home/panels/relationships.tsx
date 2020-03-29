@@ -41,6 +41,8 @@ const Panel: React.FC<{}> = function () {
     setNewLinkTarget((evt.target as HTMLInputElement).value.trim());
   }
 
+  const newLinkInputRef = useRef<HTMLInputElement | null>(null);
+
   useEffect(() => {
     newLinkInputRef.current?.focus();
   }, [addingLink]);
@@ -100,8 +102,6 @@ const Panel: React.FC<{}> = function () {
       });
     }
   }
-
-  const newLinkInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <>
