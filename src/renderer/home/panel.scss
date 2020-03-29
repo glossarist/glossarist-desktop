@@ -1,0 +1,101 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+$transition1: .2s linear;
+
+
+:local .panel {
+  $titleBarHeight: 1.5rem;
+
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+
+  box-shadow: $pt-elevation-shadow-1;
+  min-height: $titleBarHeight;
+
+  > .panelTitleBar {
+    transition: background-color $transition1;
+    background: $light-gray3;
+    text-transform: uppercase;
+    font-size: 80%;
+    font-weight: bold;
+    letter-spacing: -.01em;
+    color: $pt-text-color-muted;
+
+    height: $titleBarHeight;
+    flex-shrink: 0;
+
+    padding-left: $pt-grid-size / 2;
+    padding-right: $pt-grid-size / 2;
+
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+
+    .title {
+      flex: 1;
+      margin-left: $pt-grid-size / 2;
+    }
+
+    .panelTriggerIcon {
+      transition: opacity $transition1;
+      opacity: .5;
+    }
+
+    &:hover {
+      background-color: $light-gray2;
+      box-shadow: $pt-elevation-shadow-1;
+
+      .panelTriggerIcon {
+        opacity: 1;
+      }
+    }
+  }
+
+  > .panelContents {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: .25rem;
+    background: $pt-app-background-color;
+  }
+
+  &:not(.panelCollapsed) {
+    min-height: $titleBarHeight * 2;
+  }
+
+  &.panelCollapsible {
+    &.panelCollapsed {
+      > .panelContents {
+        display: none;
+      }
+    }
+  }
+
+  :global .bp3-input {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  :global textarea.bp3-input {
+    padding-top: 0;
+  }
+
+  :global .bp3-form-group {
+    padding: 0 .25rem;
+    padding-bottom: .25rem;
+    margin-bottom: 0;
+
+    &:first-child {
+      padding-top: .25rem;
+    }
+
+    .bp3-label {
+      margin-bottom: 0;
+    }
+
+    &.bp3-inline {
+      padding-right: .5rem;
+    }
+  }
+}

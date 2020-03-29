@@ -77,9 +77,14 @@ const Window: React.FC<WindowComponentProps> = function () {
     <div className={styles.homeWindowLayout}>
       <Panel
           isCollapsible
+
           className={styles.topPanel}
+          titleBarClassName={styles.panelTitleBar}
+          contentsClassName={styles.panelContents}
+
           iconCollapsed="caret-down"
           iconExpanded="caret-up">
+
           <div className={styles.headerAndSettings}>
             <H1 className={styles.appTitle}>Glossarist</H1>
             <Button

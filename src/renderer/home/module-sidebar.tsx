@@ -8,6 +8,10 @@ const SPanel: React.FC<{ cfg: PanelConfig }> = function ({ cfg }) {
   return (
     <Panel
         className={`${cfg.className || ''}`}
+
+        titleBarClassName={styles.panelTitleBar}
+        contentsClassName={styles.panelContents}
+
         isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
         TitleComponent={cfg.TitleComponent}
         TitleComponentSecondary={cfg.TitleComponentSecondary}
@@ -34,9 +38,14 @@ export const Sidebar: React.FC<SidebarProps> = function({ position, panelSet }) 
 
   return (
     <Panel
-        isCollapsible={true}
+        isCollapsible
         iconExpanded={position === 'left' ? 'caret-left' : 'caret-right'}
         iconCollapsed={position === 'left' ? 'caret-right' : 'caret-left'}
+
+        collapsedClassName={styles.panelCollapsed}
+        titleBarClassName={styles.panelTitleBar}
+        contentsClassName={styles.panelContents}
+
         className={`
           ${styles.moduleSidebar}
           ${position === 'left' ? styles.moduleSidebarLeft : styles.moduleSidebarRight}`}>
