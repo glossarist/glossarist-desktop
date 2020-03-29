@@ -209,11 +209,16 @@ html, body, #app {
       .panelTitleBar {
         height: $titleBarHeight;
         flex-shrink: 0;
-        padding-left: .5rem;
+        padding-left: $pt-grid-size / 2;
+        padding-right: $pt-grid-size / 2;
 
         display: flex;
         flex-flow: row nowrap;
         align-items: center;
+
+        .title {
+          flex: 1;
+        }
       }
       .panelContents {
         overflow-y: auto;

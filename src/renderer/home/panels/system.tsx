@@ -16,7 +16,14 @@ const Panel: React.FC<{}> = function () {
 };
 
 
+const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isCollapsed }) {
+  const concept = useContext(ConceptContext);
+  return isCollapsed ? <div>ID: {`${concept?.ref}`}</div> : null;
+}
+
+
 export default {
   title: "System",
   Contents: Panel,
+  TitleComponentSecondary: PanelTitleSecondary,
 } as PanelConfig;

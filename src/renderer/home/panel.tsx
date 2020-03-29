@@ -4,36 +4,36 @@ import styles from './styles.scss';
 import { Icon } from '@blueprintjs/core';
 
 
+export const PanelContext =
+  React.createContext<{ state: any, setState: (opts: any) => void }>
+  ({ state: {}, setState: () => {} });
+
+
 interface PanelProps {
   title?: string
-  TitleComponent?: React.FC<{}>
+  TitleComponent?: React.FC<{ isCollapsed?: boolean }>
+  TitleComponentSecondary?: React.FC<{ isCollapsed?: boolean }>
   className?: string
   iconCollapsed?: IconName
   iconExpanded?: IconName
   isCollapsible?: true
   isCollapsedByDefault?: true
-  onToggle?: (state: boolean) => void
 }
 export const Panel: React.FC<PanelProps> = function ({
     className,
-    title, TitleComponent,
+    title, TitleComponent, TitleComponentSecondary,
     iconCollapsed, iconExpanded,
     isCollapsible, isCollapsedByDefault,
-    onToggle,
     children }) {
   const [isCollapsed, setCollapsedState] =
     useState<boolean>(isCollapsedByDefault || false);
 
-  useEffect(() => {
-    onToggle ? onToggle(isCollapsed) : void 0;
-  }, [isCollapsed]);
+  const [panelState, setPanelState] = useState<object>({});
 
   function onCollapse() {
-    onToggle ? onToggle(true) : void 0;
     setCollapsedState(true);
   }
   function onExpand() {
-    onToggle ? onToggle(false) : void 0;
     setCollapsedState(false);
   }
 
@@ -49,27 +49,38 @@ export const Panel: React.FC<PanelProps> = function ({
         ${isCollapsible === true && isCollapsed === true
             ? styles.panelCollapsed
             : ''}`}>
+      <PanelContext.Provider value={{ state: panelState, setState: setPanelState }}>
 
-      {title || TitleComponent || isCollapsible
-        ? <div
-              className={styles.panelTitleBar}
-              onClick={(isCollapsible === true && isCollapsed === false)
-                ? onCollapse
-                : onExpand}>
-            <Icon
-              className={styles.panelTriggerIcon}
-              icon={isCollapsible ? toggleIcon : 'blank'}
-            />
-            {TitleComponent ? <TitleComponent /> : title}
-          </div>
-        : null}
+        {title || TitleComponent || isCollapsible
+          ? <div
+                className={styles.panelTitleBar}
+                onClick={(isCollapsible === true && isCollapsed === false)
+                  ? onCollapse
+                  : onExpand}>
+              <Icon
+                className={styles.panelTriggerIcon}
+                icon={isCollapsible ? toggleIcon : 'blank'}
+              />
+              <span className={styles.title}>
+                {TitleComponent
+                  ? <TitleComponent isCollapsed={isCollapsed} />
+                  : title}
+              </span>
+              <span className={styles.titleSecondary}>
+                {TitleComponentSecondary
+                  ? <TitleComponentSecondary isCollapsed={isCollapsed} />
+                  : null}
+              </span>
+            </div>
+          : null}
 
-      {isCollapsible && isCollapsed
-        ? null
-        : <div className={styles.panelContents}>
-            {children}
-          </div>}
+        {isCollapsible && isCollapsed
+          ? null
+          : <div className={styles.panelContents}>
+              {children}
+            </div>}
 
+      </PanelContext.Provider>
     </div>
   );
 };

@@ -2,7 +2,8 @@ import React from 'react';
 
 export interface PanelConfig {
   title: string
-  Title?: React.FC<{}>
+  TitleComponent?: React.FC<{ isCollapsed?: boolean }>
+  TitleComponentSecondary?: React.FC<{ isCollapsed?: boolean }>
   actions?: React.FC<{}>[]
   Contents: React.FC<{}>
   objectIndependent?: true
