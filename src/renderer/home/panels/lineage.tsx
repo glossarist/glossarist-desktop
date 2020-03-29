@@ -24,8 +24,8 @@ const Panel: React.FC<{}> = function () {
 
   function handleNodeClick(node: ITreeNode) {
     // TODO: Replace with revision selection logic
-    const nodeData = node.nodeData as { isAuthSource?: boolean };
-    const isAuthSource = nodeData.isAuthSource;
+    const nodeData = node?.nodeData as { isAuthSource?: boolean } | undefined;
+    const isAuthSource = nodeData?.isAuthSource;
     if (isAuthSource) {
       openAuthSource();
     }
