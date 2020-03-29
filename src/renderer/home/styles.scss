@@ -325,6 +325,7 @@ html, body, #app {
 :local .conceptID {
   opacity: .4;
   font-size: 80%;
+  width: 1.5em;
 }
 
 :local .conceptItem {
@@ -333,7 +334,6 @@ html, body, #app {
 
 :local .lazyConceptList {
   .conceptID {
-    width: 1.5em;
     margin-right: .5em;
   }
 
