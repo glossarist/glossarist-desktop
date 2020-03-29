@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useReducer, useRef } from 'react';
 import { InputGroup, Button, ITreeNode, Tree } from '@blueprintjs/core';
 import { callIPC } from 'coulomb/ipc/renderer';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
@@ -28,6 +28,7 @@ const Panel: React.FC<{}> = function () {
   const panel = useContext(PanelContext)
   const panelState = panel.state as { addingLink?: boolean };
   const addingLink = panelState.addingLink || false;
+
   function toggleAddingLink(state: boolean) {
     panel.setState({ addingLink: state });
   }
@@ -39,6 +40,10 @@ const Panel: React.FC<{}> = function () {
   function handleNewLinkChange(evt: React.FormEvent<HTMLInputElement>) {
     setNewLinkTarget((evt.target as HTMLInputElement).value.trim());
   }
+
+  useEffect(() => {
+    newLinkInputRef.current?.focus();
+  }, [addingLink]);
 
   async function addNewLink() {
     let newLinkRef: number;
@@ -96,11 +101,14 @@ const Panel: React.FC<{}> = function () {
     }
   }
 
+  const newLinkInputRef = useRef<HTMLInputElement | null>(null);
+
   return (
     <>
       {addingLink
         ? <InputGroup small
             type="text"
+            inputRef={(ref) => { newLinkInputRef.current = ref }}
             readOnly={commitInProgress}
             rightElement={
               <>
