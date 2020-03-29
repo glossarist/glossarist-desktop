@@ -20,8 +20,6 @@ interface PanelProps {
   className?: string
   collapsedClassName?: string
   titleBarClassName?: string
-  titleClassName?: string
-  titleSecondaryClassName?: string
   contentsClassName?: string
 
   iconCollapsed?: IconName
@@ -29,7 +27,7 @@ interface PanelProps {
 }
 export const Panel: React.FC<PanelProps> = function ({
     className, collapsedClassName,
-    titleBarClassName, titleClassName, titleSecondaryClassName,
+    titleBarClassName,
     contentsClassName,
 
     title, TitleComponent, TitleComponentSecondary,
@@ -81,12 +79,12 @@ export const Panel: React.FC<PanelProps> = function ({
 
               {title || TitleComponent
                 ? <>
-                    <span className={`${styles.title} ${titleClassName}`}>
+                    <span className={styles.title}>
                       {TitleComponent
                         ? <TitleComponent isCollapsed={isCollapsed} />
                         : title}
                     </span>
-                    <span className={`${styles.titleSecondary} ${titleSecondaryClassName}`}>
+                    <span className={styles.titleSecondary}>
                       {TitleComponentSecondary
                         ? <TitleComponentSecondary isCollapsed={isCollapsed} />
                         : null}
