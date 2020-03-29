@@ -7,6 +7,12 @@ import { PanelConfig } from '../panel-config';
 import sharedStyles from '../styles.scss';
 
 
+const TitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isCollapsed }) {
+  const lang = useContext(LangConfigContext);
+  return isCollapsed ? <>{lang.available[lang.selected]}</> : null;
+}
+
+
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   const lang = useContext(LangConfigContext);
@@ -57,4 +63,5 @@ export default {
   Contents: Panel,
   title: "Language",
   className: sharedStyles.languagesPanel,
+  TitleComponentSecondary: TitleSecondary,
 } as PanelConfig;
