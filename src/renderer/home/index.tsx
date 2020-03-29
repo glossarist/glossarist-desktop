@@ -9,10 +9,10 @@ import { H1, Button, ButtonGroup } from '@blueprintjs/core';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 
 import { callIPC } from 'coulomb/ipc/renderer';
+import { Panel } from 'coulomb-panel/panel';
 
 import { ModuleContext } from './contexts';
 import { ModuleConfig } from './module-config';
-import { Panel } from './panel';
 import styles from './styles.scss';
 import { Module } from './module';
 

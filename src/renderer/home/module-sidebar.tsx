@@ -1,6 +1,6 @@
 import React from 'react';
+import { Panel } from 'coulomb-panel/panel';
 import { PanelConfig } from './panel-config';
-import { Panel } from './panel';
 import styles from './styles.scss';
 
 

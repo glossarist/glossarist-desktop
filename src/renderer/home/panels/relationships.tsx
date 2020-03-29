@@ -1,8 +1,9 @@
-import React, { useState, useContext, useEffect, useReducer, useRef } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { InputGroup, Button, ITreeNode, Tree } from '@blueprintjs/core';
 import { callIPC } from 'coulomb/ipc/renderer';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { ConceptRef, MultiLanguageConcept, ConceptRelation } from 'models/concepts';
+import { PanelContext } from 'coulomb-panel/panel';
 
 import {
   ConceptContext,
@@ -13,7 +14,6 @@ import {
 import { LazyConceptItem } from '../concepts';
 import { availableLanguages } from 'app';
 import { PanelConfig } from '../panel-config';
-import { PanelContext } from '../panel';
 
 import styles from './relationships.scss';
 import sharedStyles from '../styles.scss';
@@ -25,7 +25,7 @@ const DEFAULT_RELATIONSHIP_TYPE = 'related';
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
 
-  const panel = useContext(PanelContext)
+  const panel = useContext(PanelContext);
   const panelState = panel.state as { addingLink?: boolean };
   const addingLink = panelState.addingLink || false;
 

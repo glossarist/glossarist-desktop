@@ -2291,6 +2291,10 @@ cosmiconfig@^5.0.0:
     js-yaml "^3.13.1"
     parse-json "^4.0.0"
 
+"coulomb-panel@https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.1-gitpkg":
+  version "0.0.1"
+  resolved "https://github.com/riboseinc/coulomb-panel#928c28982de92be8ed10342ef9a8f57540bf4a0f"
+
 "coulomb@https://github.com/coulombjs/coulomb#coulomb-v0.1.8-gitpkg":
   version "0.1.8"
   resolved "https://github.com/coulombjs/coulomb#724876e082b6b86befec90df2094f2569e98643c"
