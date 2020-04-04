@@ -386,6 +386,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
           object: { ...props.concept, [entry.language_code]: sanitized },
           commit: true,
         });
+        setCommitInProgress(false);
       } catch (e) {
         setCommitInProgress(false);
       }
