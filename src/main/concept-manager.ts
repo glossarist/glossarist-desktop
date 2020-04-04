@@ -87,6 +87,7 @@ function conceptMatchesQuery(_q: string): (c: MultiLanguageConcept<any>) => bool
   const q = _q.toLowerCase();
   return (c) => {
     return (c.eng.term || '').toLowerCase().indexOf(q) >= 0 ||
+    // TODO: Search across all localized entries
       (c.eng.definition || '').toLowerCase().indexOf(q) >= 0 ||
       `${c.termid}`.indexOf(q) >= 0;
   }
