@@ -19,6 +19,7 @@
   },
   "resolutions": {
     "js-yaml": "3.13.1",
+    "acorn": "6.4.1",
     "kind-of": "6.0.3"
   },
   "electronWebpack": {
