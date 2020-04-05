@@ -226,8 +226,36 @@ html, body, #app {
     .designation {
       font-weight: normal;
       font-family: Georgia, serif;
-      font-size: 210%;
       margin-bottom: 1rem;
+    }
+    .primaryDesignation {
+      .designationMarkers {
+        margin-left: .1rem;
+      }
+    }
+    .synonyms {
+      margin-bottom: 1rem;
+
+      &:before {
+        content: "Syn.";
+        margin-right: .5rem;
+      }
+
+      > :not(:last-child) {
+        &:after {
+          content: ", ";
+          margin-right: .5rem;
+        }
+      }
+    }
+    .designationMarkers {
+      color: grey;
+      font-size: 80%;
+      font-family: sans-serif;
+
+      > * {
+        margin-left: .35rem;
+      }
     }
     .example, .note {
       .label {
@@ -252,8 +280,35 @@ html, body, #app {
     padding: $padding;
 
     .designation {
+      box-shadow: $pt-elevation-shadow-1;
+      margin-top: -$pt-grid-size / 2;
+
       :global .bp3-input {
         font-weight: bold;
+      }
+    }
+
+    .designationProps {
+      z-index: 2;
+      position: relative;
+      padding: 0 $pt-grid-size;
+      margin-top: -$pt-border-radius / 2;
+
+      .usageArea {
+        width: 6em;
+      }
+    }
+
+    .usageInfo {
+      display: flex;
+      flex-flow: row nowrap;
+
+      > :first-child {
+        margin-right: $pt-grid-size;
+      }
+
+      > * {
+        flex: 1;
       }
     }
 
@@ -267,15 +322,16 @@ html, body, #app {
         margin-left: -$padding;
         margin-right: -$padding;
 
+        > .bp3-input, > .bp3-input-group .bp3-input {
+          border-radius: 0;
+          box-shadow: none;
+          padding-left: $padding;
+        }
+
         .bp3-form-helper-text {
           margin-left: $padding;
           margin-right: $padding;
         }
-      }
-      .bp3-input {
-        border-radius: 0;
-        box-shadow: none;
-        padding-left: $padding;
       }
     }
   }

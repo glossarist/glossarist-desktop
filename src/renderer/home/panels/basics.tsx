@@ -19,7 +19,7 @@ const Panel: React.FC<{}> = function () {
   const isValid = localized ? ['retired', 'superseded'].indexOf(localized.entry_status) < 0 : undefined;
   const designationValidityClass = isValid === false ? sharedStyles.invalidDesignation : '';
   const loadingClass = concept.isLoading ? Classes.SKELETON : undefined;
-  const preferredDesignationMarker = localized?.classification === 'preferred'
+  const preferredDesignationMarker = localized?.terms[0].normativeStatus === 'preferred'
     ? <span className={loadingClass}>preferred</span>
     : undefined;
 
@@ -34,7 +34,7 @@ const Panel: React.FC<{}> = function () {
                 className={styles.designation}>
               <InputGroup
                 large={true}
-                value={localized.term}
+                value={localized.terms[0].designation}
                 className={`${rtlClass} ${designationValidityClass} ${loadingClass}`}
                 {...field} />
             </FormGroup>

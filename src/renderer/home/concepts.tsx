@@ -9,6 +9,9 @@ import {
   Intent,
   IconName,
   IButtonProps,
+  ControlGroup,
+  HTMLSelect,
+  Checkbox,
 } from '@blueprintjs/core';
 
 import { FixedSizeList as List } from 'react-window';
@@ -21,6 +24,14 @@ import {
   Concept,
   MultiLanguageConcept,
   ConceptRef,
+  Designation,
+  DESIGNATION_TYPES,
+  DesignationType,
+  NORMATIVE_STATUS_CHOICES,
+  NormativeStatus,
+  Expression,
+  TypedDesignation,
+  Noun,
 } from '../../models/concepts';
 
 import { availableLanguages } from '../../app';
@@ -157,7 +168,7 @@ function ({ lang, concept, className }) {
 
   const c = concept[lang as keyof typeof availableLanguages] || concept.eng;
 
-  const designation = c.term;
+  const designation = c.terms[0].designation;
   const isValid = c ? ['retired', 'superseded'].indexOf(c.entry_status) < 0 : undefined;
   const designationValidityClass = isValid === false ? styles.invalidDesignation : '';
 
@@ -201,6 +212,33 @@ export const LazyConceptItem: React.FC<LazyConceptItemProps> = function ({ conce
 
 // Viewing terminological entries
 
+const Designation: React.FC<{ d: Designation }> = function ({ d }) {
+  return <span className={styles.designation}>
+    {d.designation}
+
+    <span className={styles.designationMarkers}>
+      {d.type === 'expression' && d.geographicalArea
+        ? <i>{d.geographicalArea}</i>
+        : null}
+      {d.type === 'expression' && d.partOfSpeech
+        ? <i>{d.partOfSpeech}</i>
+        : null}
+      {d.type === 'expression' && d.isPreposition
+        ? <i>prep.</i>
+        : null}
+      {d.type === 'expression' && d.isAbbreviation
+        ? <i>abbr.</i>
+        : null}
+      {d.type === 'expression' && d.partOfSpeech === 'noun' && (d.gender || d.grammaticalNumber)
+        ? <><i>{d.gender}</i> <i>{d.grammaticalNumber}</i></>
+        : null}
+      {d.type === 'expression' && d.geographicalArea
+        ? <i>{d.geographicalArea}</i>
+        : null}
+    </span>
+  </span>
+};
+
 interface EntryDetailsProps {
   isLoading?: boolean
   entry: Concept<any, any>
@@ -209,9 +247,26 @@ interface EntryDetailsProps {
 export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, entry, className }) {
   const loadingClass = isLoading ? Classes.SKELETON : undefined;
 
+  const primaryDesignation = entry.terms[0];
+
+  let synonyms: Designation[];
+  if (entry.terms.length > 1) {
+    synonyms = entry.terms.slice(1, entry.terms.length);
+  } else {
+    synonyms = [];
+  }
+
   return (
     <div className={`${styles.entryDetails} ${entry.language_code === 'ara' ? Classes.RTL : ''} ${className || ''}`}>
-      <H2 className={`${styles.designation} ${loadingClass}`}>{entry?.term}</H2>
+      <H2 className={`${styles.primaryDesignation} ${loadingClass}`}>
+        <Designation d={primaryDesignation} />
+      </H2>
+
+      {synonyms.length > 0
+        ? <div className={styles.synonyms}>
+            {[...synonyms.entries()].map(([idx, s]) => <Designation key={idx} d={s} />)}
+          </div>
+        : null}
 
       <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
         <p className={`${styles.definition} ${loadingClass}`}>{entry?.definition}</p>
@@ -240,8 +295,10 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
 interface EntryFormProps {
   entry: Concept<any, any>
   className?: string
-  onTermChange?: (newVal: string) => void
   onDefinitionChange?: (newVal: string) => void
+  onUsageInfoChange?: (newVal: string) => void
+  onDesignationEdit?: (idx: number, newVal: Designation) => void
+  onDesignationDeletion?: (idx: number) => void
   onNoteEdit?: (idx: number, newVal: string) => void
   onNoteDeletion?: (idx: number) => void
   onExampleEdit?: (idx: number, newVal: string) => void
@@ -253,23 +310,214 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
     require('electron').shell.openExternal(link);
   }
 
+  function handleDesignationTypeEdit(idx: number, t: DesignationType) {
+    if (!props.onDesignationEdit) { return; }
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], type: t } as Designation);
+  }
+
+  function handleDesignationNormativeStatusEdit(idx: number, ns: NormativeStatus) {
+    if (!props.onDesignationEdit) { return; }
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], normativeStatus: ns } as Designation);
+  }
+
+  function handleDesignationEdit(idx: number, d: string) {
+    if (!props.onDesignationEdit) { return; }
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], designation: d });
+  }
+
+  function handleExpressionPartOfSpeech(idx: number, pos: Expression["partOfSpeech"]) {
+    if (!props.onDesignationEdit) { return; }
+    if (pos === 'noun') {
+      props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: pos });
+    } else {
+      // Reset properties only applicable to nouns
+      props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: pos, gender: undefined, grammaticalNumber: undefined });
+    }
+  }
+
+  function handleNounGender(idx: number, gnd: Noun["gender"]) {
+    if (!props.onDesignationEdit) { return; }
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: 'noun', gender: gnd });
+  }
+
+  function handleNounNumber(idx: number, nmb: Noun["grammaticalNumber"]) {
+    if (!props.onDesignationEdit) { return; }
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: 'noun', grammaticalNumber: nmb });
+  }
+
+  function designationTypeLabel(idx: number, dt: DesignationType): string {
+    if (idx === 0) {
+      return "Designation";
+    } else if (dt === "symbol") {
+      return "Symbol";
+    } else {
+      return "Synonym";
+    }
+  }
+
+  function normativeStatusChoices(idx: number, d: Designation) {
+    return <>
+      {[...NORMATIVE_STATUS_CHOICES.entries()].map(([nsIdx, ns]) => 
+        <Button small minimal
+            key={nsIdx}
+            active={ns === d.normativeStatus}
+            onClick={() => handleDesignationNormativeStatusEdit(idx, ns)}>
+          {ns}
+        </Button>
+      )}
+    </>
+  }
+
+  function getUnit(exp: Expression): 'abbr' | 'prep' | 'none' {
+    if (exp.isAbbreviation) {
+      return 'abbr';
+    } else if (exp.isPreposition) {
+      return 'prep';
+    } else {
+      return 'none'
+    }
+  }
+
+  function handleUnit(idx: number, unit: string) {
+    if (!props.onDesignationEdit) { return; }
+    const designation = props.entry.terms[idx];
+    if (designation.type === 'expression') {
+      if (unit === 'abbr') {
+        props.onDesignationEdit(idx, { ...designation, isPreposition: undefined, isAbbreviation: true });
+      } else if (unit === 'prep') {
+        props.onDesignationEdit(idx, { ...designation, isPreposition: true, isAbbreviation: undefined });
+      } else {
+        props.onDesignationEdit(idx, { ...designation, isPreposition: undefined, isAbbreviation: undefined });
+      }
+    }
+  }
+
   return (
     <div className={styles.entryForm}>
-      <FormGroup
-          className={styles.designation}
-          label="Designation"
-          labelFor="designation"
-          labelInfo="(required)">
-        <InputGroup large fill
-          value={props.entry.term || ''}
-          id="designation"
-          intent={!props.entry.term ? 'danger' : undefined}
-          readOnly={!props.onTermChange}
-          onChange={(evt: React.FormEvent<HTMLInputElement>) =>
-            props.onTermChange
-              ? props.onTermChange((evt.target as HTMLInputElement).value)
-              : void 0} />
-      </FormGroup>
+      {[...props.entry.terms.entries()].map(([idx, d]) =>
+        <FormGroup
+            key={`designation-${idx}`}
+            label={designationTypeLabel(idx, d.type)}
+            labelFor={`designation-${idx}`}
+            labelInfo={<>
+              {props.onDesignationEdit
+                ? <ButtonGroup title="Select normative status">
+                    {normativeStatusChoices(idx, d)}
+                  </ButtonGroup>
+                : <>{d.normativeStatus || '(unspecified)'}</>}
+              {" "}
+              {props.onExampleDeletion
+                ? <Button small
+                    title="Delete this designation"
+                    icon="cross"
+                    disabled={idx === 0}
+                    onClick={() => props.onDesignationDeletion
+                      ? props.onDesignationDeletion(idx)
+                      : void 0} />
+                : undefined}
+            </>}
+            intent={d.designation.trim() === '' ? 'danger' : undefined}>
+
+          <InputGroup fill className={styles.designation}
+            value={d.designation}
+            id={`designation-${idx}`}
+            disabled={!props.onDesignationEdit}
+            onChange={(evt: React.FormEvent<HTMLInputElement>) => {
+              evt.persist();
+              handleDesignationEdit(idx, (evt.target as HTMLInputElement).value);
+            }} />
+
+          <div className={styles.designationProps}>
+            <ControlGroup>
+              {props.onDesignationEdit
+                ? <HTMLSelect
+                      onChange={(evt: React.FormEvent<HTMLSelectElement>) => {
+                        handleDesignationTypeEdit(idx, evt.currentTarget.value as DesignationType);
+                      }}
+                      value={d.type}
+                      options={DESIGNATION_TYPES.map(dt => ({ value: dt }))} />
+                : <Button disabled>{d.type}</Button>}
+              {d.type === 'expression'
+                ? <>
+                    <InputGroup className={styles.usageArea} placeholder="Area…" maxLength={5} />
+
+                    <HTMLSelect
+                        value={getUnit(d)}
+                        onChange={(evt: React.FormEvent<HTMLSelectElement>) => {
+                          handleUnit(idx, evt.currentTarget.value);
+                        }}>
+                      <option value="none">unit</option>
+                      <option value="abbr" title="Abbreviation">abbr.</option>
+                      <option value="prep" title="Preposition">prep.</option>
+                    </HTMLSelect>
+
+                    <HTMLSelect
+                        value={d.partOfSpeech}
+                        onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                          handleExpressionPartOfSpeech(idx, evt.currentTarget.value as Expression["partOfSpeech"])}>
+                      <option value={undefined}>PoS</option>
+                      <option value="noun" title="Noun">n.</option>
+                      <option value="adjective" title="Adjective">adj.</option>
+                      <option value="verb" title="Verb">v.</option>
+                      <option value="adverb" title="Adverb">adv.</option>
+                    </HTMLSelect>
+
+                    {d.partOfSpeech === 'noun'
+                      ? <>
+                          <HTMLSelect key="gender"
+                            title="Grammatical gender"
+                            value={d.gender}
+                            onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                              handleNounGender(idx, evt.currentTarget.value as Noun["gender"])}>
+                            <option value={undefined}>gender</option>
+                            <option value="masculine" title="Masculine">m.</option>
+                            <option value="feminine" title="Feminine">f.</option>
+                            <option value="common" title="Common gender">comm.</option>
+                            <option value="neuter" title="Neuter/neutral gender">nt.</option>
+                          </HTMLSelect>
+                          <HTMLSelect key="number"
+                            title="Grammatical number"
+                            value={d.grammaticalNumber}
+                            onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                              handleNounNumber(idx, evt.currentTarget.value as Noun["grammaticalNumber"])}>
+                            <option value={undefined}>number</option>
+                            <option value="singular">sing.</option>
+                            <option value="plural">pl.</option>
+                            <option value="mass">mass</option>
+                          </HTMLSelect>
+                        </>
+                      : null}
+                  </>
+                : null}
+            </ControlGroup>
+          </div>
+        </FormGroup>
+      )}
+
+      <div className={styles.usageInfo}>
+        <FormGroup
+            label="Usage notes"
+            labelFor="usageInfo">
+          <InputGroup fill
+            value={props.entry.usageInfo || ''}
+            id="usageInfo"
+            disabled={!props.onUsageInfoChange}
+            onChange={(evt: React.FormEvent<HTMLInputElement>) =>
+              props.onUsageInfoChange
+                ? props.onUsageInfoChange((evt.target as HTMLInputElement).value)
+                : void 0} />
+        </FormGroup>
+        <FormGroup
+            label="Domain"
+            helperText="Legacy."
+            labelFor="domainLegacy">
+          <InputGroup fill
+            defaultValue={props.entry.domain || ''}
+            readOnly
+            disabled
+            id="domainLegacy" />
+        </FormGroup>
+      </div>
 
       <FormGroup
           className={styles.definition}
@@ -394,7 +642,8 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   };
 
   function sanitizeEntry(entry: Concept<any, any>): Concept<any, any> | undefined {
-    if ((entry.term || '').trim() === '' || (entry.definition || '').trim() === '') {
+    const hasEmptyDesignations = entry.terms.filter(t => t.designation.trim() === '').length > 0;
+    if (hasEmptyDesignations || (entry.definition || '').trim() === '') {
       return undefined;
     }
     return {
@@ -404,18 +653,48 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     };
   }
 
-  function handleTermChange(val: string) {
-    updateEntry(e => ( e ? { ...e, term: val } : e));
+  function handleDesignationAddition() {
+    updateEntry((e): Concept<number, any> => {
+      if (e) {
+        const newTerm: Designation = { type: 'expression', designation: '', partOfSpeech: undefined };
+        return { ...e, terms: [...e.terms, newTerm] }
+      }
+      return e;
+    });
+  }
+  function handleDesignationChange(idx: number, val: Designation) {
+    updateEntry(e => {
+      if (e) {
+        var items = [ ...e.terms ];
+        items[idx] = val;
+
+        return { ...e, terms: items.sort((i1, i2) => {
+          if (NORMATIVE_STATUS_CHOICES.indexOf(i1.normativeStatus || 'admitted') >
+              NORMATIVE_STATUS_CHOICES.indexOf(i2.normativeStatus || 'admitted')) {
+             return 1;
+           } else if (NORMATIVE_STATUS_CHOICES.indexOf(i1.normativeStatus || 'admitted') <
+                      NORMATIVE_STATUS_CHOICES.indexOf(i2.normativeStatus || 'admitted')) {
+             return -1;
+           } else {
+             return 0;
+           }
+        })};
+      }
+      return e;
+    });
   }
   function handleDefChange(val: string) {
     updateEntry(e => ( e ? { ...e, definition: val } : e));
+  }
+  function handleUsageInfoChange(val: string) {
+    updateEntry(e => ( e ? { ...e, usageInfo: val } : e));
   }
   function handleItemAddition(field: 'notes' | 'examples') {
     return () => {
       updateEntry(e => ( e ? { ...e, [field]: [...e[field], ''] } : e));
     };
   }
-  function handleItemDeletion(field: 'notes' | 'examples') {
+  function handleItemDeletion(field: 'notes' | 'examples' | 'terms') {
     return (idx: number) => {
       updateEntry(e => {
         if (e) {
@@ -443,8 +722,10 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   const conceptForm = (
     <EntryForm
       entry={entry}
-      onTermChange={handleTermChange}
       onDefinitionChange={handleDefChange}
+      onUsageInfoChange={handleUsageInfoChange}
+      onDesignationDeletion={handleItemDeletion('terms')}
+      onDesignationEdit={handleDesignationChange}
       onExampleDeletion={handleItemDeletion('examples')}
       onExampleEdit={handleItemEdit('examples')}
       onNoteDeletion={handleItemDeletion('notes')}
@@ -453,8 +734,8 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   );
 
   const hasUncommittedChanges = sanitized && entry && props.entry &&
-    JSON.stringify([props.entry.term, props.entry.definition, props.entry.notes, props.entry.examples]) !==
-    JSON.stringify([sanitized?.term, sanitized?.definition, sanitized?.notes, sanitized?.examples]);
+    JSON.stringify([props.entry.usageInfo, props.entry.terms, props.entry.definition, props.entry.notes, props.entry.examples]) !==
+    JSON.stringify([sanitized.usageInfo, sanitized?.terms, sanitized?.definition, sanitized?.notes, sanitized?.examples]);
 
   const isValid = ['retired', 'superseded'].indexOf(props.entry.entry_status) < 0;
 
@@ -474,8 +755,9 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
 
       <div className={styles.entryFormToolbar}>
         <ButtonGroup>
-          <Button icon="add" onClick={handleItemAddition('examples')}>EXAMPLE</Button>
-          <Button icon="add" onClick={handleItemAddition('notes')}>NOTE</Button>
+          <Button icon="add" onClick={handleDesignationAddition} title="Add another designation/synonym">Designation</Button>
+          <Button icon="add" onClick={handleItemAddition('examples')} title="Add an EXAMPLE">EX.</Button>
+          <Button icon="add" onClick={handleItemAddition('notes')} title="Add a NOTE">NOTE</Button>
         </ButtonGroup>
 
         <ButtonGroup>
@@ -514,3 +796,21 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     </div>
   );
 };
+
+
+function designationTypeLabelShort(dt: DesignationType): string {
+  if (dt === 'expression') {
+    return "expr.";
+  } else if (dt === 'symbol') {
+    return "symb.";
+  } else if (dt === 'prefix') {
+    return "prfx.";
+  } else {
+    return "unk."
+  }
+}
+
+
+function isExpression(d: TypedDesignation): d is Expression {
+  return d.type === 'expression';
+}

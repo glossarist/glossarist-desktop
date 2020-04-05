@@ -42,7 +42,7 @@ const Panel: React.FC<{}> = function () {
       label: lang.available[langID],
       //secondaryLabel: <Text ellipsize>{(concept.active || {})[langID]?.term}</Text>,
       isSelected: lang.selected === langID,
-      disabled: (concept.active || {})[langID]?.term === undefined,
+      disabled: (concept.active || {})[langID]?.terms === undefined,
     } as ITreeNode;
   }
 
