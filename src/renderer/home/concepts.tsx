@@ -211,27 +211,30 @@ export const LazyConceptItem: React.FC<LazyConceptItemProps> = function ({ conce
 // Viewing terminological entries
 
 const Designation: React.FC<{ d: Designation }> = function ({ d }) {
+  function partOfSpeechLabel(d: Expression): JSX.Element | null {
+    if (d.partOfSpeech === 'noun') {
+      return <><span>{d.gender}</span> <span>{d.grammaticalNumber}</span> noun</>
+    } else if (d.partOfSpeech === 'adjective' && d.isParticiple) {
+      return <>adj. participle</>
+    } else if (d.partOfSpeech === 'adverb' && d.isParticiple) {
+      return <>adv. participle</>
+    } else {
+      return <>{d.partOfSpeech}</>
+    }
+  }
+
   return <span className={styles.designation}>
     {d.designation}
 
     <span className={styles.designationMarkers}>
       {d.type === 'expression' && d.geographicalArea
-        ? <i>{d.geographicalArea}</i>
+        ? <strong title="Geographical area of usage">{d.geographicalArea}</strong>
         : null}
       {d.type === 'expression' && d.partOfSpeech
-        ? <i>{d.partOfSpeech}</i>
-        : null}
-      {d.type === 'expression' && (d.partOfSpeech === 'adjective' || d.partOfSpeech === 'adverb') && d.isParticiple
-        ? <i title="Participle">prtc.</i>
+        ? <span className={styles.partOfSpeech}>{partOfSpeechLabel(d)}</span>
         : null}
       {d.type === 'expression' && d.isAbbreviation
-        ? <i title="Acronym or abbreviation">abbr.</i>
-        : null}
-      {d.type === 'expression' && d.partOfSpeech === 'noun' && (d.gender || d.grammaticalNumber)
-        ? <><i>{d.gender}</i> <i>{d.grammaticalNumber}</i></>
-        : null}
-      {d.type === 'expression' && d.geographicalArea
-        ? <i title="Geographical area of usage">{d.geographicalArea}</i>
+        ? <span title="Acronym or abbreviation">abbr.</span>
         : null}
     </span>
   </span>
@@ -256,6 +259,8 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
 
   return (
     <div className={`${styles.entryDetails} ${entry.language_code === 'ara' ? Classes.RTL : ''} ${className || ''}`}>
+      {entry.domain ? <span className={styles.legacyDomain}>&lt;{entry.domain}&gt;</span> : null}
+
       <H2 className={`${styles.primaryDesignation} ${loadingClass}`}>
         <Designation d={primaryDesignation} />
       </H2>
@@ -267,7 +272,10 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
         : null}
 
       <div className={`${Classes.RUNNING_TEXT} ${styles.basics}`}>
-        <p className={`${styles.definition} ${loadingClass}`}>{entry?.definition}</p>
+        <p className={`${styles.definition} ${loadingClass}`}>
+          {entry.usageInfo ? <span className={styles.usageInfo}>&lt;{entry.usageInfo}&gt;</span> : null}
+          {entry?.definition}
+        </p>
 
         {[...entry.examples.entries()].map(([idx, item]) =>
           <p className={`${styles.example} ${loadingClass}`} key={`example-${idx}`}>

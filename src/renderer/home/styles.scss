@@ -222,15 +222,29 @@ html, body, #app {
   .entryDetails {
     padding: 2rem;
     background: white;
+    position: relative;
 
     .designation {
       font-weight: normal;
       font-family: Georgia, serif;
       margin-bottom: 1rem;
     }
+    .legacyDomain {
+      font-weight: normal;
+      font-family: sans-serif;
+      font-size: $pt-font-size-large;
+      position: absolute;
+      top: .75rem;
+    }
+    .usageInfo {
+      color: $pt-text-color-muted;
+      margin-right: 1em;
+    }
     .primaryDesignation {
       .designationMarkers {
-        margin-left: .1rem;
+        > * {
+          margin-left: .75rem;
+        }
       }
     }
     .synonyms {
@@ -238,23 +252,27 @@ html, body, #app {
 
       &:before {
         content: "Syn.";
-        margin-right: .5rem;
+        font-style: italic;
       }
 
-      > :not(:last-child) {
-        &:after {
+      > * {
+        font-size: $pt-font-size-large;
+        margin-left: .75em;
+        &:not(:last-child):after {
           content: ", ";
-          margin-right: .5rem;
         }
       }
     }
     .designationMarkers {
-      color: grey;
-      font-size: 80%;
+      color: $pt-text-color-muted;
       font-family: sans-serif;
+      font-size: $pt-font-size;
 
       > * {
-        margin-left: .35rem;
+        margin-left: .5em;
+        &:not(:last-child):after {
+          content: ",";
+        }
       }
     }
     .example, .note {
