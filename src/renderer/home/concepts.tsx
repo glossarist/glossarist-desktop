@@ -334,14 +334,14 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
     }
   }
 
-  function handleNounGender(idx: number, gnd: Noun["gender"]) {
+  function handleNounGender(idx: number, gnd: Noun["gender"] | '') {
     if (!props.onDesignationEdit) { return; }
-    props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: 'noun', gender: gnd });
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: 'noun', gender: gnd || undefined });
   }
 
-  function handleNounNumber(idx: number, nmb: Noun["grammaticalNumber"]) {
+  function handleNounNumber(idx: number, nmb: Noun["grammaticalNumber"] | '') {
     if (!props.onDesignationEdit) { return; }
-    props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: 'noun', grammaticalNumber: nmb });
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: 'noun', grammaticalNumber: nmb || undefined });
   }
 
   function designationTypeLabel(idx: number, dt: DesignationType): string {
@@ -466,8 +466,8 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
                             title="Grammatical gender"
                             value={d.gender}
                             onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
-                              handleNounGender(idx, evt.currentTarget.value as Noun["gender"])}>
-                            <option value={undefined}>gender</option>
+                              handleNounGender(idx, evt.currentTarget.value as Noun["gender"] || '')}>
+                            <option value="">gender</option>
                             <option value="masculine" title="Masculine">m.</option>
                             <option value="feminine" title="Feminine">f.</option>
                             <option value="common" title="Common gender">comm.</option>
@@ -477,8 +477,8 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
                             title="Grammatical number"
                             value={d.grammaticalNumber}
                             onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
-                              handleNounNumber(idx, evt.currentTarget.value as Noun["grammaticalNumber"])}>
-                            <option value={undefined}>number</option>
+                              handleNounNumber(idx, evt.currentTarget.value as Noun["grammaticalNumber"] || '')}>
+                            <option value="">number</option>
                             <option value="singular">sing.</option>
                             <option value="plural">pl.</option>
                             <option value="mass">mass</option>
