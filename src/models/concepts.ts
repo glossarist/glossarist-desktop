@@ -4,23 +4,53 @@ import { StandardRef, StandardClause } from './standards';
 // import { ReviewRef } from './reviews';
 
 
+/* Revisions */
+
+interface Revision<T> {
+  object: T
+  parents: string[]
+  timeCreated: Date
+}
+
+export type WithRevisions<T> = T & {
+  _revisions: {
+    current?: string
+    /* Points to existing revision ID from the tree */
+
+    tree: { [revisionID: string]: Revision<T> }
+    /* When new version is saved,
+    new revision is created with current object data and current revision ID as parent;
+    new revision is assigned a randomly generated ID and added to the tree;
+    current revision pointer is updated with that ID. */
+  }
+}
+
+
+/* Concepts */
+
 export type ConceptRelation =
   { type: string, to: ConceptRef };
+// Stored in the database
 
 export type IncomingConceptRelation =
   { type: string, from: ConceptRef };
+// Inferred at runtime
 
 
 export type MultiLanguageConcept<Ref extends ConceptRef> = {
   termid: Ref
+
+  parent?: Ref
+  // Domain or subject.
+
   relations?: ConceptRelation[]
-  eng: Concept<Ref, AuthoritativeLanguage>
+  eng: WithRevisions<Concept<Ref, AuthoritativeLanguage>>
   // English is required, others optional
 } & _Concepts<Ref>;
 
 
 export type _Concepts<Ref extends ConceptRef> = {
-  [Lang in keyof OptionalLanguages]?: Concept<Ref, Lang>
+  [Lang in keyof OptionalLanguages]?: WithRevisions<Concept<Ref, Lang>>
 }
 
 
@@ -29,9 +59,14 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   language_code: Lang
   entry_status: ConceptStatus
 
+  terms: Designation[]
+
+  domain?: string
+  // Legacy.
+
   //subject_field: SubjectFieldLabel
 
-  term: Designation
+  usageInfo?: string
 
   // Superfluous in current data schema,
   // which allows only one designation per concept,
@@ -40,7 +75,7 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   // there may be preferred and non-preferred designations.
   //is_preferred: boolean
 
-  definition: Definition
+  definition: string
   notes: Note[]
   examples: Example[]
 
@@ -61,7 +96,7 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
 
   // Deprecated:
 
-  classification?: 'preferred'
+  //classification?: 'preferred'
 
   review_date?: Date
   review_status?: string
@@ -95,12 +130,6 @@ export type AuthoritativeSource = {
 
 export type SubjectFieldLabel = string;
 
-type Designation = string;
-// Plain text
-
-type Definition = string;
-// Rich text
-
 type Note = string;
 // Rich text
 
@@ -126,8 +155,68 @@ export interface ConceptCollection {
 
 // type GitHash = string;
 
-type SupportedLanguages = typeof availableLanguages;
+export type SupportedLanguages = typeof availableLanguages;
 
-type AuthoritativeLanguage = 'eng';
+export type AuthoritativeLanguage = 'eng';
 
-type OptionalLanguages = Omit<SupportedLanguages, 'eng'>;
+export type OptionalLanguages = Omit<SupportedLanguages, 'eng'>;
+
+
+/* Designations */
+
+export type Designation = {
+  designation: string
+  normativeStatus?: NormativeStatus
+} & TypedDesignation;
+
+export const NORMATIVE_STATUS_CHOICES = [
+  'preferred',
+  'admitted',
+  'deprecated',
+] as const;
+export type NormativeStatus = typeof NORMATIVE_STATUS_CHOICES[number];
+
+export type TypedDesignation = Symbol | Expression | Prefix;
+export const DESIGNATION_TYPES = [
+  'expression',
+  'symbol',
+  'prefix',
+  // IMPORTANT: Changing order of designation types REQUIRES changing corresponding types following
+] as const;
+export type DesignationType = typeof DESIGNATION_TYPES[number];
+type Symbol = { type: typeof DESIGNATION_TYPES[1] }
+type Prefix = { type: typeof DESIGNATION_TYPES[2] }
+export type Expression = { type: typeof DESIGNATION_TYPES[0] } & Usage & Grammar
+
+type Usage = {
+  geographicalArea?: string
+}
+
+type Grammar = {
+	alternateForms?: string[]
+	// NOT synonyms; variations of number/tense etc.
+	isAbbreviation?: true
+	isPreposition?: true
+} & (Noun | Verb | Adjective | Adverb | { partOfSpeech: undefined })
+// {} is for unknown part of speech.
+
+export type Noun = {
+	partOfSpeech: 'noun'
+
+	grammaticalNumber?: 'plural' | 'singular' | 'mass'
+	// Doesn’t have to be explicit for singulars, unless circumstances require
+
+	gender?: 'masculine' | 'feminine' | 'common' | 'neuter'
+}
+
+type Verb = {
+	partOfSpeech: 'verb'
+}
+
+type Adjective = {
+	partOfSpeech: 'adjective'
+}
+
+type Adverb = {
+	partOfSpeech: 'adverb'
+}

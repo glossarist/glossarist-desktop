@@ -5,6 +5,7 @@ import { MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRel
 import { ObjectSource } from '../app';
 import { app } from '.';
 import { listen } from 'coulomb/ipc/main';
+import { migrateConcept } from './legacy';
 
 
 class ConceptManager
@@ -16,6 +17,13 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
   protected getObjID(dbRef: string) {
     const filename = super.getObjID(dbRef) as unknown as string;
     return parseInt(filename.replace('concept-', ''), 10);
+  }
+
+  public async read(objID: number) {
+    const obj = (await super.read(objID)) as MultiLanguageConcept<any>;
+    // Possibly legacy data.
+
+    return migrateConcept(obj);
   }
 
   public async listIDs(query?: { inSource: ObjectSource }) {
@@ -61,6 +69,16 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
   public async readAll(query?: { inSource: ObjectSource, matchingText?: string }) {
     const ids = await this.listIDs(query);
     var objects = (await super.readAll({ onlyIDs: ids }));
+
+    // Async migration
+    //objects = (await Promise.all(
+    //  Object.values(objects).map(async (c) => await this.migrate(c))
+    //)).reduce((objs, obj) => ({ ...objs, [obj.termid]: obj }), {});
+
+    objects = Object.values(objects).
+    map(migrateConcept).
+    reduce((objs, obj) => ({ ...objs, [obj.termid]: obj }), {});
+
     const textQuery = (query?.matchingText || '').trim();
 
     if (textQuery !== '') {
@@ -86,8 +104,13 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
 function conceptMatchesQuery(_q: string): (c: MultiLanguageConcept<any>) => boolean {
   const q = _q.toLowerCase();
   return (c) => {
-    return (c.eng.term || '').toLowerCase().indexOf(q) >= 0 ||
     // TODO: Search across all localized entries
+
+    const matchesDesignation: boolean = c.eng.terms.
+      filter(t => t.designation.toLowerCase().indexOf(q) >= 0).
+      length > 0;
+
+    return matchesDesignation ||
       (c.eng.definition || '').toLowerCase().indexOf(q) >= 0 ||
       `${c.termid}`.indexOf(q) >= 0;
   }
