@@ -334,6 +334,14 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
     }
   }
 
+  function handleExpressionArea(idx: number, val: string) {
+    if (!props.onDesignationEdit) { return; }
+    const designation = props.entry.terms[idx];
+    if (designation.type === 'expression') {
+      props.onDesignationEdit(idx, { ...designation, geographicalArea: val.trim() || undefined });
+    }
+  }
+
   function handleNounGender(idx: number, gnd: Noun["gender"] | '') {
     if (!props.onDesignationEdit) { return; }
     props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: 'noun', gender: gnd || undefined });
@@ -431,7 +439,12 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
 
               {d.type === 'expression'
                 ? <>
-                    <InputGroup className={styles.usageArea} placeholder="Area…" maxLength={5} />
+                    <InputGroup
+                      className={styles.usageArea}
+                      placeholder="Area…"
+                      onChange={(evt: React.FormEvent<HTMLInputElement>) =>
+                        handleExpressionArea(idx, evt.currentTarget.value)}
+                      maxLength={5} />
 
                     <HTMLSelect
                         value={d.partOfSpeech}
