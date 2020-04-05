@@ -221,17 +221,17 @@ const Designation: React.FC<{ d: Designation }> = function ({ d }) {
       {d.type === 'expression' && d.partOfSpeech
         ? <i>{d.partOfSpeech}</i>
         : null}
-      {d.type === 'expression' && d.isPreposition
-        ? <i>prep.</i>
+      {d.type === 'expression' && (d.partOfSpeech === 'adjective' || d.partOfSpeech === 'adverb') && d.isParticiple
+        ? <i title="Participle">prtc.</i>
         : null}
       {d.type === 'expression' && d.isAbbreviation
-        ? <i>abbr.</i>
+        ? <i title="Acronym or abbreviation">abbr.</i>
         : null}
       {d.type === 'expression' && d.partOfSpeech === 'noun' && (d.gender || d.grammaticalNumber)
         ? <><i>{d.gender}</i> <i>{d.grammaticalNumber}</i></>
         : null}
       {d.type === 'expression' && d.geographicalArea
-        ? <i>{d.geographicalArea}</i>
+        ? <i title="Geographical area of usage">{d.geographicalArea}</i>
         : null}
     </span>
   </span>
@@ -367,27 +367,19 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
     </>
   }
 
-  function getUnit(exp: Expression): 'abbr' | 'prep' | 'none' {
-    if (exp.isAbbreviation) {
-      return 'abbr';
-    } else if (exp.isPreposition) {
-      return 'prep';
-    } else {
-      return 'none'
-    }
-  }
-
-  function handleUnit(idx: number, unit: string) {
+  function handleExpAbbrToggle(idx: number) {
     if (!props.onDesignationEdit) { return; }
     const designation = props.entry.terms[idx];
     if (designation.type === 'expression') {
-      if (unit === 'abbr') {
-        props.onDesignationEdit(idx, { ...designation, isPreposition: undefined, isAbbreviation: true });
-      } else if (unit === 'prep') {
-        props.onDesignationEdit(idx, { ...designation, isPreposition: true, isAbbreviation: undefined });
-      } else {
-        props.onDesignationEdit(idx, { ...designation, isPreposition: undefined, isAbbreviation: undefined });
-      }
+      props.onDesignationEdit(idx, { ...designation, isAbbreviation: (!designation.isAbbreviation) || undefined });
+    }
+  }
+
+  function handleExpParticipleToggle(idx: number) {
+    if (!props.onDesignationEdit) { return; }
+    const designation = props.entry.terms[idx];
+    if (designation.type === 'expression' && (designation.partOfSpeech === 'adjective' || designation.partOfSpeech === 'adverb')) {
+      props.onDesignationEdit(idx, { ...designation, isParticiple: (!designation.isParticiple) || undefined });
     }
   }
 
@@ -436,19 +428,10 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
                       value={d.type}
                       options={DESIGNATION_TYPES.map(dt => ({ value: dt }))} />
                 : <Button disabled>{d.type}</Button>}
+
               {d.type === 'expression'
                 ? <>
                     <InputGroup className={styles.usageArea} placeholder="Area…" maxLength={5} />
-
-                    <HTMLSelect
-                        value={getUnit(d)}
-                        onChange={(evt: React.FormEvent<HTMLSelectElement>) => {
-                          handleUnit(idx, evt.currentTarget.value);
-                        }}>
-                      <option value="none">unit</option>
-                      <option value="abbr" title="Abbreviation">abbr.</option>
-                      <option value="prep" title="Preposition">prep.</option>
-                    </HTMLSelect>
 
                     <HTMLSelect
                         value={d.partOfSpeech}
@@ -460,6 +443,22 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
                       <option value="verb" title="Verb">v.</option>
                       <option value="adverb" title="Adverb">adv.</option>
                     </HTMLSelect>
+
+                    {d.partOfSpeech === 'adjective' || d.partOfSpeech === 'adverb'
+                      ? <Button small
+                            title="This is a participle form"
+                            onClick={() => handleExpParticipleToggle(idx)}
+                            active={d.isParticiple}>
+                          prp.
+                        </Button>
+                      : null}
+
+                    <Button small
+                        title="This is an abbreviated form"
+                        onClick={() => handleExpAbbrToggle(idx)}
+                        active={d.isAbbreviation}>
+                      abbr.
+                    </Button>
 
                     {d.partOfSpeech === 'noun'
                       ? <>

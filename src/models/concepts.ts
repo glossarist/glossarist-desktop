@@ -196,7 +196,6 @@ type Grammar = {
 	alternateForms?: string[]
 	// NOT synonyms; variations of number/tense etc.
 	isAbbreviation?: true
-	isPreposition?: true
 } & (Noun | Verb | Adjective | Adverb | { partOfSpeech: undefined })
 // {} is for unknown part of speech.
 
@@ -213,10 +212,14 @@ type Verb = {
 	partOfSpeech: 'verb'
 }
 
-type Adjective = {
+type MaybeParticiple = {
+  isParticiple?: true
+}
+
+type Adjective = MaybeParticiple & {
 	partOfSpeech: 'adjective'
 }
 
-type Adverb = {
+type Adverb = MaybeParticiple & {
 	partOfSpeech: 'adverb'
 }
