@@ -2,8 +2,6 @@ import { MultiLanguageConcept, SupportedLanguages, WithRevisions, Concept, Desig
 import { availableLanguages } from '../app';
 
 
-/* Migrating legacy domains */
-
 export function migrateConcept(obj: MultiLanguageConcept<any>): MultiLanguageConcept<any> {
   var migrated: MultiLanguageConcept<any> = { ...obj };
 
