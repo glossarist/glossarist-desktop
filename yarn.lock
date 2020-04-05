@@ -4934,12 +4934,13 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
-less@^3.9.0:
-  version "3.10.3"
-  resolved "https://registry.yarnpkg.com/less/-/less-3.10.3.tgz#417a0975d5eeecc52cff4bcfa3c09d35781e6792"
-  integrity sha512-vz32vqfgmoxF1h3K4J+yKCtajH0PWmjkIFgbs5d78E/c/e+UQTnI+lWK+1eQRE95PXM2mC3rJlLSSP9VQHnaow==
+less@^3.11.1:
+  version "3.11.1"
+  resolved "https://registry.yarnpkg.com/less/-/less-3.11.1.tgz#c6bf08e39e02404fe6b307a3dfffafdc55bd36e2"
+  integrity sha512-tlWX341RECuTOvoDIvtFqXsKj072hm3+9ymRBe76/mD6O5ZZecnlAOVDlWAleF2+aohFrxNidXhv2773f6kY7g==
   dependencies:
     clone "^2.1.2"
+    tslib "^1.10.0"
   optionalDependencies:
     errno "^0.1.1"
     graceful-fs "^4.1.2"
@@ -6498,6 +6499,15 @@ postcss@^7.0.14, postcss@^7.0.16, postcss@^7.0.23, postcss@^7.0.5, postcss@^7.0.
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
+postcss@^7.0.27:
+  version "7.0.27"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-7.0.27.tgz#cc67cdc6b0daa375105b7c424a85567345fc54d9"
+  integrity sha512-WuQETPMcW9Uf1/22HWUWP9lgsIC+KEHg2kozMflKjbeUtw9ujvFX6QmIfozaErDkmLWS9WEnEdEe6Uo9/BNTdQ==
+  dependencies:
+    chalk "^2.4.2"
+    source-map "^0.6.1"
+    supports-color "^6.1.0"
+
 posthtml-parser@^0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/posthtml-parser/-/posthtml-parser-0.4.2.tgz#a132bbdf0cd4bc199d34f322f5c1599385d7c6c1"
@@ -7273,10 +7283,10 @@ sass-loader@^8.0.2:
     schema-utils "^2.6.1"
     semver "^6.3.0"
 
-sass@^1.23.7:
-  version "1.25.0"
-  resolved "https://registry.yarnpkg.com/sass/-/sass-1.25.0.tgz#f8bd7dfbb39d6b0305e27704a8ebe637820693f3"
-  integrity sha512-uQMjye0Y70SEDGO56n0j91tauqS9E1BmpKHtiYNQScXDHeaE9uHwNEqQNFf4Bes/3DHMNinB6u79JsG10XWNyw==
+sass@^1.26.1:
+  version "1.26.3"
+  resolved "https://registry.yarnpkg.com/sass/-/sass-1.26.3.tgz#412df54486143b76b5a65cdf7569e86f44659f46"
+  integrity sha512-5NMHI1+YFYw4sN3yfKjpLuV9B5l7MqQ6FlkTcC4FT+oHbBRUZoSjHrrt/mE0nFXJyY2kQtU9ou9HxvFVjLFuuw==
   dependencies:
     chokidar ">=2.0.0 <4.0.0"
 
@@ -8186,6 +8196,11 @@ ts-loader@^6.0.0:
     micromatch "^4.0.0"
     semver "^6.0.0"
 
+tslib@^1.10.0:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.11.1.tgz#eb15d128827fbee2841549e171f45ed338ac7e35"
+  integrity sha512-aZW88SY8kQbU7gpV19lN24LtXh/yD4ZZg6qieAJDDg+YBsJcSmLGK9QpnUjAKVG/xefmvJGd1WUmfpT/g6AJGA==
+
 tslib@^1.9.0:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
@@ -8246,21 +8261,21 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript-plugin-css-modules@^2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/typescript-plugin-css-modules/-/typescript-plugin-css-modules-2.1.2.tgz#c12b9bf1da6eab9ad7a72422e4bcc890da9acf1d"
-  integrity sha512-SMZjhSii0C86eviPv4Rv/p+0/M52LUlZLeA0lZcaxyljok/i/YG0Q8u9+Cc9r/rFd36IX+v5JQiJx3z4K0Dtyg==
+typescript-plugin-css-modules@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/typescript-plugin-css-modules/-/typescript-plugin-css-modules-2.2.0.tgz#c145e4187a5cf0c029c90e4c63bef165226dca4c"
+  integrity sha512-bJoX+jyJkKsB3IJa7Ot7y7dMO8p7P8ZirT9sfyJ3wivzdYVdXpaIoc/ZW4Kts870++LVIpWyLOx3bWSGjVV/9w==
   dependencies:
     dotenv "^8.2.0"
     icss-utils "^4.1.1"
-    less "^3.9.0"
+    less "^3.11.1"
     lodash.camelcase "^4.3.0"
-    postcss "^7.0.23"
+    postcss "^7.0.27"
     postcss-filter-plugins "^3.0.1"
     postcss-icss-selectors "^2.0.3"
     postcss-load-config "^2.1.0"
     reserved-words "^0.1.2"
-    sass "^1.23.7"
+    sass "^1.26.1"
 
 typescript@^3.7.2:
   version "3.7.3"
