@@ -1,0 +1,221 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+
+:local .entryForm {
+  $padding: $pt-grid-size + $pt-border-radius;
+
+  display: flex;
+  flex-flow: column nowrap;
+  padding: $padding;
+
+  .designation {
+    box-shadow: $pt-elevation-shadow-1;
+    margin-top: -$pt-grid-size / 2;
+
+    :global .bp3-input {
+      font-weight: bold;
+    }
+  }
+
+  .designationProps {
+    z-index: 2;
+    position: relative;
+    padding: 0 $pt-grid-size;
+    margin-top: -$pt-border-radius / 2;
+
+    .usageArea {
+      width: 6em;
+    }
+  }
+
+  .usageInfo {
+    display: flex;
+    flex-flow: row nowrap;
+
+    > :first-child {
+      margin-right: $pt-grid-size;
+    }
+
+    > * {
+      flex: 1;
+    }
+  }
+
+  :global .bp3-form-group {
+    .bp3-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .bp3-form-content {
+      margin-left: -$padding;
+      margin-right: -$padding;
+
+      > .bp3-input, > .bp3-input-group .bp3-input {
+        border-radius: 0;
+        box-shadow: none;
+        padding-left: $padding;
+      }
+
+      .bp3-form-helper-text {
+        margin-left: $padding;
+        margin-right: $padding;
+      }
+    }
+  }
+}
+
+
+:local .conceptEntryForm {
+  flex: 1;
+
+  display: flex;
+  flex-flow: column nowrap;
+  overflow-y: auto;
+
+  .entryFormToolbar {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    padding: $pt-grid-size;
+    background: $light-gray2;
+
+    > * { flex: 1 }
+
+    > :last-child {
+      // The commit / revert button group
+      > :last-child {
+        // The save button
+        :global .bp3-button {
+          justify-content: flex-start;
+          flex: 1;
+
+          .bp3-button-text {
+            flex: 1;
+          }
+        }
+      }
+    }
+
+    :global .bp3-button-group {
+      overflow: hidden;
+    }
+  }
+
+  .entryForm {
+    flex: 1;
+  }
+}
+
+
+:local .entryDetails {
+  padding: 2rem;
+  background: white;
+  position: relative;
+
+  .designation {
+    font-weight: normal;
+    font-family: Georgia, serif;
+    margin-bottom: 1rem;
+  }
+  .legacyDomain {
+    font-weight: normal;
+    font-family: sans-serif;
+    font-size: $pt-font-size-large;
+    position: absolute;
+    top: .75rem;
+  }
+  .usageInfo {
+    color: $pt-text-color-muted;
+    margin-right: 1em;
+  }
+  .primaryDesignation {
+    .designationMarkers {
+      > * {
+        margin-left: .75rem;
+      }
+    }
+  }
+  .synonyms {
+    margin-bottom: 1rem;
+
+    &:before {
+      content: "Syn.";
+      font-style: italic;
+    }
+
+    > * {
+      font-size: $pt-font-size-large;
+      margin-left: .75em;
+      &:not(:last-child):after {
+        content: ", ";
+      }
+    }
+  }
+  .designationMarkers {
+    color: $pt-text-color-muted;
+    font-family: sans-serif;
+    font-size: $pt-font-size;
+
+    > * {
+      margin-left: .5em;
+      &:not(:last-child):after {
+        content: ",";
+      }
+    }
+  }
+  .example, .note {
+    .label {
+      margin-right: 1rem;
+    }
+  }
+  .example {
+    font-style: italic;
+  }
+  .definition {
+    font-size: 120%;
+    margin-left: 1em;
+    margin-bottom: 2rem;
+  }
+}
+
+
+:local .lazyConceptList {
+  //.conceptID {
+  //  margin-right: .5em;
+  //}
+
+  .lazyConceptListItem {
+    border-radius: 0 !important;
+    overflow: hidden;
+
+    :global .bp3-button-text {
+      display: flex;
+      flex-flow: row nowrap;
+
+      overflow: hidden;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .conceptItem {
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .itemMarker {
+      flex-shrink: 0;
+      width: 2rem;
+      overflow: hidden;
+      display: inline-block;
+      margin-left: .5rem;
+      margin-right: .5rem;
+    }
+
+    .itemMarkerRight {
+      flex-shrink: 0;
+      margin-left: 1rem;
+      margin-right: 1rem;
+    }
+  }
+}

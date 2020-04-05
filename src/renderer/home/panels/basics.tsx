@@ -7,6 +7,7 @@ import { ConceptContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 import styles from './basics.scss';
 import { panelFieldProps } from './common';
+import { getRepresentingDesignation } from '../concepts/designation';
 
 
 const Panel: React.FC<{}> = function () {
@@ -34,7 +35,7 @@ const Panel: React.FC<{}> = function () {
                 className={styles.designation}>
               <InputGroup
                 large={true}
-                value={localized.terms[0].designation}
+                value={getRepresentingDesignation(localized)}
                 className={`${rtlClass} ${designationValidityClass} ${loadingClass}`}
                 {...field} />
             </FormGroup>
