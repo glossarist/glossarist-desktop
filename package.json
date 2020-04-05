@@ -17,6 +17,9 @@
     "cdist": "yarn compile && electron-builder -mlw",
     "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
+  "resolutions": {
+    "js-yaml": "3.13.1"
+  },
   "electronWebpack": {
     "staticSourceDirectory": "src/static",
     "main": {
