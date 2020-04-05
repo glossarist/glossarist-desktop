@@ -18,7 +18,8 @@
     "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "resolutions": {
-    "js-yaml": "3.13.1"
+    "js-yaml": "3.13.1",
+    "kind-of": "6.0.3"
   },
   "electronWebpack": {
     "staticSourceDirectory": "src/static",
