@@ -11,7 +11,6 @@ import {
   IButtonProps,
   ControlGroup,
   HTMLSelect,
-  Checkbox,
 } from '@blueprintjs/core';
 
 import { FixedSizeList as List } from 'react-window';
@@ -30,7 +29,6 @@ import {
   NORMATIVE_STATUS_CHOICES,
   NormativeStatus,
   Expression,
-  TypedDesignation,
   Noun,
 } from '../../models/concepts';
 
@@ -796,21 +794,3 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     </div>
   );
 };
-
-
-function designationTypeLabelShort(dt: DesignationType): string {
-  if (dt === 'expression') {
-    return "expr.";
-  } else if (dt === 'symbol') {
-    return "symb.";
-  } else if (dt === 'prefix') {
-    return "prfx.";
-  } else {
-    return "unk."
-  }
-}
-
-
-function isExpression(d: TypedDesignation): d is Expression {
-  return d.type === 'expression';
-}
