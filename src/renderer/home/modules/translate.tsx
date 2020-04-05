@@ -106,7 +106,7 @@ const MainView: React.FC<{}> = function () {
       id: active?.termid,
       language_code: lang.selected,
       entry_status: 'proposed',
-      term: '',
+      terms: [{ designation: '', type: 'expression', partOfSpeech: undefined }],
       definition: '',
       notes: [],
       examples: [],

@@ -91,6 +91,7 @@ WithRevisions<Concept<number, any>> {
     designation: legacy.term,
     type: 'expression',
     normativeStatus: legacy.classification,
+    partOfSpeech: undefined,
   }
 
   const synonyms = (legacy.synonyms || '').split(',').map(s => s.trim());
@@ -102,6 +103,7 @@ WithRevisions<Concept<number, any>> {
   const terms = [designation, ...synonyms.filter(s => s !== '').map((s): Designation => ({
     designation: s,
     type: 'expression',
+    partOfSpeech: undefined,
   }))];
 
   const migrated: WithRevisions<Concept<number, any>> = { ...legacy, terms };

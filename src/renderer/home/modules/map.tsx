@@ -47,8 +47,8 @@ const ConceptNeighborhood: React.FC<{}> = function () {
   function label(c: MultiLanguageConcept<any> | undefined) {
     if (c !== undefined) {
       return (
-        c[lang.selected as keyof typeof availableLanguages]?.term ||
-        c[lang.default as keyof typeof availableLanguages]?.term
+        (c[lang.selected as keyof typeof availableLanguages] ||
+        c[lang.default as keyof typeof availableLanguages])?.terms[0]?.designation
       );
     } else {
       // Concept with this ID does not exist

@@ -325,11 +325,12 @@ const EntryForm: React.FC<EntryFormProps> = function (props) {
 
   function handleExpressionPartOfSpeech(idx: number, pos: Expression["partOfSpeech"]) {
     if (!props.onDesignationEdit) { return; }
+    const designation = props.entry.terms[idx];
     if (pos === 'noun') {
-      props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: pos });
+      props.onDesignationEdit(idx, { ...designation, partOfSpeech: pos });
     } else {
       // Reset properties only applicable to nouns
-      props.onDesignationEdit(idx, { ...props.entry.terms[idx], partOfSpeech: pos, gender: undefined, grammaticalNumber: undefined });
+      props.onDesignationEdit(idx, { ...designation, partOfSpeech: pos, gender: undefined, grammaticalNumber: undefined } as Designation);
     }
   }
 
