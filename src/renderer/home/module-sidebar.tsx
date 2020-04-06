@@ -13,6 +13,7 @@ const SPanel: React.FC<{ cfg: PanelConfig }> = function ({ cfg }) {
         contentsClassName={styles.panelContents}
 
         isCollapsible={cfg.collapsed !== 'never' ? true : undefined}
+        isCollapsedByDefault={cfg.collapsed === 'by-default' ? true : undefined}
         TitleComponent={cfg.TitleComponent}
         TitleComponentSecondary={cfg.TitleComponentSecondary}
         title={cfg.title}>

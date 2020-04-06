@@ -14,10 +14,11 @@ const Panel: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const concept = useContext(ConceptContext);
   const localized = concept.activeLocalized;
+  const revision = concept.revision;
   const field = panelFieldProps(concept);
   const rtlClass = lang.selected === 'ara' ? Classes.RTL : '';
 
-  const isValid = localized ? ['retired', 'superseded'].indexOf(localized.entry_status) < 0 : undefined;
+  const isValid = revision ? ['retired', 'superseded'].indexOf(revision.entry_status) < 0 : undefined;
   const designationValidityClass = isValid === false ? sharedStyles.invalidDesignation : '';
   const loadingClass = concept.isLoading ? Classes.SKELETON : undefined;
   const preferredDesignationMarker = localized?.terms[0].normativeStatus === 'preferred'
@@ -26,7 +27,7 @@ const Panel: React.FC<{}> = function () {
 
   return (
     <div className={`${styles.panelBase} ${rtlClass}`}>
-      {localized !== null && localized !== undefined
+      {revision !== null
         ? <>
             <FormGroup
                 key="designation"
@@ -35,7 +36,7 @@ const Panel: React.FC<{}> = function () {
                 className={styles.designation}>
               <InputGroup
                 large={true}
-                value={getRepresentingDesignation(localized)}
+                value={getRepresentingDesignation(revision)}
                 className={`${rtlClass} ${designationValidityClass} ${loadingClass}`}
                 {...field} />
             </FormGroup>
@@ -46,11 +47,11 @@ const Panel: React.FC<{}> = function () {
               <AutoSizedTextArea
                 growVertically={true}
                 className={`${styles.definition} ${rtlClass} ${loadingClass}`}
-                value={localized.definition || ''}
+                value={revision.definition || ''}
                 {...field} />
             </FormGroup>
 
-            {[...localized.notes.entries()].map(([idx, note]) =>
+            {[...revision.notes.entries()].map(([idx, note]) =>
               <FormGroup
                   key={`note-${idx}`}
                   inline
@@ -60,7 +61,7 @@ const Panel: React.FC<{}> = function () {
               </FormGroup>
             )}
 
-            {[...localized.examples.entries()].map(([idx, example]) =>
+            {[...revision.examples.entries()].map(([idx, example]) =>
               <FormGroup
                   key={`note-${idx}`}
                   inline

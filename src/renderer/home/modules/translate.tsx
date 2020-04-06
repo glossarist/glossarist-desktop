@@ -11,7 +11,7 @@ import {
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
-import { AuthoritativeSource, Concept } from 'models/concepts';
+import { AuthoritativeSource, Concept, WithRevisions } from 'models/concepts';
 import { availableLanguages } from 'app';
 import * as panels from '../panels';
 import { ConceptContext, ModuleContext } from '../contexts';
@@ -30,7 +30,9 @@ const MainView: React.FC<{}> = function () {
   const mod = useContext(ModuleContext);
 
   const active = ctx.active;
-  const entry = active ? active[lang.selected as keyof typeof availableLanguages] : undefined;
+  const entry = active
+    ? active[lang.selected as keyof typeof availableLanguages]
+    : undefined;
 
   const authVersion = ctx.active ? ctx.active[lang.default as keyof typeof availableLanguages] : null;
   const authIsValid: boolean | undefined = authVersion
@@ -98,20 +100,30 @@ const MainView: React.FC<{}> = function () {
     });
   }
 
-  let entryWithSource: Concept<any, any> | undefined
+  let entryWithSource: WithRevisions<Concept<any, any>> | undefined
   if (entry) {
     entryWithSource = entry;
   } else if (proposedAuthSource) {
-    entryWithSource = {
-      id: active?.termid,
-      language_code: lang.selected,
-      entry_status: 'proposed',
-      terms: [{ designation: '', type: 'expression', partOfSpeech: undefined }],
-      definition: '',
-      notes: [],
-      examples: [],
-      authoritative_source: proposedAuthSource,
-    };
+    return <Callout intent="danger" title="Adding new entries is not supported yet">
+      <p>
+        Sorry about that! This functionality is being updated
+        to work with the new revision and review model.
+      </p>
+    </Callout>
+    // entryWithSource = {
+    //   id: active?.termid,
+    //   language_code: lang.selected,
+    //   entry_status: 'proposed',
+    //   terms: [{ designation: '', type: 'expression', partOfSpeech: undefined }],
+    //   definition: '',
+    //   notes: [],
+    //   examples: [],
+    //   authoritative_source: proposedAuthSource,
+    //   _revisions: {
+    //     current: undefined,
+    //     tree: [],
+    //   },
+    // };
   } else {
     entryWithSource = undefined;
   };
@@ -161,11 +173,12 @@ const MainView: React.FC<{}> = function () {
     <div className={sharedStyles.backdrop}>
 
       <div>
-        {entryWithSource
+        {entryWithSource && ctx.revisionID
           ? <EntryEdit
               key={`${active.termid}-${lang.selected}`}
               concept={active}
               entry={entryWithSource}
+              parentRevisionID={ctx.revisionID}
               isLoading={ctx.isLoading} />
           : authSourceForm}
       </div>
@@ -199,7 +212,6 @@ export default {
 
   leftSidebar: [
     panels.system,
-    panels.languages,
     panels.sourceRollTranslated,
     panels.databases,
   ],
@@ -208,6 +220,7 @@ export default {
   mainToolbar: [CompareAuthoritative],
 
   rightSidebar: [
+    panels.languages,
     panels.status,
     panels.lineage,
   ],

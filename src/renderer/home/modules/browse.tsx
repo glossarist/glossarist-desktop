@@ -116,6 +116,7 @@ export default {
   rightSidebar: [
     panels.status,
     panels.basics,
+    panels.reviews,
     panels.relationships,
     panels.lineage,
   ],

@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import React, { useState, useEffect } from 'react';
 
 import {
@@ -14,20 +15,38 @@ import {
   MultiLanguageConcept,
   Designation,
   NORMATIVE_STATUS_CHOICES,
+  WithRevisions,
+  Revision,
 } from 'models/concepts';
 
 import { EntryForm } from './entry-form';
 import styles from './styles.scss';
+import sharedStyles from '../styles.scss';
 
 
 interface EntryEditProps {
   concept: MultiLanguageConcept<any>
-  entry: Concept<any, any>
+  entry: WithRevisions<Concept<any, any>>
   isLoading: boolean
+  parentRevisionID: string
+  onCreateRevision?: (newRevisionID: string) => void
   className?: string
 }
 export const EntryEdit: React.FC<EntryEditProps> = function (props) {
-  const [entry, updateEntry] = useState(props.entry);
+  const _revision =
+    props.entry._revisions.tree[props.parentRevisionID]?.object
+    // NOTE: this falls back to “naked” entry data,
+    // which may happen when entry was updated but parentRevisionID
+    // still points to a revision from another entry (e.g., during language switch).
+    // Proper parentRevisionID would load quickly after that with an effect
+    // on one of the parent components, so this would be a fleeting state:
+    || props.entry;
+
+  if (!_revision) {
+    throw new Error("Failed to load revision");
+  }
+
+  const [entry, updateEntry] = useState<Concept<any, any>>(_revision);
   const [sanitized, updateSanitized] = useState<Concept<any, any> | undefined>(undefined);
   const [commitInProgress, setCommitInProgress] = useState(false);
 
@@ -35,18 +54,41 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     updateSanitized(sanitizeEntry(entry));
   }, [JSON.stringify(entry)]);
 
+  useEffect(() => {
+    updateEntry(_revision);
+  }, [props.parentRevisionID]);
+
   const commitChanges = async () => {
     if (sanitized !== undefined) {
       setCommitInProgress(true);
+
+      const newRevisionID = crypto.randomBytes(3).toString('hex');
+      const newRevision: Revision<Concept<any, any>> = {
+        object: sanitized,
+        timeCreated: new Date(),
+        parents: [props.parentRevisionID],
+      };
+      const newRevisionTree = {
+        ...props.entry._revisions.tree,
+        [newRevisionID]: newRevision,
+      };
+      const newEntry: WithRevisions<Concept<any, any>> = {
+        ...entry,
+        _revisions: {
+          current: newRevisionID,
+          tree: newRevisionTree,
+        },
+      };
 
       try {
         await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
         ('model-concepts-update-one', {
           objectID: props.concept.termid,
-          object: { ...props.concept, [entry.language_code]: sanitized },
+          object: { ...props.concept, [entry.language_code]: newEntry },
           commit: true,
         });
         setCommitInProgress(false);
+        setImmediate(() => props.onCreateRevision ? props.onCreateRevision(newRevisionID) : void 0);
       } catch (e) {
         setCommitInProgress(false);
       }
@@ -145,8 +187,8 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     />
   );
 
-  const hasUncommittedChanges = sanitized && entry && props.entry &&
-    JSON.stringify([props.entry.usageInfo, props.entry.terms, props.entry.definition, props.entry.notes, props.entry.examples]) !==
+  const hasUncommittedChanges = sanitized && entry && _revision &&
+    JSON.stringify([_revision.usageInfo, _revision.terms, _revision.definition, _revision.notes, _revision.examples]) !==
     JSON.stringify([sanitized.usageInfo, sanitized?.terms, sanitized?.definition, sanitized?.notes, sanitized?.examples]);
 
   const isValid = ['retired', 'superseded'].indexOf(props.entry.entry_status) < 0;
@@ -165,7 +207,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   return (
     <div className={`${styles.conceptEntryForm} ${props.className || ''}`}>
 
-      <div className={styles.entryFormToolbar}>
+      <div className={sharedStyles.moduleViewToolbarInner}>
         <ButtonGroup>
           <Button icon="add" onClick={handleDesignationAddition} title="Add another designation/synonym">Designation</Button>
           <Button icon="add" onClick={handleItemAddition('examples')} title="Add an EXAMPLE">EX.</Button>

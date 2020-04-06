@@ -73,35 +73,6 @@
   flex-flow: column nowrap;
   overflow-y: auto;
 
-  .entryFormToolbar {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    padding: $pt-grid-size;
-    background: $light-gray2;
-
-    > * { flex: 1 }
-
-    > :last-child {
-      // The commit / revert button group
-      > :last-child {
-        // The save button
-        :global .bp3-button {
-          justify-content: flex-start;
-          flex: 1;
-
-          .bp3-button-text {
-            flex: 1;
-          }
-        }
-      }
-    }
-
-    :global .bp3-button-group {
-      overflow: hidden;
-    }
-  }
-
   .entryForm {
     flex: 1;
   }

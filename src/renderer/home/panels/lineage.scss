@@ -1,0 +1,24 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+:local .revisionNode {
+  :global .bp3-tree-node-content {
+    overflow: hidden;
+  }
+
+  :global .bp3-tree-node-label {
+    flex-shrink: 0;
+  }
+
+  :global .bp3-icon {
+    margin-right: $pt-grid-size;
+  }
+
+  :global .bp3-tree-node-secondary-label {
+    overflow: hidden;
+  }
+
+  .revisionNodeTimestamp {
+    font-size: $pt-font-size-small;
+    opacity: .5;
+  }
+}

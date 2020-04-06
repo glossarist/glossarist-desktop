@@ -1,68 +1,125 @@
-import React, { useContext } from 'react';
-import { ITreeNode, Tag, Tree } from '@blueprintjs/core';
+import moment from 'moment';
+import React, { useContext, useState } from 'react';
+import { Text, ITreeNode, Tree, Icon } from '@blueprintjs/core';
+import { callIPC } from 'coulomb/ipc/renderer';
+import { app } from 'renderer';
+import { Revision, Concept } from 'models/concepts';
+import { Review } from 'models/reviews';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
+import { ReviewIcon } from '../reviews';
+import styles from './lineage.scss';
+
+
+type RevisionNodeData = {
+  id: string
+  parents: string[]
+}
 
 
 const Panel: React.FC<{}> = function () {
-  // TODO: Rewrite as list of revisions, overlaid on top of a tree diagram
-  // tracing revisions back to their parents and ultimately original revisions
-  // (which may or may not be linked to external authoritative sources).
+  const ctx = useContext(ConceptContext)
+  const entry = ctx.activeLocalized;
 
-  const concept = useContext(ConceptContext).activeLocalized;
-  const authURL = concept?.authoritative_source.link;
-
-  if (!concept) {
+  if (!entry) {
     return null;
   }
 
-  function openAuthSource() {
-    if (authURL) {
-      require('electron').shell.openExternal(authURL.toString());
+  var revisionNodes: ITreeNode[] = [];
+  var rev: string | null = entry._revisions.current;
+
+  const reviewObjectID = `${entry.id}_${entry.language_code}`;
+
+  while (rev !== null) {
+    const revData: Revision<Concept<any, any>> | undefined =
+      entry._revisions.tree[rev];
+
+    if (revData === undefined) {
+      console.error("Missing revData", entry._revisions);
+      break;
     }
+
+    revisionNodes.push({
+      id: rev,
+      label: rev,
+      className: styles.revisionNode,
+      isSelected: ctx.revisionID === rev,
+      icon:
+        <ReviewStatus
+          objectType="concepts"
+          objectID={reviewObjectID}
+          revisionID={rev} />,
+      secondaryLabel:
+        <Text ellipsize className={styles.revisionNodeTimestamp}>
+          {moment(revData.timeCreated).toLocaleString()}
+        </Text>,
+      nodeData: {
+        id: rev,
+        parents: revData.parents,
+      },
+    });
+
+    rev = revData.parents[0] || null;
   }
 
   function handleNodeClick(node: ITreeNode) {
     // TODO: Replace with revision selection logic
-    const nodeData = node?.nodeData as { isAuthSource?: boolean } | undefined;
-    const isAuthSource = nodeData?.isAuthSource;
-    if (isAuthSource) {
-      openAuthSource();
+    const nodeData = node?.nodeData as RevisionNodeData | undefined;
+    const revID = nodeData?.id;
+    if (revID) {
+      ctx.selectRevision(revID);
     }
   }
 
-  var treeState: ITreeNode[] = [];
-
-  if (concept.lineage_source) {
-    treeState.push({
-      id: 'preceding-use',
-      label: concept.lineage_source,
-      secondaryLabel: <Tag
-          minimal
-          title={`Lineage source similarity: ${concept.lineage_source_similarity || 'unknown'}`}
-          rightIcon={<>=&nbsp;<strong>{concept.lineage_source_similarity || '?'}</strong></>}>
-        Lineage
-      </Tag>,
-    });
-  }
-
-  treeState.push({
-    id: 'auth-source',
-    label: concept.authoritative_source.ref,
-    disabled: authURL === undefined,
-    secondaryLabel: <>
-      <Tag intent={authURL ? "primary" : undefined} title="Authoritative source">Auth. source</Tag>
-    </>,
-    nodeData: { isAuthSource: true },
-  });
-
   return (
-    <Tree contents={treeState} onNodeClick={handleNodeClick} />
+    <Tree contents={revisionNodes} onNodeClick={handleNodeClick} />
   );
 };
 
 
 export default {
   Contents: Panel,
-  title: "Revisions",
+  title: "Revision",
 } as PanelConfig;
+
+
+const ReviewStatus: React.FC<{ objectType: string, objectID: string, revisionID: string }> =
+function ({ objectType, objectID, revisionID }) {
+  const reviewID = `${objectType}-${objectID}-${revisionID}`
+  const review = app.useOne<Review, string>('reviews', reviewID).object;
+  const [requestInProgress, setRequestInProgress] = useState(false);
+
+  const requestReview = async () => {
+    if (requestInProgress) { return; }
+    setRequestInProgress(true);
+
+    try {
+      await callIPC<{ commit: boolean, objectID: string, object: Review }, { success: true }>
+      ('model-reviews-create-one', {
+        objectID: reviewID,
+        object: {
+          id: reviewID,
+          timeRequested: new Date(),
+          objectType,
+          objectID,
+          revisionID,
+        },
+        commit: true,
+      });
+      setRequestInProgress(false);
+    } catch (e) {
+      setRequestInProgress(false);
+    }
+  };
+
+  if (review) {
+    return <ReviewIcon review={review} />;
+  } else {
+    return <Icon
+      htmlTitle="Review had not been requested yet"
+      color={requestInProgress ? "#cccccc" : undefined}
+      onClick={requestReview}
+      icon="confirm"
+    />;
+  }
+};

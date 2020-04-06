@@ -35,6 +35,9 @@ export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
       {d.type === 'expression' && d.isAbbreviation
         ? <span title="Acronym or abbreviation">abbr.</span>
         : null}
+      {d.normativeStatus !== 'admitted'
+        ? <strong title="Normative status">{d.normativeStatus}</strong>
+        : null}
     </span>
   </span>
 };

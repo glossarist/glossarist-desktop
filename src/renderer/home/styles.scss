@@ -168,6 +168,36 @@ html, body, #app {
 
   > :first-child {
     flex: 1;
+
+    .moduleViewToolbarInner {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      justify-content: flex-end;
+      padding: $pt-grid-size;
+      background: $light-gray2;
+
+      > * { flex: 1 }
+
+      > :last-child {
+        // The commit / revert button group
+        > :last-child {
+          // The save button
+          :global .bp3-button {
+            justify-content: flex-start;
+            flex: 1;
+
+            .bp3-button-text {
+              flex: 1;
+            }
+          }
+        }
+      }
+
+      :global .bp3-button-group {
+        overflow: hidden;
+      }
+    }
   }
 
   > .moduleToolbar {
@@ -253,5 +283,11 @@ html, body, #app {
 :local .languagesPanel {
   .panelContents {
     height: 140px;
+  }
+}
+
+:local .reviewNode {
+  :global .bp3-icon {
+    margin-right: $pt-grid-size;
   }
 }

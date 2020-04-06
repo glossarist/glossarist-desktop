@@ -32,6 +32,11 @@ export const conf: AppConfig = {
       verboseName: 'concept',
       verboseNamePlural: 'concepts',
     },
+    reviews: {
+      shortName: 'review',
+      verboseName: 'concept review',
+      verboseNamePlural: 'concept reviews',
+    },
     collections: {
       shortName: 'collection',
       verboseName: 'collection',

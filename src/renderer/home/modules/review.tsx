@@ -1,7 +1,220 @@
-import React from 'react';
-import { NonIdealState } from '@blueprintjs/core';
+import moment from 'moment';
+import React, { useContext, useState, useEffect } from 'react';
+import VisualDiff from 'react-visual-diff';
+
+import { InputGroup, NonIdealState, ButtonGroup, Button, Icon, FormGroup, Callout } from '@blueprintjs/core';
+import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
+import { Concept, Revision } from 'models/concepts';
+import { app } from 'renderer';
+import { Review } from 'models/reviews';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
+import { ReviewContext, ConceptContext, SourceContext } from '../contexts';
+import { EntryDetails } from '../concepts';
+import sharedStyles from '../styles.scss';
+import styles from './review.scss';
+import { PanelConfig } from '../panel-config';
+import { ReviewList } from '../reviews';
+
+
+type ConceptRevision = Revision<Concept<any, any>>;
+
+const MainView: React.FC<{}> = function () {
+  const source = useContext(SourceContext);
+  const ctx = useContext(ConceptContext);
+  const lang = useContext(LangConfigContext);
+  const reviewCtx = useContext(ReviewContext);
+  const review = app.useOne<Review, string>('reviews', reviewCtx.reviewID).object;
+
+  //const active = ctx.activeLocalized;
+
+  const availableReviews = app.useMany<Review, { query: { completed: boolean, objectType: 'concepts', objectIDs: string[] }}>
+  ('reviews', { query: {
+    objectType: 'concepts',
+    completed: false,
+    objectIDs: ctx.ref
+      ? Object.keys(lang.available).map(langID => `${ctx.ref}_${langID}`)
+      : [] }}).objects;
+
+  const revisionToCompare = ctx.revision;
+
+  function selectComparableRevision() {
+    if (ctx.activeLocalized && ctx.revisionID) {
+      const rev = ctx.activeLocalized._revisions.tree[ctx.revisionID];
+      if (rev && rev.parents.length > 0) {
+        ctx.selectRevision(rev.parents[0]);
+      }
+    }
+  }
+  const availableReviewIDs = Object.keys(availableReviews);
+  useEffect(() => {
+    if (availableReviewIDs.length < 1) {
+      reviewCtx.selectReviewID(null);
+    } else {
+      reviewCtx.selectReviewID(availableReviewIDs[0]);
+      selectComparableRevision();
+    }
+  }, [JSON.stringify(availableReviews), ctx.ref]);
+
+  useEffect(() => {
+    if (reviewCtx.reviewID !== null) {
+      lang.select(reviewCtx.reviewID.split('-')[1].split('_')[1]);
+      selectComparableRevision();
+    }
+  }, [reviewCtx.reviewID]);
+
+  const [reviewed, setReviewed] = useState(false);
+
+  const reviewMaterial = useIPCValue
+  <{ reviewID: string | null }, { toReview?: ConceptRevision, revisionID?: string }>
+  ('model-reviews-get-review-material', {}, { reviewID: reviewCtx.reviewID }).value;
+
+  async function applyDecision(approved: boolean) {
+    const reviewID = reviewCtx.reviewID;
+    if (reviewed || !reviewID || !review || reviewMaterial.toReview === undefined) {
+      return;
+    }
+
+    try {
+      await callIPC<{ commit: boolean, objectID: string, object: Review }, { success: true }>
+      ('model-reviews-update-one', {
+        objectID: reviewID,
+        object: { ...review, timeCompleted: new Date(), approved },
+        commit: true,
+      });
+      setReviewed(true);
+    } catch (e) {
+      console.error("Error applying review decision");
+    }
+  }
+  async function handleAccept() {
+    await applyDecision(true);
+  }
+  async function handleReject() {
+    await applyDecision(false);
+  }
+
+  if (review === null) {
+    return <NonIdealState
+      title="No review is selected"
+      description={source.active.type !== 'catalog-preset' || source.active.presetName !== 'pendingReview' ? <>
+        <Callout intent="primary">
+          <a onClick={() => source.select({ type: 'catalog-preset', presetName: 'pendingReview' })}>
+            Browse “Pending Review”
+          </a>
+          <br />
+          to only see items requiring review.
+        </Callout>
+      </> : undefined}
+    />;
+  } else if (reviewMaterial.toReview === undefined) {
+    return <NonIdealState
+      title="No review material to show"
+      description="If you’re still reading, it looks like review material failed to load due to an error. Apologies." />;
+  }
+
+  let material: JSX.Element;
+
+  const toReview = <EntryDetails entry={reviewMaterial.toReview.object} />;
+
+  if (revisionToCompare) {
+    const toCompare = <EntryDetails entry={revisionToCompare} />;
+    material = <VisualDiff left={toCompare} right={toReview} />
+  } else {
+    material = toReview;
+  }
+
+  return (
+    <div className={sharedStyles.backdrop}>
+      <div className={styles.reviewForm}>
+        <div className={sharedStyles.moduleViewToolbarInner}>
+          <ButtonGroup fill>
+            <Button
+              disabled={reviewed || review.approved !== undefined}
+              icon="tick-circle" onClick={handleReject}>Reject</Button>
+            <Button
+              disabled={reviewed || review.approved !== undefined}
+              icon="cross" onClick={handleAccept}>Accept</Button>
+          </ButtonGroup>
+        </div>
+        {material}
+      </div>
+    </div>
+  );
+};
+
+
+const completedReviews: PanelConfig = {
+  title: "Review history",
+  Contents: () => {
+    const ctx = useContext(ConceptContext);
+    const lang = useContext(LangConfigContext);
+  const reviewCtx = useContext(ReviewContext);
+    const reviews = app.useMany<Review, { query: { completed: boolean, objectType: 'concepts', objectIDs: string[] }}>
+    ('reviews', { query: {
+      objectType: 'concepts',
+      completed: true,
+      objectIDs: ctx.ref
+        ? Object.keys(lang.available).map(langID => `${ctx.ref}_${langID}`)
+        : [] }});
+
+    return (
+      <ReviewList
+        reviews={reviews.objects}
+        selected={reviewCtx.reviewID}
+        onSelect={(id) => reviewCtx.selectReviewID(id)} />
+    );
+  },
+}
+
+
+const reviewDetails: PanelConfig = {
+  title: "Review details",
+  Contents: () => {
+    const ctx = useContext(ConceptContext);
+    const reviewCtx = useContext(ReviewContext);
+    const review = app.useOne<Review, string>('reviews', reviewCtx.reviewID).object;
+    const reviewMaterial = useIPCValue
+    <{ reviewID: string | null }, { toReview?: ConceptRevision, revisionID?: string }>
+    ('model-reviews-get-review-material', {}, { reviewID: reviewCtx.reviewID }).value;
+    const lang = useContext(LangConfigContext);
+
+    if (!reviewMaterial.revisionID || !reviewMaterial.toReview || !review) {
+      return null;
+    }
+
+    return (
+      <>
+        <FormGroup label="Review of">
+          <InputGroup readOnly defaultValue={`#${ctx.ref} rev. ${reviewMaterial.revisionID}`} />
+        </FormGroup>
+
+        <FormGroup label="Requested">
+          <InputGroup readOnly defaultValue={moment(review.timeRequested).toLocaleString()} />
+        </FormGroup>
+
+        {ctx.revisionID !== reviewMaterial.revisionID
+          ? <FormGroup label="Comparing with">
+              <InputGroup readOnly defaultValue={`rev. ${ctx.revisionID} (${lang.available[lang.selected]})`} />
+            </FormGroup>
+          : null}
+
+        {review.timeCompleted
+          ? <FormGroup inline label="Completed">
+              <InputGroup readOnly defaultValue={moment(review.timeCompleted).toLocaleString()} />
+            </FormGroup>
+          : null}
+
+        {review.approved !== undefined
+          ? <FormGroup inline label="Decision">
+              <InputGroup readOnly defaultValue={review.approved ? 'APPROVE' : 'REJECT'} />
+            </FormGroup>
+          : null}
+      </>
+    );
+  },
+};
 
 
 export default {
@@ -9,18 +222,22 @@ export default {
   title: "Review",
 
   leftSidebar: [
-    panels.languages,
-    panels.lineage,
-    panels.sourceRollTranslated,
+    panels.system,
+    panels.sourceRollAuthoritative,
     panels.databases,
   ],
 
-  MainView: () => <NonIdealState title="Concept review is coming soon." />,
+  MainView: MainView,
   mainToolbar: [],
 
   rightSidebar: [
-    panels.system,
-    panels.basics,
-    panels.relationships,
+    panels.reviews,
+    reviewDetails,
+    completedReviews,
+    { className: styles.reviewTargetsPanelSeparator,
+      Contents: () => <span><Icon icon="chevron-down" />{" "}Comparison target</span>,
+      collapsed: 'never' },
+    { ...panels.languages, collapsed: 'by-default' },
+    panels.lineage,
   ],
 } as ModuleConfig;

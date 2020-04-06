@@ -3,7 +3,7 @@ import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { ObjectSource, availableLanguages } from 'app';
 import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
 import { app } from 'renderer';
-import { ConceptContext, SourceContext, TextSearchContext } from './contexts';
+import { ConceptContext, SourceContext, TextSearchContext, ReviewContext } from './contexts';
 import { ModuleConfig } from './module-config';
 import { Sidebar } from './module-sidebar';
 import styles from './styles.scss';
@@ -14,8 +14,10 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   const lang = useContext(LangConfigContext);
 
   const [selectedConceptRef, selectConceptRef] = useState(null as null | ConceptRef);
+  const [selectedRevisionID, selectRevisionID] = useState(null as null | string);
   const [activeSource, selectSource] = useState({ type: 'catalog-preset', presetName: 'all' } as ObjectSource);
   const [textQuery, setTextQuery] = useState('' as string);
+  const [selectedReviewID, selectReviewID] = useState<string | null>(null);
 
   const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
   ('concepts', { query: { inSource: activeSource, matchingText: textQuery }});
@@ -25,6 +27,25 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       ('concepts', { query: { inSource: activeSource }}).ids,
     objects: Object.values(_objs.objects).sort((a, b) => a.termid - b.termid),
   };
+
+  useEffect(() => {
+    if (localizedConcept !== undefined && localizedConcept !== null) {
+      if (selectedRevisionID === null) {
+        selectRevisionID(localizedConcept._revisions.current || null);
+      } else if (localizedConcept._revisions.tree[selectedRevisionID] === undefined) {
+        selectRevisionID(localizedConcept._revisions.current || null);
+      }
+      //selectReviewID(null);
+    }
+  }, [lang.selected, selectedConceptRef]);
+
+  useEffect(() => {
+    if (localizedConcept !== undefined && localizedConcept !== null) {
+      if (selectedRevisionID === null) {
+        selectRevisionID(localizedConcept._revisions.current);
+      }
+    }
+  }, [selectedRevisionID]);
 
   // One-off collection migration call
   //const collectionsMigrated = useRef({ yes: false });
@@ -78,8 +99,13 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   const localizedConcept = concept
     ? (concept[lang.selected as keyof typeof availableLanguages] || null)
     : undefined;
+  const revision = localizedConcept && selectedRevisionID
+    ? (localizedConcept._revisions.tree[selectedRevisionID]?.object || null)
+    : null;
 
   return (
+    <ReviewContext.Provider value={{ reviewID: selectedReviewID, selectReviewID: selectReviewID }}>
+
     <ConceptContext.Provider
         value={{
           active: concept,
@@ -87,6 +113,9 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
           activeLocalized: localizedConcept,
           ref: selectedConceptRef,
           select: selectConceptRef,
+          revisionID: selectedRevisionID,
+          revision,
+          selectRevision: selectRevisionID,
         }}>
       <SourceContext.Provider
           value={{
@@ -120,5 +149,6 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
         </TextSearchContext.Provider>
       </SourceContext.Provider>
     </ConceptContext.Provider>
+    </ReviewContext.Provider>
   );
 };

@@ -13,6 +13,8 @@ import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
 import { conf as appConf } from '../app';
 
 import { default as ConceptManagerCls } from './concept-manager';
+import { default as ConceptReviewManagerCls } from './review-manager';
+import { Review } from 'models/reviews';
 
 
 const appDataPath = electronApp.getPath('userData');
@@ -40,6 +42,14 @@ export const conf: MainConfig<typeof appConf> = {
   },
 
   managers: {
+    reviews: {
+      dbName: 'default',
+      options: {
+        cls: ConceptReviewManagerCls,
+        workDir: 'reviews',
+        idField: 'id',
+      } as ManagerOptions<Review>,
+    },
     concepts: {
       dbName: 'default',
       options: {

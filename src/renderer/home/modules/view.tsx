@@ -2,11 +2,10 @@ import React, { useContext } from 'react';
 
 import { NonIdealState } from '@blueprintjs/core';
 
-import { LangSelector } from 'coulomb/localizer/renderer/widgets';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { EntryDetails } from '../concepts';
-import { ToolbarItem, ModuleConfig } from '../module-config';
+import { ModuleConfig } from '../module-config';
 import { ConceptContext } from '../contexts';
 import * as panels from '../panels';
 import sharedStyles from '../styles.scss';
@@ -15,13 +14,15 @@ import sharedStyles from '../styles.scss';
 const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
-  const concept = ctx.activeLocalized;
+  const concept = ctx.revision;
   const isLoading = ctx.isLoading;
 
   let conceptDetails: JSX.Element;
 
   if (concept === null) {
-    conceptDetails = <NonIdealState title={`Not yet translated into ${lang.available[lang.selected]}.`} />
+    conceptDetails = <NonIdealState
+      title="Nothing to show"
+      description={`Nothing is selected, or item not localized in ${lang.available[lang.selected]}.`} />
   } else if (concept === undefined) {
     conceptDetails = <NonIdealState title="No concept is selected" />
   } else {
@@ -35,13 +36,13 @@ const MainView: React.FC<{}> = function () {
 };
 
 
-const CompareLanguage: ToolbarItem = function () {
-  const concept = useContext(ConceptContext);
-  return <LangSelector
-    untranslatedProps={{ disabled: true }}
-    value={concept.active || undefined}
-  />;
-};
+// const CompareLanguage: ToolbarItem = function () {
+//   const concept = useContext(ConceptContext);
+//   return <LangSelector
+//     untranslatedProps={{ disabled: true }}
+//     value={concept.active || undefined}
+//   />;
+// };
 
 
 export default {
@@ -55,11 +56,13 @@ export default {
   ],
 
   MainView,
-  mainToolbar: [CompareLanguage],
+  mainToolbar: [],
 
   rightSidebar: [
-    panels.status,
+    panels.languages,
     panels.relationships,
+    panels.reviews,
+    panels.status,
     panels.lineage,
   ],
 } as ModuleConfig;

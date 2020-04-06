@@ -112,6 +112,7 @@
     "react-cytoscapejs": "^1.2.1",
     "react-dom": "^16.11.0",
     "react-transition-group": "^4.3.0",
+    "react-visual-diff": "^0.4.3",
     "react-window": "^1.8.5",
     "source-map-support": "^0.5.16",
     "throttle-debounce": "^2.1.0"

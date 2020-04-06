@@ -15,8 +15,14 @@ const SourceRollTitle: React.FC<{}> = function () {
   const src = useContext(SourceContext).active;
 
   let sourceName: string | null;
-  if (src.type === 'catalog-preset' && src.presetName === 'all') {
-    sourceName = "All concepts";
+  if (src.type === 'catalog-preset') {
+    if (src.presetName === 'all') {
+      sourceName = "All concepts";
+    } else if (src.presetName === 'pendingReview') {
+      sourceName = "Pending review";
+    } else {
+      sourceName = src.presetName;
+    }
   } else if (src.type === 'collection') {
     sourceName = "Collection";
   } else {

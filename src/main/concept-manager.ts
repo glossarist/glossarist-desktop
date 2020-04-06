@@ -6,6 +6,7 @@ import { ObjectSource } from '../app';
 import { app } from '.';
 import { listen } from 'coulomb/ipc/main';
 import { migrateConcept } from './legacy';
+import ConceptReviewManager from './review-manager';
 
 
 class ConceptManager
@@ -19,6 +20,10 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
     return parseInt(filename.replace('concept-', ''), 10);
   }
 
+  public async saveRevision() {
+    // TODO
+  }
+
   public async read(objID: number) {
     const obj = (await super.read(objID)) as MultiLanguageConcept<any>;
     // Possibly legacy data.
@@ -27,13 +32,21 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
   }
 
   public async listIDs(query?: { inSource: ObjectSource }) {
-    const collectionManager = (await app).managers.collections as Manager<ConceptCollection, string>;
     const ids = await super.listIDs();
     const src = query?.inSource;
+    const _app = await app;
+    const collectionManager = _app.managers.collections as Manager<ConceptCollection, string>;
+    const reviewManager = _app.managers.reviews as ConceptReviewManager;
 
     if (src) {
-      if (src.type === 'catalog-preset' && src.presetName === 'all') {
-        return ids;
+      if (src.type === 'catalog-preset') {
+        if (src.presetName === 'pendingReview') {
+          const reviewIDs = await reviewManager.listIDs({ completed: false });
+          const conceptIDs = reviewIDs.
+            filter(rid => rid.startsWith('concepts-')).
+            map(crid => parseInt(crid.replace('concepts-', '').split('_')[0], 10));
+          return ids.filter(cid => conceptIDs.indexOf(cid) >= 0);
+        }
       } else if (src.type === 'collection') {
         const collection = await collectionManager.read(src.collectionID);
         const collectionItemIDs = collection.items;
@@ -43,9 +56,9 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
         log.error("Glossarist: Invalid concept source", src);
         throw new Error("Invalid source in query");
       }
-    } else {
-      return ids;
     }
+
+    return ids;
   }
 
   public async findIncomingRelations(ref: ConceptRef | null):

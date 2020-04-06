@@ -7,6 +7,12 @@ interface HTMLElement {
   scrollIntoViewIfNeeded: () => void
 }
 
+
+declare module "react-visual-diff" {
+  const VisualDiff: React.FC<{ left: JSX.Element, right: JSX.Element }>
+  export = VisualDiff
+}
+
 declare module "react-cytoscapejs" {
   import cytoscape, { NodeDataDefinition, EdgeDataDefinition } from "cytoscape";
   import { Stylesheet, LayoutOptions, ElementDefinition } from "cytoscape";

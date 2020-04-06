@@ -1,8 +1,13 @@
 import React, { useContext } from 'react';
 
-import { MultiLanguageConcept, ConceptRef, Concept, ConceptRelation, IncomingConceptRelation } from '../../models/concepts';
+import { MultiLanguageConcept, ConceptRef, Concept, ConceptRelation, IncomingConceptRelation, WithRevisions } from '../../models/concepts';
 import { ObjectSource } from '../../app';
 import { useIPCValue } from 'coulomb/ipc/renderer';
+
+
+export const ReviewContext =
+  React.createContext<{ reviewID: string | null, selectReviewID: (id: string | null) => void }>
+  ({ reviewID: null, selectReviewID: () => {}})
 
 
 export const ModuleContext =
@@ -39,7 +44,7 @@ export const SourceContext = React.createContext<ObjectSourceContextSpec>({
 
 
 export type MaybeActiveConcept = MultiLanguageConcept<any> | null;
-export type MaybeActiveLocalizedConcept = Concept<any, any> | null | undefined;
+export type MaybeActiveLocalizedConcept = WithRevisions<Concept<any, any>> | null | undefined;
 // `null` means not yet localized into `lang.selected`, `undefined` means probably still loading.
 
 export interface ConceptContextSpec {
@@ -48,13 +53,19 @@ export interface ConceptContextSpec {
   isLoading: boolean
   ref: ConceptRef | null
   select: (ref: ConceptRef | null) => void
+  revisionID: null | string
+  revision: Concept<any, any> | null
+  selectRevision: (revID: string) => void
 }
 export const ConceptContext = React.createContext<ConceptContextSpec>({
   active: null,
   activeLocalized: null,
+  select: () => {},
   isLoading: false,
   ref: null,
-  select: () => {},
+  revisionID: null,
+  revision: null,
+  selectRevision: () => {},
 })
 
 

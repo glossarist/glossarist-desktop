@@ -6,18 +6,22 @@ import { StandardRef, StandardClause } from './standards';
 
 /* Revisions */
 
-interface Revision<T> {
+export interface Revision<T> {
   object: T
+
   parents: string[]
+  // parent revision IDs
+
   timeCreated: Date
 }
 
 export type WithRevisions<T> = T & {
   _revisions: {
-    current?: string
+    current: string
     /* Points to existing revision ID from the tree */
 
     tree: { [revisionID: string]: Revision<T> }
+    /* revision ID is 6 hexadecimal characters */
     /* When new version is saved,
     new revision is created with current object data and current revision ID as parent;
     new revision is assigned a randomly generated ID and added to the tree;
@@ -54,10 +58,26 @@ export type _Concepts<Ref extends ConceptRef> = {
 }
 
 
+export const LIFECYCLE_STAGES = [
+  'Proposal',
+  'Evaluation',
+  'Validation',
+  'Rejected',
+  'Withdrawn',
+  'Resolved',
+  'Extended procedure',
+  'Test',
+] as const;
+
+export type LifecycleStage = typeof LIFECYCLE_STAGES[number];
+
+
 export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLanguages> {
   id: Ref
   language_code: Lang
   entry_status: ConceptStatus
+
+  lifecycle_stage?: LifecycleStage,
 
   terms: Designation[]
 
@@ -80,7 +100,9 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   examples: Example[]
 
   // These apply to the definition.
+
   authoritative_source: AuthoritativeSource
+  // Can be set 
 
   //lineage_source: LineageSource
 

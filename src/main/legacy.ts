@@ -1,4 +1,5 @@
-import { MultiLanguageConcept, SupportedLanguages, WithRevisions, Concept, Designation } from 'models/concepts';
+import * as crypto from 'crypto';
+import { MultiLanguageConcept, SupportedLanguages, WithRevisions, Concept, Designation, Revision } from 'models/concepts';
 import { availableLanguages } from '../app';
 
 
@@ -11,11 +12,11 @@ export function migrateConcept(obj: MultiLanguageConcept<any>): MultiLanguageCon
       // Entry for this language is not present on this concept.
       continue;
     }
-    const withRevisions = initializeRevisionsForLanguageEntry(localized);
-    const withMultipleTerms = migrateTerms(withRevisions);
+    const withMultipleTerms = migrateTerms(localized);
     const withDomain = migrateDomain(withMultipleTerms);
+    const withRevisions = initializeRevisionsForLanguageEntry(withDomain);
 
-    migrated[langID as keyof SupportedLanguages] = withDomain;
+    migrated[langID as keyof SupportedLanguages] = withRevisions;
   }
 
   return migrated;
@@ -28,17 +29,29 @@ WithRevisions<Concept<number, L>> {
   /* Prepares revision history scaffolding for given entry,
   if its revision history is missing. */
 
-  if (e.hasOwnProperty('_revisions')) {
+  if (e.hasOwnProperty('_revisions') && e._revisions.current !== undefined) {
     // Entry already has revisions.
     return e as WithRevisions<Concept<number, L>>;
 
   } else {
     // Entry doesn’t have revisions yet.
+
+    const objectID = crypto.randomBytes(3).toString('hex');
+    // 6 hexadecimal characters
+
+    const defaultRevision: Revision<Concept<number, L>> = {
+      object: e,
+      parents: [],
+      timeCreated: e.date_accepted || new Date(),
+    };
+
     return {
       ...e,
       _revisions: {
-        current: undefined,
-        tree: {},
+        current: objectID,
+        tree: {
+          [objectID]: defaultRevision,
+        },
       },
     };
   }

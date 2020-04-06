@@ -2834,6 +2834,11 @@ diff3@0.0.3:
   resolved "https://registry.yarnpkg.com/diff3/-/diff3-0.0.3.tgz#d4e5c3a4cdf4e5fe1211ab42e693fcb4321580fc"
   integrity sha1-1OXDpM305f4SEatC5pP8tDIVgPw=
 
+diff@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
+  integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
+
 diffie-hellman@^5.0.0:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/diffie-hellman/-/diffie-hellman-5.0.3.tgz#40e8ee98f55a2149607146921c63e1ae5f3d2875"
@@ -3579,6 +3584,11 @@ findup-sync@3.0.0:
     is-glob "^4.0.0"
     micromatch "^3.0.4"
     resolve-dir "^1.0.1"
+
+flatted@^1.0.2:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/flatted/-/flatted-1.0.3.tgz#18dc8704f89e757d88d7048e9d77b316f91705c2"
+  integrity sha512-3JPwKDX4pKsnnuPtApEoD4HEy61R1gO6CN8XH5/wdA5i7TrhLKIB2lgHEb9ETGkigo9snd1iCSvvcjhFanyxvg==
 
 flatten@^1.0.2:
   version "1.0.3"
@@ -6847,6 +6857,11 @@ react-dom@^16.11.0:
     prop-types "^15.6.2"
     scheduler "^0.18.0"
 
+react-is@^16.6.3:
+  version "16.13.1"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
+  integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
 react-is@^16.8.1:
   version "16.12.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.12.0.tgz#2cc0fe0fba742d97fd527c42a13bec4eeb06241c"
@@ -6888,6 +6903,16 @@ react-transition-group@^4.3.0:
     dom-helpers "^5.0.1"
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
+
+react-visual-diff@^0.4.3:
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/react-visual-diff/-/react-visual-diff-0.4.3.tgz#7c5f6576094fb860c925b7ea62be1a974e813530"
+  integrity sha512-66gN974h4dzAeelxvIXZxMpp9oWHT9Ct9++X0cNpn+jTvcqKTgcU8efJDTwhBX8n8rokrUu2+hJWaJMuTY1yOA==
+  dependencies:
+    diff "^3.5.0"
+    flatted "^1.0.2"
+    lodash "^4.17.10"
+    react-is "^16.6.3"
 
 react-window@^1.8.5:
   version "1.8.5"

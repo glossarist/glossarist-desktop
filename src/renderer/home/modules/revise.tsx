@@ -27,6 +27,8 @@ const MainView: React.FC<{}> = function () {
     return <NonIdealState title="No concept is selected" />;
   } else if (auth === undefined) {
     return <NonIdealState icon="error" title="Concept is missing authoritative language entry" />;
+  } else if (ctx.revision === null || ctx.revisionID === null) {
+    return <NonIdealState title="No revision is selected" />;
   }
 
   return (
@@ -35,6 +37,8 @@ const MainView: React.FC<{}> = function () {
         concept={active}
         key={auth.id}
         entry={auth}
+        parentRevisionID={ctx.revisionID}
+        onCreateRevision={(rev) => ctx.selectRevision(rev)}
         isLoading={ctx.isLoading} />
     </div>
   );
