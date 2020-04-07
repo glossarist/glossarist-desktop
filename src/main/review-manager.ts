@@ -72,9 +72,7 @@ extends Manager<Review, string, ReviewManagerQuery> {
     if (query.completed !== undefined && idx !== null) {
       for (const rid of Object.keys(idx)) {
         const completed = idx[rid].timeCompleted !== undefined;
-        console.debug(rid, completed, idx[rid].timeCompleted, query.completed)
         if (completed !== query.completed) {
-          console.debug("Removeing reviewfom list'", rid)
           delete idx[rid];
           ids = ids.filter(_rid => _rid !== rid);
         }
@@ -86,9 +84,7 @@ extends Manager<Review, string, ReviewManagerQuery> {
 
   public async readAll(query?: ReviewManagerQuery) {
     const objs = await super.readAll();
-    log.info("Filtering reviews", query, objs)
     const result = query !== undefined ? this.applyQuery(query, objs) : objs;
-    log.info("Filtered reviews", result)
     return result;
   }
 
