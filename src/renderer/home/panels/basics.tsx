@@ -1,11 +1,10 @@
 import React, { useContext } from 'react';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { Classes, FormGroup, InputGroup, Text } from '@blueprintjs/core';
+import { Classes, FormGroup, Text } from '@blueprintjs/core';
 import { PanelConfig } from '../panel-config';
 import { ConceptContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 import styles from './basics.scss';
-import { panelFieldProps } from './common';
 import { RepresentingDesignation } from '../concepts/designation';
 import MathJax from 'react-mathjax2';
 
