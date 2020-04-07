@@ -1,6 +1,6 @@
 {
   "name": "geolexica",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "Geolexica database viewer & editor for desktop",
   "repository": "git@github.com:geolexica/isotc211-desktop.git",
   "bugs": "https://github.com/geolexica/isotc211-desktop/issues",
@@ -14,7 +14,7 @@
     "dist:mac": "electron-builder -m",
     "pack": "electron-builder --dir",
     "release": "electron-builder --publish always",
-    "cdist": "yarn compile && electron-builder -mlw",
+    "cdist": "yarn compile && electron-builder -m",
     "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "resolutions": {
@@ -99,8 +99,8 @@
     "@blueprintjs/select": "^3.11.2",
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
-    "coulomb-panel": "https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.2-gitpkg",
     "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.1.11-gitpkg",
+    "coulomb-panel": "https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.2-gitpkg",
     "cytoscape": "3",
     "electron-log": "^4.0.6",
     "fs-extra": "^8.1.0",
