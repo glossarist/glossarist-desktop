@@ -29,7 +29,7 @@ function ({ lang, concept, className }) {
           ${styles.conceptItem} ${className || ''}
           ${designationValidityClass}
         `}>
-      <RepresentingDesignation entry={c} />
+      {c ? <RepresentingDesignation entry={c} /> : <i>missing designation</i>}
     </span>
   );
 };
