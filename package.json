@@ -1,6 +1,6 @@
 {
   "name": "geolexica",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Geolexica database viewer & editor for desktop",
   "repository": "git@github.com:geolexica/isotc211-desktop.git",
   "bugs": "https://github.com/geolexica/isotc211-desktop/issues",
