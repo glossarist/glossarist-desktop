@@ -186,9 +186,13 @@
       white-space: nowrap;
     }
 
+    :global .bp3-icon {
+      margin: 0 $pt-grid-size !important;
+      color: unset;
+    }
+
     .conceptItem {
       text-overflow: ellipsis;
-      flex: 1;
       overflow: hidden;
     }
 
@@ -203,8 +207,13 @@
 
     .itemMarkerRight {
       flex-shrink: 0;
+      flex: 1;
+      width: 14em;
       margin-left: 1rem;
       margin-right: 1rem;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: flex-end;
     }
   }
 }

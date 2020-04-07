@@ -1,6 +1,6 @@
 import { debounce } from 'throttle-debounce';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Icon, InputGroup, Button } from '@blueprintjs/core';
+import { InputGroup, Button, Tag } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { ConceptRef, MultiLanguageConcept } from 'models/concepts';
@@ -24,6 +24,20 @@ const MainView: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   const lang = useContext(LangConfigContext);
 
+  function renderItemMarker(c: MultiLanguageConcept<any>): JSX.Element {
+    const entry = c[lang.selected as keyof typeof availableLanguages];
+    if (!entry) {
+      return <Tag minimal icon="translate" intent="danger">Not translated</Tag>
+    }
+    const lcStage = entry.lifecycle_stage;
+    if (!lcStage) {
+      return <Tag minimal icon="flow-linear" intent="danger">Missing lifecycle stage</Tag>
+    }
+    return <>
+      <Tag intent="primary" icon="flow-linear" className={styles.lifecycleStage}>{lcStage}</Tag>
+    </>;
+  }
+
   return (
     <div className={styles.conceptBrowser}>
       <ConceptList
@@ -33,12 +47,7 @@ const MainView: React.FC<{}> = function () {
         onItemSelect={(ref: ConceptRef) => concept.select(ref)}
         itemMarker={(c: MultiLanguageConcept<any>) =>
           <span className={sharedStyles.conceptID}>{c.termid}</span>}
-        itemMarkerRight={(c: MultiLanguageConcept<any>) => <>
-          {!c[lang.selected as keyof typeof availableLanguages]
-            ? <Icon htmlTitle={`Missing entry in ${lang.available[lang.selected]}`}intent="warning" icon="translate" />
-            : c[lang.selected as keyof typeof availableLanguages]?.lifecycle_stage ||
-                <Icon htmlTitle={`Missing lifecycle stage in ${lang.available[lang.selected]}`} intent="warning" icon="flow-linear" />}
-        </>}
+        itemMarkerRight={renderItemMarker}
       />
     </div>
   );
