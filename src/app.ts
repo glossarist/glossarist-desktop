@@ -37,6 +37,11 @@ export const conf: AppConfig = {
       verboseName: 'concept review',
       verboseNamePlural: 'concept reviews',
     },
+    relations: {
+      shortName: 'relation',
+      verboseName: 'concept relation',
+      verboseNamePlural: 'concept relations',
+    },
     collections: {
       shortName: 'collection',
       verboseName: 'collection',
@@ -57,26 +62,26 @@ export const conf: AppConfig = {
   windows: {
     splash: {
       openerParams: {
-        title: 'ISO/TC 211 Geolexica',
+        title: 'Glossarist',
         frameless: true,
         dimensions: { width: 800, height: 500, minWidth: 800, minHeight: 500 },
       },
     },
     default: {
       openerParams: {
-        title: 'ISO/TC 211 Geolexica Desktop',
+        title: 'Glossarist Desktop',
         dimensions: { width: 1200, height: 700, minWidth: 800, minHeight: 500 },
       },
     },
     batchCommit: {
       openerParams: {
-        title: 'ISO/TC 211 Geolexica Desktop: Commit changes',
+        title: 'Glossarist Desktop: Commit changes',
         dimensions: { width: 800, height: 700, minWidth: 800, minHeight: 500 },
       },
     },
     settings: {
       openerParams: {
-        title: 'ISO/TC 211 Geolexica Desktop Settings',
+        title: 'Glossarist Desktop: Settings',
         dimensions: { width: 800, height: 500, minWidth: 800, minHeight: 500 },
       },
     },
