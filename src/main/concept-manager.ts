@@ -182,6 +182,11 @@ function conceptMatchesQuery(_q: string): (c: MultiLanguageConcept<any>) => bool
   return (c) => {
     // TODO: Search across all localized entries
 
+    if (!c.eng) {
+      log.error("Glossarist: Concept is missing authoritative language entry", c);
+      return false;
+    }
+
     const matchesDesignation: boolean = c.eng.terms.
       filter(t => t.designation.toLowerCase().indexOf(q) >= 0).
       length > 0;
