@@ -11,7 +11,7 @@ import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { ReviewContext, ConceptContext, SourceContext } from '../contexts';
-import { EntryDetails } from '../concepts';
+import { EntryDetails, refToString } from '../concepts';
 import sharedStyles from '../styles.scss';
 import styles from './review.scss';
 import { PanelConfig } from '../panel-config';
@@ -214,7 +214,7 @@ const reviewDetails: PanelConfig = {
     return (
       <>
         <FormGroup label="Review of">
-          <InputGroup readOnly defaultValue={`#${ctx.ref} rev. ${reviewMaterial.revisionID}`} />
+          <InputGroup readOnly defaultValue={`#${ctx.ref ? refToString(ctx.ref) : '—'} rev. ${reviewMaterial.revisionID}`} />
         </FormGroup>
 
         <FormGroup label="Requested">

@@ -6,7 +6,7 @@ import { availableLanguages } from 'app';
 import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
 import { PanelConfig } from '../panel-config';
 import { SourceContext, ConceptContext } from '../contexts';
-import { ConceptList } from '../concepts';
+import { ConceptList, refToString } from '../concepts';
 
 import sharedStyles from '../styles.scss';
 
@@ -44,7 +44,7 @@ const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function
       buttonProps={{ small: true }}
       concepts={concepts}
       itemMarker={(c: MultiLanguageConcept<any>) =>
-        <span className={sharedStyles.conceptID}>{c.termid}</span>}
+        <span className={sharedStyles.conceptID}>{refToString(c.termid)}</span>}
       isItemSelected={(ref: ConceptRef) => concept.ref === ref}
       onItemSelect={(ref: ConceptRef) => concept.select(ref)}
     />

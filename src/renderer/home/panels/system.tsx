@@ -2,14 +2,17 @@ import React, { useContext } from 'react';
 import { FormGroup, InputGroup } from '@blueprintjs/core';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
+import { refToString } from '../concepts';
 
 
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
+  const ref = concept?.ref ? refToString(concept.ref) : '—';
+
   return (
     <div>
       <FormGroup label="ID" inline={true}>
-        <InputGroup readOnly={true} value={`${concept?.ref}` || '—'} />
+        <InputGroup readOnly={true} value={ref} />
       </FormGroup>
     </div>
   );

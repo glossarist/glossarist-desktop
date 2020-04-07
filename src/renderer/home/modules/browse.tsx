@@ -10,7 +10,7 @@ import {
   ConceptContext,
   TextSearchContext,
 } from '../contexts';
-import { ConceptList } from '../concepts';
+import { ConceptList, refToString } from '../concepts';
 import * as panels from '../panels';
 import { ModuleConfig, ToolbarItem } from '../module-config';
 import { availableLanguages } from 'app';
@@ -46,7 +46,7 @@ const MainView: React.FC<{}> = function () {
         isItemSelected={(ref: ConceptRef) => concept.ref === ref}
         onItemSelect={(ref: ConceptRef) => concept.select(ref)}
         itemMarker={(c: MultiLanguageConcept<any>) =>
-          <span className={sharedStyles.conceptID}>{c.termid}</span>}
+          <span className={sharedStyles.conceptID}>{refToString(c.termid)}</span>}
         itemMarkerRight={renderItemMarker}
       />
     </div>
