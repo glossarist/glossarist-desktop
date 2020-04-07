@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import React, { useState, useEffect } from 'react';
 
 import {
@@ -16,7 +15,6 @@ import {
   Designation,
   NORMATIVE_STATUS_CHOICES,
   WithRevisions,
-  Revision,
 } from 'models/concepts';
 
 import { EntryForm } from './entry-form';
@@ -62,30 +60,13 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     if (sanitized !== undefined) {
       setCommitInProgress(true);
 
-      const newRevisionID = crypto.randomBytes(3).toString('hex');
-      const newRevision: Revision<Concept<any, any>> = {
-        object: sanitized,
-        timeCreated: new Date(),
-        parents: [props.parentRevisionID],
-      };
-      const newRevisionTree = {
-        ...props.entry._revisions.tree,
-        [newRevisionID]: newRevision,
-      };
-      const newEntry: WithRevisions<Concept<any, any>> = {
-        ...entry,
-        _revisions: {
-          current: newRevisionID,
-          tree: newRevisionTree,
-        },
-      };
-
       try {
-        await callIPC<{ commit: boolean, objectID: number, object: MultiLanguageConcept<any> }, { success: true }>
-        ('model-concepts-update-one', {
-          objectID: props.concept.termid,
-          object: { ...props.concept, [entry.language_code]: newEntry },
-          commit: true,
+        const { newRevisionID } = await callIPC<{ data: Concept<any, any>, objID: number, lang: string, parentRevision: string }, { newRevisionID: string }>
+        ('model-concepts-create-revision', {
+          objID: props.concept.termid,
+          data: sanitized,
+          lang: entry.language_code,
+          parentRevision: props.parentRevisionID,
         });
         setCommitInProgress(false);
         setImmediate(() => props.onCreateRevision ? props.onCreateRevision(newRevisionID) : void 0);

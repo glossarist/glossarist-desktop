@@ -1,7 +1,9 @@
+import * as yaml from 'js-yaml';
+import * as crypto from 'crypto';
 import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 
-import { MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRelation } from '../models/concepts';
+import { MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRelation, Concept, Revision, SupportedLanguages, WithRevisions } from '../models/concepts';
 import { ObjectSource } from '../app';
 import { app } from '.';
 import { listen } from 'coulomb/ipc/main';
@@ -20,8 +22,63 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
     return parseInt(filename.replace('concept-', ''), 10);
   }
 
-  public async saveRevision() {
-    // TODO
+  public async saveRevision(objID: number, lang: keyof SupportedLanguages, parentRev: string, data: Concept<any, any>) {
+    const concept = await this.read(objID);
+
+    const langEntry: WithRevisions<Concept<any, any>> | undefined = concept[lang];
+
+    if (!langEntry) {
+      log.error("Glossarist: Failed to save revision, unable to locate concept language entry", objID, lang);
+      throw new Error("Failed to save revision: Unable to read localized concept entry");
+    }
+
+    if (!langEntry._revisions?.tree[parentRev]) {
+      log.warn("Glossarist: Unable to locate parent revision, auto-filling", objID, lang, parentRev);
+      delete langEntry._revisions;
+      langEntry._revisions = {
+        tree: {
+          [parentRev]: {
+            object: { ...langEntry } as Concept<any, any>,
+            parents: [],
+            timeCreated: new Date()
+          },
+        },
+        current: parentRev,
+      };
+    }
+
+    const newRevisionID = crypto.randomBytes(3).toString('hex');
+
+    const newRevision: Revision<Concept<any, any>> = {
+      object: data,
+      timeCreated: new Date(),
+      parents: [parentRev],
+    };
+
+    const newRevisionTree = {
+      ...langEntry._revisions.tree,
+      [newRevisionID]: newRevision,
+    };
+
+    const newEntry: WithRevisions<Concept<any, any>> = {
+      ...data,
+      _revisions: {
+        current: newRevisionID,
+        tree: newRevisionTree,
+      },
+    };
+
+    const newConcept: MultiLanguageConcept<any> = {
+      ...concept,
+      [lang]: newEntry,
+    };
+
+    //log.debug("saving concept1", yaml.dump(newConcept))
+    //log.debug("saving concept1", yaml.dump(data))
+
+    await this.update(objID, newConcept, true);
+
+    return newRevisionID;
   }
 
   public async read(objID: number) {
@@ -110,6 +167,12 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
     listen<{ objID: ConceptRef }, { relations: IncomingConceptRelation[] }>
     (`${prefix}-find-incoming-relations`, async ({ objID }) => {
       return { relations: await this.findIncomingRelations(objID) };
+    });
+
+    listen<{ objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string }, { newRevisionID: string }>
+    (`${prefix}-create-revision`, async ({ objID, lang, parentRevision, data }) => {
+      const newRevisionID = await this.saveRevision(objID, lang, parentRevision, data);
+      return { newRevisionID };
     });
   }
 }
