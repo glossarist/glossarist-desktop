@@ -251,6 +251,8 @@ export default {
   leftSidebar: [
     panels.system,
     panels.sourceRollAuthoritative,
+    panels.reviews,
+    completedReviews,
     panels.databases,
   ],
 
@@ -258,9 +260,7 @@ export default {
   mainToolbar: [],
 
   rightSidebar: [
-    panels.reviews,
     reviewDetails,
-    completedReviews,
     { className: styles.reviewTargetsPanelSeparator,
       Contents: () => <span><Icon icon="chevron-down" />{" "}Comparison target</span>,
       collapsed: 'never' },
