@@ -1,6 +1,6 @@
 {
   "name": "glossarist",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "Glossarist database viewer & editor for desktop",
   "repository": "git@github.com:glossarist/isotc211-desktop.git",
   "bugs": "https://github.com/glossarist/isotc211-desktop/issues",
