@@ -1,7 +1,7 @@
 {
-  "name": "geolexica",
-  "version": "1.2.3",
-  "description": "Geolexica database viewer & editor for desktop",
+  "name": "glossarist",
+  "version": "1.3",
+  "description": "Glossarist database viewer & editor for desktop",
   "repository": "git@github.com:geolexica/isotc211-desktop.git",
   "bugs": "https://github.com/geolexica/isotc211-desktop/issues",
   "author": "Ribose Inc. <open.source@ribose.com>",
