@@ -37,7 +37,6 @@ extends Manager<Review, string, ReviewManagerQuery> {
 
   applyQuery<T extends Record<string, Review> | string[]>
   (query: ReviewManagerQuery, objects: T): T {
-    log.info("Applying query", query, objects)
     var idx = objects.hasOwnProperty('entries')
       ? null
       : objects as Record<string, Review>;
