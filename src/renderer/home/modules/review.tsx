@@ -213,23 +213,13 @@ const reviewDetails: PanelConfig = {
 
     return (
       <>
-        <FormGroup label="Review of">
+        <FormGroup inline label="Review of">
           <InputGroup readOnly defaultValue={`#${ctx.ref ? refToString(ctx.ref) : '—'} rev. ${reviewMaterial.revisionID}`} />
         </FormGroup>
 
-        <FormGroup label="Requested">
-          <InputGroup readOnly defaultValue={moment(review.timeRequested).toLocaleString()} />
-        </FormGroup>
-
         {ctx.revisionID !== reviewMaterial.revisionID
-          ? <FormGroup label="Comparing with">
+          ? <FormGroup inline label="Comparing&nbsp;with">
               <InputGroup readOnly defaultValue={`rev. ${ctx.revisionID} (${lang.available[lang.selected]})`} />
-            </FormGroup>
-          : null}
-
-        {review.timeCompleted
-          ? <FormGroup inline label="Completed">
-              <InputGroup readOnly defaultValue={moment(review.timeCompleted).toLocaleString()} />
             </FormGroup>
           : null}
 
@@ -238,6 +228,16 @@ const reviewDetails: PanelConfig = {
               <InputGroup readOnly defaultValue={review.approved ? 'APPROVE' : 'REJECT'} />
             </FormGroup>
           : null}
+
+        {review.timeCompleted
+          ? <FormGroup label="Completed">
+              <InputGroup readOnly defaultValue={moment(review.timeCompleted).toLocaleString()} />
+            </FormGroup>
+          : null}
+
+        <FormGroup label="Requested">
+          <InputGroup readOnly defaultValue={moment(review.timeRequested).toLocaleString()} />
+        </FormGroup>
       </>
     );
   },
