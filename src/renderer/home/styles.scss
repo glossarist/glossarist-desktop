@@ -122,7 +122,11 @@ html, body, #app {
     overflow: hidden;
 
     .fixedPanel {
-      flex: 0;
+      flex-shrink: 0;
+      max-height: 33vh;
+      overflow: hidden;
+      display: flex;
+      flex-flow: column nowrap;
     }
 
     .restOfPanels {
