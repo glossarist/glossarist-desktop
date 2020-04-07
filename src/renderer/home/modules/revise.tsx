@@ -52,7 +52,6 @@ export default {
     panels.system,
     panels.sourceRollTranslated,
     //panels.languages,
-    panels.lineage,
     panels.databases,
   ],
 
@@ -60,7 +59,9 @@ export default {
   mainToolbar: [],
 
   rightSidebar: [
-    panels.basics,
+    panels.lifecycle,
+    panels.status,
     panels.relationships,
+    panels.lineage,
   ],
 } as ModuleConfig;

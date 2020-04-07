@@ -52,6 +52,7 @@ export default {
   leftSidebar: [
     panels.system,
     panels.sourceRollTranslated,
+    panels.languages,
     panels.databases,
   ],
 
@@ -59,7 +60,7 @@ export default {
   mainToolbar: [],
 
   rightSidebar: [
-    panels.languages,
+    panels.lifecycle,
     panels.relationships,
     panels.reviews,
     panels.status,
