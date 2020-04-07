@@ -1,13 +1,13 @@
 import React, { useContext } from 'react';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { Classes, FormGroup, InputGroup, Text } from '@blueprintjs/core';
-import { AutoSizedTextArea } from '../widgets';
 import { PanelConfig } from '../panel-config';
 import { ConceptContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 import styles from './basics.scss';
 import { panelFieldProps } from './common';
 import { getRepresentingDesignation } from '../concepts/designation';
+import MathJax from 'react-mathjax2';
 
 
 const Panel: React.FC<{}> = function () {
@@ -44,32 +44,34 @@ const Panel: React.FC<{}> = function () {
             <FormGroup
                 className={rtlClass}
                 key="definition">
-              <AutoSizedTextArea
-                growVertically={true}
-                className={`${styles.definition} ${rtlClass} ${loadingClass}`}
-                value={revision.definition || ''}
-                {...field} />
+              <div className={`${styles.definition} ${rtlClass} ${loadingClass}`}>
+                <MathJax.Text text={revision.definition || ''} />
+              </div>
             </FormGroup>
 
-            {[...revision.notes.entries()].map(([idx, note]) =>
-              <FormGroup
-                  key={`note-${idx}`}
-                  inline
-                  label="NOTE">
-                <Text
-                  className={`${styles.note} ${loadingClass}`}>{note}</Text>
-              </FormGroup>
-            )}
+            <div className={styles.notesAndExamples}>
+              {[...revision.notes.entries()].map(([idx, note]) =>
+                <FormGroup
+                    key={`note-${idx}`}
+                    inline
+                    label="NOTE">
+                  <Text className={`${styles.note} ${loadingClass}`}>
+                    <MathJax.Text text={note} />
+                  </Text>
+                </FormGroup>
+              )}
 
-            {[...revision.examples.entries()].map(([idx, example]) =>
-              <FormGroup
-                  key={`note-${idx}`}
-                  inline
-                  label="EXAMPLE">
-                <Text
-                  className={`${loadingClass} ${styles.example}`}>{example}</Text>
-              </FormGroup>
-            )}
+              {[...revision.examples.entries()].map(([idx, example]) =>
+                <FormGroup
+                    key={`note-${idx}`}
+                    inline
+                    label="EXAMPLE">
+                  <Text className={`${loadingClass} ${styles.example}`}>
+                    <MathJax.Text text={example} />
+                  </Text>
+                </FormGroup>
+              )}
+            </div>
           </>
 
         : null}
