@@ -44,17 +44,17 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
         </div>
 
         {[...entry.examples.entries()].map(([idx, item]) =>
-          <p className={`${styles.example} ${loadingClass}`} key={`example-${idx}`}>
+          <div className={`${styles.example} ${loadingClass}`} key={`example-${idx}`}>
             <span className={styles.label}>EXAMPLE:</span>
-            {item}
-          </p>
+            <MathJax.Text text={item} />
+          </div>
         )}
 
         {[...entry.notes.entries()].map(([idx, item]) =>
-            <p className={`${styles.note} ${loadingClass}`} key={`note-${idx}`}>
-            <span className={styles.label}>NOTE:</span>
-              {item}
-            </p>
+            <div className={`${styles.note} ${loadingClass}`} key={`note-${idx}`}>
+              <span className={styles.label}>NOTE:</span>
+              <MathJax.Text text={item} />
+            </div>
           )}
       </div>
     </div>
