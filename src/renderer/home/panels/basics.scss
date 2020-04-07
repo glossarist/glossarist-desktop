@@ -1,14 +1,16 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 :local .panelBase {
   :global .bp3-rtl {
     .bp3-input {
       direction: rtl;
     }
   }
-  .designation {
-    :global .bp3-input {
-      font-family: Georgia, serif;
-      font-weight: bold;
-    }
+  .designationText {
+    font-family: Georgia, serif;
+    font-weight: bold;
+    font-size: $pt-font-size-large;
+    margin: .75rem 0 .5rem $pt-grid-size;
   }
   .note {
     font-size: 90%;

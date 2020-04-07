@@ -7,6 +7,7 @@ import {
 } from 'models/concepts';
 
 import styles from './styles.scss';
+import MathJax from 'react-mathjax2';
 
 
 export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
@@ -25,7 +26,7 @@ export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
   const normativeStatusClass = styles[`normativeStatus-${d.normativeStatus || 'undefined'}`];
 
   return <span className={`${styles.designation} ${normativeStatusClass}`}>
-    {d.designation}
+    <MathJax.Text text={d.designation} />
 
     <span className={styles.designationMarkers}>
       {d.type === 'expression' && d.partOfSpeech
@@ -49,4 +50,15 @@ export function getRepresentingDesignation(entry: Concept<any, any>): string {
   const repDesignation = entry.terms[0].designation;
 
   return `${repDesignation}${entry.domain ? ' <' + entry.domain + '>' : ''}`;
+};
+
+
+export const RepresentingDesignation: React.FC<{ entry: Concept<any, any> }> = function ({ entry }) {
+  const repDesignation = entry.terms[0].designation;
+
+  return <>
+    <MathJax.Text text={repDesignation} />
+    {" "}
+    {entry.domain ? ' <' + entry.domain + '>' : ''}
+  </>;
 };

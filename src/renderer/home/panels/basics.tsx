@@ -6,7 +6,7 @@ import { ConceptContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 import styles from './basics.scss';
 import { panelFieldProps } from './common';
-import { getRepresentingDesignation } from '../concepts/designation';
+import { RepresentingDesignation } from '../concepts/designation';
 import MathJax from 'react-mathjax2';
 
 
@@ -15,7 +15,6 @@ const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   const localized = concept.activeLocalized;
   const revision = concept.revision;
-  const field = panelFieldProps(concept);
   const rtlClass = lang.selected === 'ara' ? Classes.RTL : '';
 
   const isValid = revision ? ['retired', 'superseded'].indexOf(revision.entry_status) < 0 : undefined;
@@ -34,11 +33,9 @@ const Panel: React.FC<{}> = function () {
                 label="Designation"
                 labelInfo={preferredDesignationMarker}
                 className={styles.designation}>
-              <InputGroup
-                large={true}
-                value={getRepresentingDesignation(revision)}
-                className={`${rtlClass} ${designationValidityClass} ${loadingClass}`}
-                {...field} />
+              <div className={`${styles.designationText} ${rtlClass} ${designationValidityClass} ${loadingClass}`}>
+                <RepresentingDesignation entry={revision} />
+              </div>
             </FormGroup>
 
             <FormGroup

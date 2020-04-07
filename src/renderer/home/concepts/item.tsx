@@ -7,7 +7,7 @@ import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
 import { app } from '../../index';
 
 import styles from './styles.scss';
-import { getRepresentingDesignation } from './designation';
+import { RepresentingDesignation } from './designation';
 
 
 interface ConceptItemProps {
@@ -29,7 +29,7 @@ function ({ lang, concept, className }) {
           ${styles.conceptItem} ${className || ''}
           ${designationValidityClass}
         `}>
-      {getRepresentingDesignation(c)}
+      <RepresentingDesignation entry={c} />
     </span>
   );
 };
