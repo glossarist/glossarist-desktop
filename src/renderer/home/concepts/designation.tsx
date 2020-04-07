@@ -22,21 +22,23 @@ export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
     }
   }
 
-  return <span className={styles.designation}>
+  const normativeStatusClass = styles[`normativeStatus-${d.normativeStatus || 'undefined'}`];
+
+  return <span className={`${styles.designation} ${normativeStatusClass}`}>
     {d.designation}
 
     <span className={styles.designationMarkers}>
-      {d.type === 'expression' && d.geographicalArea
-        ? <strong title="Geographical area of usage">{d.geographicalArea}</strong>
-        : null}
       {d.type === 'expression' && d.partOfSpeech
-        ? <span className={styles.partOfSpeech}>{partOfSpeechLabel(d)}</span>
+        ? <span className={styles.grammar}>{partOfSpeechLabel(d)}</span>
         : null}
       {d.type === 'expression' && d.isAbbreviation
-        ? <span title="Acronym or abbreviation">abbr.</span>
+        ? <span className={styles.grammar} title="Acronym or abbreviation">abbr.</span>
         : null}
-      {d.normativeStatus !== 'admitted'
-        ? <strong title="Normative status">{d.normativeStatus}</strong>
+      {d.type === 'expression' && d.geographicalArea
+        ? <span className={styles.usage} title="Geographical area of usage">{d.geographicalArea}</span>
+        : null}
+      {d.normativeStatus !== 'admitted' && d.normativeStatus !== undefined
+        ? <strong className={`${styles.normativeStatus} ${normativeStatusClass}`} title="Normative status">{d.normativeStatus}</strong>
         : null}
     </span>
   </span>

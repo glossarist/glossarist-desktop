@@ -81,6 +81,7 @@
 
 :local .entryDetails {
   padding: 2rem;
+  padding-top: 3rem;
   background: white;
   position: relative;
 
@@ -88,13 +89,17 @@
     font-weight: normal;
     font-family: Georgia, serif;
     margin-bottom: 1rem;
+
+    &.normativeStatus-deprecated {
+      color: $pt-text-color-disabled;
+    }
   }
   .legacyDomain {
     font-weight: normal;
     font-family: sans-serif;
     font-size: $pt-font-size-large;
     position: absolute;
-    top: .75rem;
+    top: 1.75rem;
   }
   .usageInfo {
     color: $pt-text-color-muted;
@@ -103,7 +108,7 @@
   .primaryDesignation {
     .designationMarkers {
       > * {
-        margin-left: .75rem;
+        margin-left: .5rem;
       }
     }
   }
@@ -119,14 +124,26 @@
       font-size: $pt-font-size-large;
       margin-left: .75em;
       &:not(:last-child):after {
-        content: ", ";
+        content: ";";
+        font-style: italic;
       }
     }
   }
   .designationMarkers {
-    color: $pt-text-color-muted;
     font-family: sans-serif;
     font-size: $pt-font-size;
+
+    .grammar, .usage {
+      color: $pt-text-color-muted;
+    }
+
+    .normativeStatus {
+      color: $pt-text-color-muted;
+    }
+
+    .usage {
+      text-transform: uppercase;
+    }
 
     > * {
       margin-left: .5em;
