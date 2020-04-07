@@ -16,6 +16,7 @@ export function migrateConcept(obj: MultiLanguageConcept<any>): MultiLanguageCon
     const withDomain = migrateDomain(withMultipleTerms);
     const withRevisions = initializeRevisionsForLanguageEntry(withDomain);
 
+    // @ts-ignore
     migrated[langID as keyof SupportedLanguages] = withRevisions;
   }
 
