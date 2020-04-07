@@ -2,9 +2,9 @@ import moment from 'moment';
 import React, { useContext, useState, useEffect } from 'react';
 import VisualDiff from 'react-visual-diff';
 
-import { InputGroup, NonIdealState, ButtonGroup, Button, Icon, FormGroup, Callout } from '@blueprintjs/core';
+import { InputGroup, NonIdealState, ButtonGroup, Button, Icon, FormGroup, Callout, HTMLSelect } from '@blueprintjs/core';
 import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
-import { Concept, Revision } from 'models/concepts';
+import { Concept, Revision, SupportedLanguages, LIFECYCLE_STAGES, LifecycleStage } from 'models/concepts';
 import { app } from 'renderer';
 import { Review } from 'models/reviews';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
@@ -27,6 +27,17 @@ const MainView: React.FC<{}> = function () {
   const reviewCtx = useContext(ReviewContext);
   const review = app.useOne<Review, string>('reviews', reviewCtx.reviewID).object;
 
+  const [reviewed, setReviewed] = useState(false);
+
+  const [lifecycleStage, setLifecycleStage] = useState<LifecycleStage | undefined>(undefined);
+
+  const reviewMaterial = useIPCValue
+  <{ reviewID: string | null }, { toReview?: ConceptRevision, revisionID?: string }>
+  ('model-reviews-get-review-material', {}, { reviewID: reviewCtx.reviewID }).value;
+
+  const revisionToReview = reviewMaterial.toReview ? reviewMaterial.toReview.object : null;
+  const revisionToCompare = ctx.revision;
+
   //const active = ctx.activeLocalized;
 
   const availableReviews = app.useMany<Review, { query: { completed: boolean, objectType: 'concepts', objectIDs: string[] }}>
@@ -37,8 +48,6 @@ const MainView: React.FC<{}> = function () {
       ? Object.keys(lang.available).map(langID => `${ctx.ref}_${langID}`)
       : [] }}).objects;
 
-  const revisionToCompare = ctx.revision;
-
   function selectComparableRevision() {
     if (ctx.activeLocalized && ctx.revisionID) {
       const rev = ctx.activeLocalized._revisions.tree[ctx.revisionID];
@@ -47,6 +56,13 @@ const MainView: React.FC<{}> = function () {
       }
     }
   }
+
+  useEffect(() => {
+    if (revisionToReview) {
+      setLifecycleStage(revisionToReview.lifecycle_stage);
+    }
+  }, [JSON.stringify(revisionToReview)]);
+
   const availableReviewIDs = Object.keys(availableReviews);
   useEffect(() => {
     if (availableReviewIDs.length < 1) {
@@ -64,15 +80,10 @@ const MainView: React.FC<{}> = function () {
     }
   }, [reviewCtx.reviewID]);
 
-  const [reviewed, setReviewed] = useState(false);
-
-  const reviewMaterial = useIPCValue
-  <{ reviewID: string | null }, { toReview?: ConceptRevision, revisionID?: string }>
-  ('model-reviews-get-review-material', {}, { reviewID: reviewCtx.reviewID }).value;
-
   async function applyDecision(approved: boolean) {
     const reviewID = reviewCtx.reviewID;
-    if (reviewed || !reviewID || !review || reviewMaterial.toReview === undefined) {
+    if (reviewed || !ctx.active || !reviewID || !review || !revisionToReview || !reviewMaterial.toReview || !reviewMaterial.revisionID) {
+      console.error("Unable to apply decision: something is missing")
       return;
     }
 
@@ -83,9 +94,18 @@ const MainView: React.FC<{}> = function () {
         object: { ...review, timeCompleted: new Date(), approved },
         commit: true,
       });
+
+      await callIPC<{ data: Concept<any, any>, objID: number, lang: string, parentRevision: string }, { newRevisionID: string }>
+      ('model-concepts-create-revision', {
+        objID: ctx.active.termid,
+        data: { ...revisionToReview, lifecycle_stage: lifecycleStage },
+        lang: revisionToReview.language_code,
+        parentRevision: reviewMaterial.revisionID,
+      });
+
       setReviewed(true);
     } catch (e) {
-      console.error("Error applying review decision");
+      console.error("Error applying review decision or lifecycle stage");
     }
   }
   async function handleAccept() {
@@ -108,7 +128,7 @@ const MainView: React.FC<{}> = function () {
         </Callout>
       </> : undefined}
     />;
-  } else if (reviewMaterial.toReview === undefined) {
+  } else if (revisionToReview === null) {
     return <NonIdealState
       title="No review material to show"
       description="If you’re still reading, it looks like review material failed to load due to an error. Apologies." />;
@@ -116,7 +136,7 @@ const MainView: React.FC<{}> = function () {
 
   let material: JSX.Element;
 
-  const toReview = <EntryDetails entry={reviewMaterial.toReview.object} />;
+  const toReview = <EntryDetails entry={revisionToReview} />;
 
   if (revisionToCompare) {
     const toCompare = <EntryDetails entry={revisionToCompare} />;
@@ -130,6 +150,13 @@ const MainView: React.FC<{}> = function () {
       <div className={styles.reviewForm}>
         <div className={sharedStyles.moduleViewToolbarInner}>
           <ButtonGroup fill>
+            <HTMLSelect
+                disabled={reviewed || review.approved !== undefined}
+                value={lifecycleStage}
+                onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                  setLifecycleStage(evt.currentTarget.value as LifecycleStage)}>
+              {LIFECYCLE_STAGES.map(ls => <option value={ls}>{ls}</option>)}
+            </HTMLSelect>
             <Button
               disabled={reviewed || review.approved !== undefined}
               icon="tick-circle" onClick={handleReject}>Reject</Button>
