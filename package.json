@@ -1,6 +1,6 @@
 {
   "name": "glossarist",
-  "version": "1.3",
+  "version": "1.3.0",
   "description": "Glossarist database viewer & editor for desktop",
   "repository": "git@github.com:geolexica/isotc211-desktop.git",
   "bugs": "https://github.com/geolexica/isotc211-desktop/issues",
