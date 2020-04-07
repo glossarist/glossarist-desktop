@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react';
-import { Tree, ITreeNode } from '@blueprintjs/core';
+import { Tree, ITreeNode, Icon } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { availableLanguages } from 'app';
 import { ConceptContext } from '../contexts';
@@ -27,11 +27,7 @@ const Panel: React.FC<{}> = function () {
 
   function handleNodeClick(nodeData: ITreeNode) {
     const langID = nodeData.id as keyof typeof availableLanguages;
-    const canSelect =
-      lang.available[langID] && (concept.active || {})[langID] !== undefined;
-    if (canSelect) {
-      setImmediate(() => lang.select(langID));
-    }
+    setImmediate(() => lang.select(langID));
   }
 
   function langToNode(_langID: string) {
@@ -42,7 +38,9 @@ const Panel: React.FC<{}> = function () {
       label: lang.available[langID],
       //secondaryLabel: <Text ellipsize>{(concept.active || {})[langID]?.term}</Text>,
       isSelected: lang.selected === langID,
-      disabled: (concept.active || {})[langID]?.terms === undefined,
+      secondaryLabel: (concept.active || {})[langID] === undefined
+        ? <Icon icon="translate" intent="danger" />
+        : null,
     } as ITreeNode;
   }
 
