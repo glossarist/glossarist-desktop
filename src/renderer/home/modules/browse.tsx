@@ -33,12 +33,12 @@ const MainView: React.FC<{}> = function () {
         onItemSelect={(ref: ConceptRef) => concept.select(ref)}
         itemMarker={(c: MultiLanguageConcept<any>) =>
           <span className={sharedStyles.conceptID}>{c.termid}</span>}
-        itemMarkerRight={(c: MultiLanguageConcept<any>) => 
-          !c[lang.selected as keyof typeof availableLanguages]
-            ? <Tooltip content={`Missing entry in ${lang.available[lang.selected]}`}>
-                <Icon intent="warning" icon="translate" />
-              </Tooltip>
-            : <Icon icon="blank" />}
+        itemMarkerRight={(c: MultiLanguageConcept<any>) => <>
+          {!c[lang.selected as keyof typeof availableLanguages]
+            ? <Icon htmlTitle={`Missing entry in ${lang.available[lang.selected]}`}intent="warning" icon="translate" />
+            : c[lang.selected as keyof typeof availableLanguages]?.lifecycle_stage ||
+                <Icon htmlTitle={`Missing lifecycle stage in ${lang.available[lang.selected]}`} intent="warning" icon="flow-linear" />}
+        </>}
       />
     </div>
   );
@@ -114,10 +114,11 @@ export default {
   mainToolbar: [() => <LangSelector />, SearchByText, SortOrder],
 
   rightSidebar: [
-    panels.status,
     panels.basics,
-    panels.reviews,
     panels.relationships,
+    panels.lifecycle,
+    panels.reviews,
+    panels.status,
     panels.lineage,
   ],
 } as ModuleConfig;
