@@ -13,6 +13,14 @@ declare module "react-visual-diff" {
   export = VisualDiff
 }
 
+declare module "react-mathjax2" {
+  const MathJax: {
+    Context: React.FC<any>
+    Text: React.FC<any>
+  }
+  export = MathJax
+}
+
 declare module "react-cytoscapejs" {
   import cytoscape, { NodeDataDefinition, EdgeDataDefinition } from "cytoscape";
   import { Stylesheet, LayoutOptions, ElementDefinition } from "cytoscape";

@@ -1,4 +1,5 @@
 import React from 'react';
+import MathJax from 'react-mathjax2';
 import { Classes, H2 } from '@blueprintjs/core';
 import { Concept, Designation } from 'models/concepts';
 import styles from './styles.scss';
@@ -37,10 +38,10 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
         : null}
 
       <div className={`${Classes.RUNNING_TEXT}`}>
-        <p className={`${styles.definition} ${loadingClass}`}>
+        <div className={`${styles.definition} ${loadingClass}`}>
           {entry.usageInfo ? <span className={styles.usageInfo}>&lt;{entry.usageInfo}&gt;</span> : null}
-          {entry?.definition}
-        </p>
+          <MathJax.Text text={entry.definition} />
+        </div>
 
         {[...entry.examples.entries()].map(([idx, item]) =>
           <p className={`${styles.example} ${loadingClass}`} key={`example-${idx}`}>

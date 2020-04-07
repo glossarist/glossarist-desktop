@@ -1,4 +1,5 @@
 import React, { useState, useContext, useMemo, useEffect } from 'react';
+import MathJax from 'react-mathjax2';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { ObjectSource, availableLanguages } from 'app';
 import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
@@ -105,6 +106,15 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
 
   return (
     <ReviewContext.Provider value={{ reviewID: selectedReviewID, selectReviewID: selectReviewID }}>
+    <MathJax.Context
+        options={ {
+          asciimath2jax: {
+            useMathMLspacing: true,
+            delimiters: [["$$","$$"]],
+            preview: "none",
+          }
+        } }
+        script="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=AM_HTMLorMML">
 
     <ConceptContext.Provider
         value={{
@@ -149,6 +159,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
         </TextSearchContext.Provider>
       </SourceContext.Provider>
     </ConceptContext.Provider>
+    </MathJax.Context>
     </ReviewContext.Provider>
   );
 };
