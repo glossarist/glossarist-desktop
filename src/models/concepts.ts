@@ -218,7 +218,7 @@ type Grammar = {
 	alternateForms?: string[]
 	// NOT synonyms; variations of number/tense etc.
 	isAbbreviation?: true
-} & (Noun | Verb | Adjective | Adverb | { partOfSpeech: undefined })
+} & (Noun | Verb | Adjective | Adverb | { partOfSpeech?: undefined })
 // {} is for unknown part of speech.
 
 export type Noun = {
