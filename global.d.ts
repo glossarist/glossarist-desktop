@@ -3,6 +3,8 @@ declare module '*.scss' {
   export default content;
 }
 
+declare const __static: string;
+
 interface HTMLElement {
   scrollIntoViewIfNeeded: () => void
 }

@@ -38,25 +38,32 @@ html, body, #app {
   overflow: hidden;
 
   .appTitle {
-    padding-left: 1rem;
+    padding-left: $pt-grid-size;
     font-size: 160%;
     color: $pt-text-color-muted;
     text-transform: uppercase;
-    letter-spacing: -.05em;
+    letter-spacing: -.025em;
     line-height: 1;
-    top: 10px;
+  }
+
+  .appSymbol {
+    height: 3rem;
+    margin-right: $pt-grid-size;
+    flex: 0;
   }
 
   .headerAndSettings {
-     display: flex;
-     align-items: baseline;
-     flex-direction: row;
-     justify-content: flex-end;
-   }
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-top: .25em;
+  }
 
-   .settingsButton {
-     margin-left: 0.3rem;
-   }
+  .settingsButton {
+    margin-left: 0.3rem;
+  }
 
   .panelContents {
     height: 3.75rem;

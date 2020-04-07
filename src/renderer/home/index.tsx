@@ -7,6 +7,7 @@ import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 import { H1, Button, ButtonGroup } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
+import { useIPCValue } from 'coulomb/ipc/renderer';
 
 import { callIPC } from 'coulomb/ipc/renderer';
 import { Panel } from 'coulomb-panel/panel';
@@ -51,6 +52,12 @@ const Window: React.FC<WindowComponentProps> = function () {
   const [activeModuleID, activateModule] = useState(MODULES[0]);
   const [moduleOptions, setModuleOptions] = useState<any>({});
 
+  const branding = useIPCValue<{ objectID: string }, { object: { name: string, symbol?: string } | null }>
+  ('db-default-read', { object: null }, { objectID: 'branding' }).value.object;
+
+  const dataRepoPath = useIPCValue<{}, { localClonePath?: string }>
+  ('db-default-describe', {}, { objectID: 'branding' }).value.localClonePath;
+
   useEffect(() => {
     for (const moduleID of MODULES) {
       Mousetrap.bind(MODULE_CONFIG[moduleID].hotkey, () => activateModule(moduleID))
@@ -85,11 +92,17 @@ const Window: React.FC<WindowComponentProps> = function () {
           iconCollapsed="caret-down"
           iconExpanded="caret-up">
 
+          <img
+            className={styles.appSymbol}
+            src={branding?.symbol !== undefined && dataRepoPath 
+              ? `file://${dataRepoPath}/${branding.symbol}`
+              : `file://${__static}/glossarist-symbol.svg`} />
+
           <div className={styles.headerAndSettings}>
-            <H1 className={styles.appTitle}>Glossarist</H1>
+            <H1 className={styles.appTitle}>{branding?.name || "Glossarist"}</H1>
             <Button
               icon="settings"
-              title="Settings"
+              title="Open settings"
               onClick={openSettingsWindow}
               className={styles.settingsButton}
               minimal={true}
