@@ -99,7 +99,7 @@
     "@blueprintjs/select": "^3.11.2",
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
-    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.1.12-gitpkg",
+    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.1.13-gitpkg",
     "coulomb-panel": "https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.2-gitpkg",
     "cytoscape": "3",
     "electron-log": "^4.0.6",
