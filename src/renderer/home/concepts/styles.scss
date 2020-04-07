@@ -200,11 +200,12 @@
 
     .itemMarker {
       flex-shrink: 0;
-      width: 2rem;
-      overflow: hidden;
-      display: inline-block;
+      width: 4rem;
       margin-left: .5rem;
       margin-right: .5rem;
+      display: flex;
+      flex-flow: row nowrap;
+      overflow: hidden;
     }
 
     .itemMarkerRight {

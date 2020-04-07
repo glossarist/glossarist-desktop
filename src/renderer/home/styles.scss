@@ -264,7 +264,9 @@ html, body, #app {
 :local .conceptID {
   opacity: .4;
   font-size: 80%;
-  width: 1.5em;
+
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 

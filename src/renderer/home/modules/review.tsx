@@ -155,7 +155,7 @@ const MainView: React.FC<{}> = function () {
                 value={lifecycleStage}
                 onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
                   setLifecycleStage(evt.currentTarget.value as LifecycleStage)}>
-              {LIFECYCLE_STAGES.map(ls => <option value={ls}>{ls}</option>)}
+              {LIFECYCLE_STAGES.map(ls => <option key={ls} value={ls}>{ls}</option>)}
             </HTMLSelect>
             <Button
               disabled={reviewed || review.approved !== undefined}
