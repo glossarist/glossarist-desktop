@@ -179,6 +179,7 @@ const MainView: React.FC<{}> = function () {
               concept={active}
               entry={entryWithSource}
               parentRevisionID={ctx.revisionID}
+              onCreateRevision={(rev) => ctx.selectRevision(rev)}
               isLoading={ctx.isLoading} />
           : authSourceForm}
       </div>
