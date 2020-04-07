@@ -114,7 +114,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
             preview: "none",
           }
         } }
-        script="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=AM_HTMLorMML">
+        script={`file://${__static}/math/MathJax.js?config=AM_HTMLorMML`}>
 
     <ConceptContext.Provider
         value={{
