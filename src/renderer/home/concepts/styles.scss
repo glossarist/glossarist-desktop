@@ -89,6 +89,9 @@
     font-weight: normal;
     font-family: Georgia, serif;
     margin-bottom: 1rem;
+    > * {
+      display: inline;
+    }
 
     &.normativeStatus-deprecated {
       color: $pt-text-color-disabled;
