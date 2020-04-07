@@ -1,4 +1,4 @@
-import * as yaml from 'js-yaml';
+//import * as yaml from 'js-yaml';
 import * as crypto from 'crypto';
 import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';

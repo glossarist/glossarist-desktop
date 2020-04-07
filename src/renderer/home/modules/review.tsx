@@ -4,7 +4,7 @@ import VisualDiff from 'react-visual-diff';
 
 import { InputGroup, NonIdealState, ButtonGroup, Button, Icon, FormGroup, Callout, HTMLSelect } from '@blueprintjs/core';
 import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
-import { Concept, Revision, SupportedLanguages, LIFECYCLE_STAGES, LifecycleStage } from 'models/concepts';
+import { Concept, Revision, LIFECYCLE_STAGES, LifecycleStage } from 'models/concepts';
 import { app } from 'renderer';
 import { Review } from 'models/reviews';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';

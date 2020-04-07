@@ -1,6 +1,6 @@
 import { debounce } from 'throttle-debounce';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Icon, Tooltip, InputGroup, Button } from '@blueprintjs/core';
+import { Icon, InputGroup, Button } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { ConceptRef, MultiLanguageConcept } from 'models/concepts';
