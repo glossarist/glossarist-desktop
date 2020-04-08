@@ -1,3 +1,7 @@
-# ISO/TC 211 Geolexica Desktop
+# Glossarist desktop -- cross-platform standardized terminology editor
 
-Standalone application for editing [ISO/TC 211 Geolexica database](https://github.com/ISO-TC211/geolexica-database) data.
+This application supports:
+
+* Editing [ISO/TC 211 Geolexica database](https://github.com/ISO-TC211/geolexica-database) data
+* Editing [OSGeo Geolexica database](https://github.com/geolexica/osgeo-glossary) data
+* (PoC) Editing [IEC Electropedia data](https://github.com/glossarist/iev-data) data
