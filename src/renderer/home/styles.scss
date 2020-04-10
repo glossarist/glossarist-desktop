@@ -124,7 +124,6 @@ html, body, #app {
     .fixedPanel {
       flex-shrink: 0;
       max-height: 33vh;
-      overflow: hidden;
       display: flex;
       flex-flow: column nowrap;
     }
