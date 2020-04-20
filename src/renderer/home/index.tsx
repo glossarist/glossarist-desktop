@@ -76,7 +76,7 @@ const Window: React.FC<WindowComponentProps> = function () {
   const module = MODULE_CONFIG[activeModuleID];
 
   const openSettingsWindow = () => {
-    callIPC("open-predefined-window", {id: "settings"});
+    callIPC('open-predefined-window', { id: 'settings' });
   };
 
 
