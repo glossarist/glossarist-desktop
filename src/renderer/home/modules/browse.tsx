@@ -101,7 +101,7 @@ const SearchByText: ToolbarItem = function () {
 const SortOrder: ToolbarItem = function () {
   const src = useContext(SourceContext).active;
   if (src.type === 'catalog-preset' && src.presetName === 'all') {
-    return <Button disabled icon="sort-numerical">Concept ID</Button>;
+    return <Button disabled icon="sort-numerical">Concept&nbsp;ID</Button>;
   } else {
     return <Button disabled icon="sort">Custom order</Button>;
   }

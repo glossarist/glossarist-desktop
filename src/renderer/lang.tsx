@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { Position, Popover, Button, Menu, Tag } from '@blueprintjs/core';
+import { Position, Popover, Button, Menu, Text, Tag } from '@blueprintjs/core';
 
 
 const LanguageMenu: React.FC<{}> = function () {
@@ -47,7 +47,7 @@ export const LangSelector: React.FC<{}> = function () {
           ? `Showing ${langName} translation`
           : `Showing default language (${langName})`}
         text={lang.selected !== lang.default
-          ? langName
+          ? <Text ellipsize>{langName}</Text>
           : undefined} />
     </Popover>
   );
