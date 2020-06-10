@@ -29,23 +29,23 @@ const Panel: React.FC<{}> = function () {
   const panelState = panel.state as { addingLink?: boolean };
   const addingLink = panelState.addingLink || false;
 
-  function toggleAddingLink(state: boolean) {
-    panel.setState({ addingLink: state });
-  }
-
   const [newLinkTarget, setNewLinkTarget] = useState<string>('');
   const [newLinkType, setNewLinkType] = useState<string>(DEFAULT_RELATIONSHIP_TYPE);
   const [commitInProgress, setCommitInProgress] = useState(false);
-
-  function handleNewLinkChange(evt: React.FormEvent<HTMLInputElement>) {
-    setNewLinkTarget((evt.target as HTMLInputElement).value.trim());
-  }
 
   const newLinkInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     newLinkInputRef.current?.focus();
   }, [addingLink]);
+
+  function toggleAddingLink(state: boolean) {
+    panel.setState({ addingLink: state });
+  }
+
+  function handleNewLinkChange(evt: React.FormEvent<HTMLInputElement>) {
+    setNewLinkTarget((evt.target as HTMLInputElement).value.trim());
+  }
 
   async function addNewLink() {
     let newLinkRef: number;
@@ -150,6 +150,7 @@ const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isC
   function toggleAddingLink(state: boolean) {
     panel.setState({ addingLink: state });
   }
+
   return (
     <Button
         small minimal
