@@ -3,11 +3,10 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { InputGroup, Button, Tag } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
-import { ConceptRef, MultiLanguageConcept } from 'models/concepts';
+import { MultiLanguageConcept } from 'models/concepts';
 import { LangSelector } from 'renderer/lang';
 import {
   SourceContext,
-  ConceptContext,
   TextSearchContext,
 } from '../contexts';
 import { ConceptList, refToString } from '../concepts';
@@ -21,7 +20,6 @@ import styles from './browse.scss';
 const MainView: React.FC<{}> = function () {
   const source = useContext(SourceContext);
   const concepts = source.objects;
-  const concept = useContext(ConceptContext);
   const lang = useContext(LangConfigContext);
 
   function renderItemMarker(c: MultiLanguageConcept<any>): JSX.Element {
@@ -43,8 +41,6 @@ const MainView: React.FC<{}> = function () {
       <ConceptList
         lang={lang.selected as keyof typeof availableLanguages}
         concepts={concepts}
-        isItemSelected={(ref: ConceptRef) => concept.ref === ref}
-        onItemSelect={(ref: ConceptRef) => concept.select(ref)}
         itemMarker={(c: MultiLanguageConcept<any>) =>
           <span className={sharedStyles.conceptID}>{refToString(c.termid)}</span>}
         itemMarkerRight={renderItemMarker}

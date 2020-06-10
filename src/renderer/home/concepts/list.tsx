@@ -22,9 +22,6 @@ interface ConceptListProps {
 
   lang: keyof typeof availableLanguages
   className?: string
-
-  isItemSelected: (ref: ConceptRef) => boolean
-  onItemSelect: (ref: ConceptRef) => void
 }
 export const ConceptList: React.FC<ConceptListProps> =
 function ({
@@ -34,10 +31,9 @@ function ({
     itemMarker,
     itemMarkerRight,
     buttonProps,
-    onItemSelect,
     paddings,
-    itemHeight,
-    isItemSelected }) {
+    itemHeight
+  }) {
 
   const CONTAINER_PADDINGS = paddings || 0;
   const ITEM_HEIGHT = itemHeight || 30;
@@ -91,9 +87,9 @@ function ({
           style={style}
           alignText="left"
           className={styles.lazyConceptListItem}
-          active={isItemSelected(c.termid)}
+          active={conceptCtx.ref === c.termid}
           {...buttonProps}
-          onClick={() => onItemSelect(c.termid)}>
+          onClick={() => conceptCtx.select(c.termid)}>
 
         {itemMarker
           ? <span className={styles.itemMarker}>{itemMarker(c)}</span>

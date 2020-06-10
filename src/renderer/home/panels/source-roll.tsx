@@ -3,9 +3,9 @@ import React, { useContext } from 'react';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { availableLanguages } from 'app';
-import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
+import { MultiLanguageConcept } from 'models/concepts';
 import { PanelConfig } from '../panel-config';
-import { SourceContext, ConceptContext } from '../contexts';
+import { SourceContext } from '../contexts';
 import { ConceptList, refToString } from '../concepts';
 
 import sharedStyles from '../styles.scss';
@@ -34,7 +34,6 @@ const SourceRollTitle: React.FC<{}> = function () {
 
 const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function ({ lang }) {
   const source = useContext(SourceContext);
-  const concept = useContext(ConceptContext);
   const concepts = source.objects;
 
   return (
@@ -45,8 +44,6 @@ const SourceRoll: React.FC<{ lang: keyof typeof availableLanguages }> = function
       concepts={concepts}
       itemMarker={(c: MultiLanguageConcept<any>) =>
         <span className={sharedStyles.conceptID}>{refToString(c.termid)}</span>}
-      isItemSelected={(ref: ConceptRef) => concept.ref === ref}
-      onItemSelect={(ref: ConceptRef) => concept.select(ref)}
     />
   );
 };
