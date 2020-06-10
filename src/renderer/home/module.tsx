@@ -107,13 +107,13 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   return (
     <ReviewContext.Provider value={{ reviewID: selectedReviewID, selectReviewID: selectReviewID }}>
     <MathJax.Context
-        options={ {
+        options={{
           asciimath2jax: {
             useMathMLspacing: true,
             delimiters: [["$$","$$"]],
             preview: "none",
-          }
-        } }
+          },
+        }}
         script={`file://${__static}/math/MathJax.js?config=AM_HTMLorMML`}>
 
     <ConceptContext.Provider
