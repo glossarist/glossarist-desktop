@@ -109,7 +109,7 @@ const Panel: React.FC<{}> = function () {
       isExpanded: hasChildren,
       label: collection.label,
       childNodes: [...children.entries()].map(collectionToNode),
-      secondaryLabel: hasItems ? <Tag minimal>{itemCount}</Tag> : undefined,
+      secondaryLabel: hasItems ? <Tag>{itemCount}</Tag> : undefined,
       isSelected: isSelected,
       nodeData: { collectionID: collection.id },
     };
