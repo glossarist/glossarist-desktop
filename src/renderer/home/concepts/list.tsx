@@ -79,17 +79,35 @@ function ({
     }
   }
 
+  function handleClick(termid: number, evt: React.MouseEvent) {
+    conceptCtx.select(termid);
+
+    if (evt.altKey) {
+      if (conceptCtx.highlightedRefs.indexOf(termid) < 0) {
+        conceptCtx.highlightRef(termid);
+      } else {
+        conceptCtx.unhighlightRef(termid);
+      }
+    } else {
+      conceptCtx.highlightOne(termid);
+    }
+  }
+
   const Row = ({ index, style }: { index: number, style: object }) => {
     const c = concepts[index];
+    const isHighlighted = conceptCtx.highlightedRefs.indexOf(c.termid) >= 0;
     return (
       <Button
           fill minimal
           style={style}
           alignText="left"
-          className={styles.lazyConceptListItem}
-          active={conceptCtx.ref === c.termid}
+          className={`
+            ${styles.lazyConceptListItem}
+            ${conceptCtx.ref === c.termid ? styles.lazyConceptListItemSelected : ''}
+          `}
+          active={isHighlighted}
           {...buttonProps}
-          onClick={() => conceptCtx.select(c.termid)}>
+          onClick={(evt: React.MouseEvent) => handleClick(c.termid, evt)}>
 
         {itemMarker
           ? <span className={styles.itemMarker}>{itemMarker(c)}</span>

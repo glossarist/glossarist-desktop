@@ -48,21 +48,37 @@ export type MaybeActiveLocalizedConcept = WithRevisions<Concept<any, any>> | nul
 // `null` means not yet localized into `lang.selected`, `undefined` means probably still loading.
 
 export interface ConceptContextSpec {
+  isLoading: boolean
+
   active: MaybeActiveConcept
   activeLocalized: MaybeActiveLocalizedConcept
-  isLoading: boolean
+
   ref: ConceptRef | null
   select: (ref: ConceptRef | null) => void
+
+  highlightedRefs: ConceptRef[]
+  highlightRef: (ref: ConceptRef) => void
+  unhighlightRef: (ref: ConceptRef) => void
+  highlightOne: (ref: ConceptRef) => void
+
   revisionID: null | string
   revision: Concept<any, any> | null
   selectRevision: (revID: string) => void
 }
 export const ConceptContext = React.createContext<ConceptContextSpec>({
+  isLoading: false,
+
   active: null,
   activeLocalized: null,
-  select: () => {},
-  isLoading: false,
+
   ref: null,
+  select: () => {},
+
+  highlightedRefs: [],
+  highlightRef: () => {},
+  unhighlightRef: () => {},
+  highlightOne: () => {},
+
   revisionID: null,
   revision: null,
   selectRevision: () => {},

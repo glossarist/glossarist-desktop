@@ -1,8 +1,9 @@
+import update from 'immutability-helper';
 import React, { useState, useContext, useMemo, useEffect } from 'react';
 import MathJax from 'react-mathjax2';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { ObjectSource, availableLanguages } from 'app';
-import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
+import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/concepts';
 import { app } from 'renderer';
 import { ConceptContext, SourceContext, TextSearchContext, ReviewContext } from './contexts';
 import { ModuleConfig } from './module-config';
@@ -15,18 +16,28 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   const lang = useContext(LangConfigContext);
 
   const [selectedConceptRef, selectConceptRef] = useState(null as null | ConceptRef);
+
+  const [highlightedConceptRefs, updateHighlightedConceptRefs] = useState<ConceptRef[]>([]);
+
   const [selectedRevisionID, selectRevisionID] = useState(null as null | string);
   const [activeSource, selectSource] = useState({ type: 'catalog-preset', presetName: 'all' } as ObjectSource);
   const [textQuery, setTextQuery] = useState('' as string);
   const [selectedReviewID, selectReviewID] = useState<string | null>(null);
 
-  const _objs = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
+  const _concepts = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
   ('concepts', { query: { inSource: activeSource, matchingText: textQuery }});
-
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
       ('concepts', { query: { inSource: activeSource }}).ids,
-    objects: Object.values(_objs.objects).sort((a, b) => a.termid - b.termid),
+    objects: Object.values(_concepts.objects).sort((a, b) => a.termid - b.termid),
+  };
+
+  const _collections = app.useMany<ConceptCollection, {}>
+  ('collections', {});
+  const collections = {
+    objects: Object.values(_collections.objects).
+      sort((a, b) => a.label.localeCompare(b.label)).
+      map(c => ({ type: 'collection' as const, alreadyExists: false, collectionID: c.id })),
   };
 
   useEffect(() => {
@@ -95,7 +106,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   }, [currentIndex]);
 
   const concept = selectedConceptRef
-    ? (_objs.objects[selectedConceptRef] || null)
+    ? (_concepts.objects[selectedConceptRef] || null)
     : null; 
   const localizedConcept = concept
     ? (concept[lang.selected as keyof typeof availableLanguages] || null)
@@ -119,10 +130,32 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     <ConceptContext.Provider
         value={{
           active: concept,
-          isLoading: _objs.isUpdating,
+          isLoading: _concepts.isUpdating,
           activeLocalized: localizedConcept,
+
           ref: selectedConceptRef,
           select: selectConceptRef,
+
+          highlightedRefs: highlightedConceptRefs,
+          highlightRef: (ref: ConceptRef) =>
+            updateHighlightedConceptRefs((refs) => {
+              const idx = refs.indexOf(ref);
+              if (idx < 0) {
+                return [ ...refs, ref ];
+              }
+              return refs;
+            }),
+          unhighlightRef: (ref: ConceptRef) =>
+            updateHighlightedConceptRefs((refs) => {
+              const idx = refs.indexOf(ref);
+              if (idx >= 0) {
+                update(refs, { $splice: [[ idx, 1 ]] });
+              }
+              return refs;
+            }),
+          highlightOne: (ref: ConceptRef) =>
+            updateHighlightedConceptRefs([ ref ]),
+
           revisionID: selectedRevisionID,
           revision,
           selectRevision: selectRevisionID,
@@ -130,11 +163,12 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       <SourceContext.Provider
           value={{
             active: activeSource,
+            collections: collections.objects,
             select: selectSource,
             refs: concepts.ids,
             objects: concepts.objects,
-            index: _objs.objects,
-            isLoading: _objs.isUpdating,
+            index: _concepts.objects,
+            isLoading: _concepts.isUpdating,
           }}>
         <TextSearchContext.Provider value={{ query: textQuery, setQuery: setTextQuery }}>
 
