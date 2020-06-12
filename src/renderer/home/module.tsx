@@ -37,7 +37,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   const collections = {
     objects: Object.values(_collections.objects).
       sort((a, b) => a.label.localeCompare(b.label)).
-      map(c => ({ type: 'collection' as const, alreadyExists: false, collectionID: c.id })),
+      map(c => update(c, { $unset: ['items' ]})),
   };
 
   useEffect(() => {

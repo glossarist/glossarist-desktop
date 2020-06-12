@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { MultiLanguageConcept, ConceptRef, Concept, ConceptRelation, IncomingConceptRelation, WithRevisions } from '../../models/concepts';
+import { MultiLanguageConcept, ConceptRef, Concept, ConceptRelation, IncomingConceptRelation, WithRevisions, ConceptCollection } from '../../models/concepts';
 import { ObjectSource } from '../../app';
 import { useIPCValue } from 'coulomb/ipc/renderer';
 
@@ -26,6 +26,7 @@ export const TextSearchContext = React.createContext<TextSearchContextSpec>({
 
 
 export interface ObjectSourceContextSpec {
+  collections: Exclude<ConceptCollection, 'items'>[]
   active: ObjectSource
   isLoading: boolean
   refs: ConceptRef[]
@@ -34,6 +35,7 @@ export interface ObjectSourceContextSpec {
   select: (source: ObjectSource) => void
 }
 export const SourceContext = React.createContext<ObjectSourceContextSpec>({
+  collections: [],
   active: { type: 'catalog-preset', presetName: 'all' },
   isLoading: false,
   objects: [],

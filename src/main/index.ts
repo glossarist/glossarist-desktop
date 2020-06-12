@@ -7,7 +7,6 @@ import { initMain } from 'coulomb/app/main';
 import { listen } from 'coulomb/ipc/main';
 import { default as Manager, ManagerOptions } from 'coulomb/db/isogit-yaml/main/manager';
 import { default as BackendCls } from 'coulomb/db/isogit-yaml/main/base';
-import { default as ModelManagerCls } from 'coulomb/db/isogit-yaml/main/manager';
 import { default as FSWrapper } from 'coulomb/db/isogit-yaml/main/yaml/file';
 
 import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
@@ -15,6 +14,7 @@ import { conf as appConf } from '../app';
 
 import { default as ConceptManagerCls } from './concept-manager';
 import { default as ConceptReviewManagerCls } from './review-manager';
+import { default as CollectionManagerCls } from './collection-manager';
 import { Review } from 'models/reviews';
 
 
@@ -62,7 +62,7 @@ export const conf: MainConfig<typeof appConf> = {
     collections: {
       dbName: 'default',
       options: {
-        cls: ModelManagerCls,
+        cls: CollectionManagerCls,
         workDir: 'collections',
         idField: 'id',
       } as ManagerOptions<ConceptCollection>,
