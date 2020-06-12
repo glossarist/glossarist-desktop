@@ -77,11 +77,11 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   useEffect(() => {
     function selectNext() {
       const ref = getNextRef(currentIndex);
-      if (ref) { selectConceptRef(ref); }
+      if (ref) { selectConceptRef(ref); updateHighlightedConceptRefs([ ref ]); }
     }
     function selectPrevious() {
       const ref = getPreviousRef(currentIndex);
-      if (ref) { selectConceptRef(ref); }
+      if (ref) { selectConceptRef(ref); updateHighlightedConceptRefs([ ref ]); }
     }
     function getNextRef(idx?: number): ConceptRef | undefined {
       if (idx !== undefined && concepts.objects[idx + 1]) {
