@@ -5,7 +5,7 @@ import { IButtonProps, Button } from '@blueprintjs/core';
 import { FixedSizeList as List } from 'react-window';
 
 import { availableLanguages } from '../../../app';
-import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/concepts';
+import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
 import { ConceptContext, SourceContext } from '../contexts';
 import { ConceptItem } from './item';
 
@@ -97,24 +97,44 @@ function ({
     }
   }
 
-  async function handleAddToCollection(collectionID: string, refs: ConceptRef[]) {
+  async function addToCollection(collectionID: string, refs: ConceptRef[]) {
     await callIPC<{ objID: string, ids: ConceptRef[], commit: boolean }, { success: true }>
     ('model-collections-add-items', { objID: collectionID, ids: refs, commit: true });
   }
 
+  async function removeFromCollection(collectionID: string, refs: ConceptRef[]) {
+    await callIPC<{ objID: string, ids: ConceptRef[], commit: boolean }, { success: true }>
+    ('model-collections-remove-items', { objID: collectionID, ids: refs, commit: true });
+  }
+
   function invokeRowContextMenu(ref: ConceptRef) {
     const cm = new remote.Menu();
+
+    // Dedupe
+    const refsActedUpon =  [ ...(new Set([ ...conceptCtx.highlightedRefs, ref ])) ];
+
     for (const collection of sourceCtx.collections) {
       cm.append(new remote.MenuItem({
         label: collection.label,
-        click: async () => await handleAddToCollection(collection.id, [ ...conceptCtx.highlightedRefs, ref ]),
+        enabled: sourceCtx.active.type !== 'collection' || collection.id !== sourceCtx.active.collectionID,
+        click: async () => await addToCollection(collection.id, refsActedUpon),
       }));
     }
 
     const m = new remote.Menu();
     m.append(new remote.MenuItem({
-      label: "Add to collection",
+      label: refsActedUpon.length > 1 ? `Add ${refsActedUpon.length} concepts to collection` : "Add to collection",
+      enabled: refsActedUpon.length > 0,
       submenu: cm,
+    }));
+    m.append(new remote.MenuItem({
+      label: refsActedUpon.length > 1 ? `Remove ${refsActedUpon.length} concepts from current collection` : "Remove from current collection",
+      enabled: sourceCtx.active.type === 'collection' && refsActedUpon.length > 0,
+      click: async () => {
+        if (sourceCtx.active.type === 'collection') {
+          await removeFromCollection(sourceCtx.active.collectionID, refsActedUpon);
+        }
+      }
     }));
     m.popup({ window: remote.getCurrentWindow() });
   }
@@ -122,6 +142,7 @@ function ({
   const Row = ({ index, style }: { index: number, style: object }) => {
     const c = concepts[index];
     const isHighlighted = conceptCtx.highlightedRefs.indexOf(c.termid) >= 0;
+
     return (
       <Button
           fill minimal
