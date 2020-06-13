@@ -9,7 +9,6 @@ import { app } from '.';
 import { listen } from 'coulomb/ipc/main';
 import { migrateConcept } from './legacy';
 import ConceptReviewManager from './review-manager';
-import moment from 'moment';
 
 
 export interface Query {
