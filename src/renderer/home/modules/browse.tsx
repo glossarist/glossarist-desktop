@@ -1,10 +1,9 @@
 import { debounce } from 'throttle-debounce';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { InputGroup, Button, Tag } from '@blueprintjs/core';
+import { Text, InputGroup, Button, Tag } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { MultiLanguageConcept } from 'models/concepts';
-import { LangSelector } from 'renderer/lang';
 import {
   SourceContext,
   TextSearchContext,
@@ -15,6 +14,7 @@ import { ModuleConfig, ToolbarItem } from '../module-config';
 import { availableLanguages } from 'app';
 import sharedStyles from '../styles.scss';
 import styles from './browse.scss';
+import { remote } from 'electron';
 
 
 const MainView: React.FC<{}> = function () {
@@ -104,6 +104,50 @@ const SortOrder: ToolbarItem = function () {
 };
 
 
+const LanguageMenu: ToolbarItem = function () {
+  const lang = useContext(LangConfigContext);
+  const langName = lang.available[lang.selected];
+
+  function invokeLanguageMenu() {
+    const m = new remote.Menu();
+
+    const translatedLanguages = Object.entries(lang.available).
+    filter(([langID, _]) => langID !== lang.default)
+
+    m.append(new remote.MenuItem({
+      label: `${lang.available[lang.default]} (authoritative)`,
+      enabled: lang.selected !== lang.default,
+      click: () => lang.select(lang.default),
+    }));
+    m.append(new remote.MenuItem({ type: 'separator' }));
+
+    for (const [langID, langName] of translatedLanguages) {
+      m.append(new remote.MenuItem({
+        label: langName,
+        enabled: lang.selected !== langID,
+        click: () => lang.select(langID),
+      }));
+    }
+
+    m.popup({ window: remote.getCurrentWindow() });
+  }
+
+  return (
+    <Button
+      icon="translate"
+      rightIcon="caret-up"
+      onClick={invokeLanguageMenu}
+      active={lang.selected !== lang.default}
+      title={lang.selected !== lang.default
+        ? `Showing ${langName} translation`
+        : `Showing default language (${langName})`}
+      text={lang.selected !== lang.default
+        ? <Text ellipsize>{langName}</Text>
+        : undefined} />
+  );
+};
+
+
 export default {
   hotkey: 'b',
   title: "Browse",
@@ -116,7 +160,7 @@ export default {
   ],
 
   MainView,
-  mainToolbar: [() => <LangSelector />, SearchByText, SortOrder],
+  mainToolbar: [() => <LanguageMenu />, SearchByText, SortOrder],
 
   rightSidebar: [
     panels.basics,
