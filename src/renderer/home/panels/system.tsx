@@ -1,8 +1,17 @@
 import React, { useContext } from 'react';
-import { FormGroup, InputGroup } from '@blueprintjs/core';
+import { shell } from 'electron';
+import { FormGroup, InputGroup, Button } from '@blueprintjs/core';
+import { callIPC } from 'coulomb/ipc/renderer';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { refToString } from '../concepts';
+import { ConceptRef } from 'models/concepts';
+
+
+async function getFilesystemPath(ref: ConceptRef): Promise<string> {
+  return (await callIPC<{ objectID: ConceptRef }, { path: string }>
+  ('model-concepts-get-filesystem-path', { objectID: ref })).path;
+}
 
 
 const Panel: React.FC<{}> = function () {
@@ -13,6 +22,14 @@ const Panel: React.FC<{}> = function () {
     <div>
       <FormGroup label="ID" inline={true}>
         <InputGroup readOnly={true} value={ref} />
+      </FormGroup>
+      <FormGroup label="File" inline={true}>
+        <Button
+          minimal
+          disabled={concept?.ref === null}
+          onClick={async () => concept?.ref !== null
+            ? shell.showItemInFolder(await getFilesystemPath(concept?.ref))
+            : void 0}>reveal</Button>
       </FormGroup>
     </div>
   );
