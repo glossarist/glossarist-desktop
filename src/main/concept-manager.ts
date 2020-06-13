@@ -181,6 +181,8 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
         reduce((objs: object, obj: MultiLanguageConcept<any>) => ({ ...objs, [obj.termid]: obj }), {});
 
       } else if (status === 'possiblyOutdated') {
+        // Return only concepts for which latest revision in authoritative language
+        // comes before latest revision in selected translated language.
         objects = Object.values(objects).
         filter((c) => {
           const authoritative = c[defaultLanguage];
