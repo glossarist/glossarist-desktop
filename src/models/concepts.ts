@@ -171,6 +171,8 @@ export interface ConceptCollection {
   // regardless of nesting
 
   parentID?: string
+  // May not be supported in the widget initially.
+
   label: string
   items: ConceptRef[]
 }
