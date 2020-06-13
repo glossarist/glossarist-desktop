@@ -1,12 +1,13 @@
+import update from 'immutability-helper';
 import { debounce } from 'throttle-debounce';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Text, InputGroup, Button, Tag } from '@blueprintjs/core';
+import { Text, InputGroup, Button, Tag, ButtonGroup } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
-import { MultiLanguageConcept } from 'models/concepts';
+import { MultiLanguageConcept, SupportedLanguages } from 'models/concepts';
 import {
   SourceContext,
-  TextSearchContext,
+  ObjectQueryContext,
 } from '../contexts';
 import { ConceptList, refToString } from '../concepts';
 import * as panels from '../panels';
@@ -51,21 +52,24 @@ const MainView: React.FC<{}> = function () {
 
 
 const SearchByText: ToolbarItem = function () {
-  const searchCtx = useContext(TextSearchContext);
+  const queryCtx = useContext(ObjectQueryContext);
   const searchFieldRef = useRef<HTMLInputElement | null>(null);
-  const [query, setQuery] = useState(searchCtx.query || '' as string);
+  const [text, updateText] = useState(queryCtx.query.matchingText || '' as string);
 
   const handleChange = function (evt: React.FormEvent<HTMLInputElement>) {
-    setQuery((evt.target as HTMLInputElement).value);
+    updateText((evt.target as HTMLInputElement).value);
   }
-  const updateQuery = debounce(400, searchCtx.setQuery);
+  function _updateQuery(newText: string) {
+    queryCtx.setQuery({ ...queryCtx.query, matchingText: newText.trim() || undefined });
+  }
+  const updateQuery = debounce(400, _updateQuery);
 
   useEffect(() => {
-    updateQuery(query);
+    updateQuery(text);
     return function cleanup() {
       updateQuery.cancel();
     }
-  }, [query]);
+  }, [text]);
 
   useEffect(() => {
     Mousetrap.bind('mod+f', () => searchFieldRef.current?.focus());
@@ -82,14 +86,14 @@ const SearchByText: ToolbarItem = function () {
     }
   }, []);
 
-  return <InputGroup round
-    value={query}
+  return <InputGroup
+    value={text}
     onChange={handleChange}
     inputRef={(ref: HTMLInputElement | null) => { searchFieldRef.current = ref }}
     leftIcon="search"
     placeholder="Type to search…"
     title="Search is performed across English designations and definitions, as well as concept identifiers. (mod+f)"
-    rightElement={<Button minimal icon="cross" onClick={() => setQuery('')} />}
+    rightElement={<Button minimal icon="cross" onClick={() => updateText('')} />}
   />;
 };
 
@@ -104,6 +108,77 @@ const SortOrder: ToolbarItem = function () {
 };
 
 
+const FilterMenu: ToolbarItem = function () {
+  const lang = useContext(LangConfigContext);
+  const queryCtx = useContext(ObjectQueryContext);
+
+  useEffect(() => {
+    if (lang.selected === lang.default) {
+      queryCtx.setQuery(update(queryCtx.query, { $unset: ['localization'] }));
+    } else if (queryCtx.query.localization) {
+      queryCtx.setQuery(update(
+        queryCtx.query,
+        { localization: { lang: { $set: lang.selected as keyof SupportedLanguages } } }));
+    }
+  }, [lang.selected]);
+
+  function invokeFilterMenu() {
+    const m = new remote.Menu();
+
+    const localizationMenu = new remote.Menu();
+
+    if (lang.selected !== lang.default) {
+      localizationMenu.append(new remote.MenuItem({
+        type: 'radio',
+        label: "Missing",
+        toolTip: `Localized entry is missing in ${lang.available[lang.selected]}`,
+        checked: queryCtx.query.localization?.status === 'missing',
+        click: () => queryCtx.setQuery({
+          ...queryCtx.query,
+          localization: { lang: lang.selected as keyof SupportedLanguages, status: 'missing' },
+        }),
+      }));
+      localizationMenu.append(new remote.MenuItem({
+        type: 'radio',
+        label: "Possibly outdated",
+        enabled: false,
+        toolTip: `Authoritative version changed since last update of localized entry in ${lang.available[lang.selected]}`,
+        checked: queryCtx.query.localization?.status === 'possiblyOutdated',
+        click: () => queryCtx.setQuery({
+          ...queryCtx.query,
+          localization: { lang: lang.selected as keyof SupportedLanguages, status: 'possiblyOutdated' },
+        }),
+      }));
+    }
+
+    m.append(new remote.MenuItem({
+      label: "Localization status",
+      enabled: lang.selected !== lang.default,
+      sublabel: queryCtx.query.localization ? 'Applied' : undefined,
+      submenu: localizationMenu,
+    }));
+
+    m.popup({ window: remote.getCurrentWindow() });
+  }
+
+  return (
+    <ButtonGroup>
+      <Button
+        icon="filter"
+        title="Filter concepts"
+        onClick={invokeFilterMenu}
+        active={queryCtx.query.localization !== undefined} />
+      {queryCtx.query.localization !== undefined
+        ? <Button
+            title="Reset filters"
+            icon="cross"
+            onClick={() => queryCtx.setQuery(update(queryCtx.query, { $unset: ['localization'] }))} />
+        : null}
+    </ButtonGroup>
+  );
+};
+
+
 const LanguageMenu: ToolbarItem = function () {
   const lang = useContext(LangConfigContext);
   const langName = lang.available[lang.selected];
@@ -115,7 +190,8 @@ const LanguageMenu: ToolbarItem = function () {
     filter(([langID, _]) => langID !== lang.default)
 
     m.append(new remote.MenuItem({
-      label: `${lang.available[lang.default]} (authoritative)`,
+      label: lang.available[lang.default],
+      sublabel: 'authoritative',
       enabled: lang.selected !== lang.default,
       click: () => lang.select(lang.default),
     }));
@@ -135,7 +211,6 @@ const LanguageMenu: ToolbarItem = function () {
   return (
     <Button
       icon="translate"
-      rightIcon="caret-up"
       onClick={invokeLanguageMenu}
       active={lang.selected !== lang.default}
       title={lang.selected !== lang.default
@@ -160,7 +235,7 @@ export default {
   ],
 
   MainView,
-  mainToolbar: [() => <LanguageMenu />, SearchByText, SortOrder],
+  mainToolbar: [() => <LanguageMenu />, FilterMenu, SearchByText, SortOrder],
 
   rightSidebar: [
     panels.basics,

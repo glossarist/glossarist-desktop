@@ -5,9 +5,10 @@ import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { ObjectSource, availableLanguages } from 'app';
 import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/concepts';
 import { app } from 'renderer';
-import { ConceptContext, SourceContext, TextSearchContext, ReviewContext } from './contexts';
+import { ConceptContext, SourceContext, ReviewContext, ObjectQueryContext } from './contexts';
 import { ModuleConfig } from './module-config';
 import { Sidebar } from './module-sidebar';
+import { Query as ConceptQuery } from 'main/concept-manager'
 import styles from './styles.scss';
 
 
@@ -16,19 +17,19 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   const lang = useContext(LangConfigContext);
 
   const [selectedConceptRef, selectConceptRef] = useState(null as null | ConceptRef);
-
   const [highlightedConceptRefs, updateHighlightedConceptRefs] = useState<ConceptRef[]>([]);
-
   const [selectedRevisionID, selectRevisionID] = useState(null as null | string);
-  const [activeSource, selectSource] = useState({ type: 'catalog-preset', presetName: 'all' } as ObjectSource);
-  const [textQuery, setTextQuery] = useState('' as string);
   const [selectedReviewID, selectReviewID] = useState<string | null>(null);
 
-  const _concepts = app.useMany<MultiLanguageConcept<any>, { query: { inSource: ObjectSource, matchingText?: string }}>
-  ('concepts', { query: { inSource: activeSource, matchingText: textQuery }});
+  const DEFAULT_SOURCE = { type: 'catalog-preset', presetName: 'all' } as const;
+  const [query, setQuery] = useState<ConceptQuery>({ inSource: DEFAULT_SOURCE });
+
+  const _concepts = app.useMany
+  <MultiLanguageConcept<any>, { query: ConceptQuery }>
+  ('concepts', { query });
   const concepts = {
     ids: app.useIDs<number, { query: { inSource: ObjectSource }}>
-      ('concepts', { query: { inSource: activeSource }}).ids,
+      ('concepts', { query: { inSource: query.inSource || DEFAULT_SOURCE } }).ids,
     objects: Object.values(_concepts.objects).sort((a, b) => a.termid - b.termid),
   };
 
@@ -72,7 +73,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
   // Hotkey navigation up/down concept roll
   const currentIndex = useMemo(() => (
     concepts.objects.findIndex((c) => c.termid === selectedConceptRef)
-  ), [JSON.stringify(concepts.ids), JSON.stringify(activeSource), selectedConceptRef]);
+  ), [JSON.stringify(concepts.ids), JSON.stringify(query), selectedConceptRef]);
 
   useEffect(() => {
     function selectNext() {
@@ -162,15 +163,17 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
         }}>
       <SourceContext.Provider
           value={{
-            active: activeSource,
-            collections: collections.objects,
-            select: selectSource,
-            refs: concepts.ids,
-            objects: concepts.objects,
-            index: _concepts.objects,
             isLoading: _concepts.isUpdating,
+
+            active: query.inSource || DEFAULT_SOURCE,
+            collections: collections.objects,
+            select: (source: ObjectSource) => setQuery(q => update(q, { inSource: { $set: source } })),
+
+            refs: concepts.ids,
+            index: _concepts.objects,
+            objects: concepts.objects,
           }}>
-        <TextSearchContext.Provider value={{ query: textQuery, setQuery: setTextQuery }}>
+        <ObjectQueryContext.Provider value={{ query, setQuery }}>
 
           <div className={styles.moduleView}>
             {leftSidebar.length > 0
@@ -190,7 +193,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
               : null}
           </div>
 
-        </TextSearchContext.Provider>
+        </ObjectQueryContext.Provider>
       </SourceContext.Provider>
     </ConceptContext.Provider>
     </MathJax.Context>

@@ -11,8 +11,21 @@ import { migrateConcept } from './legacy';
 import ConceptReviewManager from './review-manager';
 
 
+export interface Query {
+  // TODO: Make querying more flexible via a tree of predicates.
+
+  onlyIDs?: number[]
+  inSource?: ObjectSource 
+  matchingText?: string
+  localization?: {
+    lang: keyof SupportedLanguages
+    status: 'missing' | 'possiblyOutdated'
+  }
+}
+
+
 class ConceptManager
-extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSource?: ObjectSource }> {
+extends Manager<MultiLanguageConcept<any>, number, Query> {
   protected getDBRef(objID: number) {
     return super.getDBRef(`concept-${objID}`);
   }
@@ -88,9 +101,9 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
     return migrateConcept(obj);
   }
 
-  public async listIDs(query?: { inSource: ObjectSource }) {
+  public async listIDs(query?: Omit<Query, 'matchingText' | 'onlyIDs'>) {
     const ids = await super.listIDs();
-    const src = query?.inSource;
+    const src = query?.inSource || { type: 'catalog-preset', presetName: 'all' };
     const _app = await app;
     const collectionManager = _app.managers.collections as Manager<ConceptCollection, string>;
     const reviewManager = _app.managers.reviews as ConceptReviewManager;
@@ -136,7 +149,7 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
     return incomingRelations;
   }
 
-  public async readAll(query?: { inSource: ObjectSource, matchingText?: string }) {
+  public async readAll(query?: Query) {
     const ids = await this.listIDs(query);
     var objects = (await super.readAll({ onlyIDs: ids }));
 
@@ -155,6 +168,17 @@ extends Manager<MultiLanguageConcept<any>, number, { onlyIDs?: number[], inSourc
       objects = Object.values(objects).
       filter(conceptMatchesQuery(textQuery)).
       reduce((objs: object, obj: MultiLanguageConcept<any>) => ({ ...objs, [obj.termid]: obj }), {});
+    }
+
+    if (query?.localization) {
+      const lang = query.localization.lang;
+      const status = query.localization.status;
+
+      if (status === 'missing') {
+        objects = Object.values(objects).
+        filter((c) => c[lang] === undefined).
+        reduce((objs: object, obj: MultiLanguageConcept<any>) => ({ ...objs, [obj.termid]: obj }), {});
+      }
     }
 
     return objects;

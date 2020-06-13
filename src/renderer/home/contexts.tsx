@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { MultiLanguageConcept, ConceptRef, Concept, ConceptRelation, IncomingConceptRelation, WithRevisions, ConceptCollection } from '../../models/concepts';
 import { ObjectSource } from '../../app';
 import { useIPCValue } from 'coulomb/ipc/renderer';
+import { Query } from 'main/concept-manager';
 
 
 export const ReviewContext =
@@ -15,33 +16,37 @@ export const ModuleContext =
   ({ opts: {}, setOpts: () => {} });
 
 
-export interface TextSearchContextSpec {
-  query: string
-  setQuery: (newQuery: string) => void
+export interface ObjectQueryContextSpec {
+  query: Query
+  setQuery: (newQuery: Query) => void
 }
-export const TextSearchContext = React.createContext<TextSearchContextSpec>({
-  query: '',
+export const ObjectQueryContext = React.createContext<ObjectQueryContextSpec>({
+  query: {},
   setQuery: () => {}
 });
 
 
 export interface ObjectSourceContextSpec {
-  collections: Exclude<ConceptCollection, 'items'>[]
-  active: ObjectSource
   isLoading: boolean
-  refs: ConceptRef[]
-  objects: MultiLanguageConcept<any>[]
-  index: { [ref: number]: MultiLanguageConcept<any> }
+
+  active: ObjectSource
   select: (source: ObjectSource) => void
+  collections: Exclude<ConceptCollection, 'items'>[]
+
+  refs: ConceptRef[]
+  index: { [ref: number]: MultiLanguageConcept<any> }
+  objects: MultiLanguageConcept<any>[]
 }
 export const SourceContext = React.createContext<ObjectSourceContextSpec>({
-  collections: [],
-  active: { type: 'catalog-preset', presetName: 'all' },
   isLoading: false,
-  objects: [],
-  index: {},
-  refs: [],
+
+  active: { type: 'catalog-preset', presetName: 'all' },
   select: () => {},
+  collections: [],
+
+  refs: [],
+  index: {},
+  objects: [],
 });
 
 
