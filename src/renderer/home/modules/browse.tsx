@@ -141,7 +141,6 @@ const FilterMenu: ToolbarItem = function () {
       localizationMenu.append(new remote.MenuItem({
         type: 'radio',
         label: "Possibly outdated",
-        enabled: false,
         toolTip: `Authoritative version changed since last update of localized entry in ${lang.available[lang.selected]}`,
         checked: queryCtx.query.localization?.status === 'possiblyOutdated',
         click: () => queryCtx.setQuery({

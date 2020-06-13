@@ -4,11 +4,12 @@ import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 
 import { MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRelation, Concept, Revision, SupportedLanguages, WithRevisions } from '../models/concepts';
-import { ObjectSource } from '../app';
+import { ObjectSource, defaultLanguage } from '../app';
 import { app } from '.';
 import { listen } from 'coulomb/ipc/main';
 import { migrateConcept } from './legacy';
 import ConceptReviewManager from './review-manager';
+import moment from 'moment';
 
 
 export interface Query {
@@ -177,6 +178,26 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
       if (status === 'missing') {
         objects = Object.values(objects).
         filter((c) => c[lang] === undefined).
+        reduce((objs: object, obj: MultiLanguageConcept<any>) => ({ ...objs, [obj.termid]: obj }), {});
+
+      } else if (status === 'possiblyOutdated') {
+        objects = Object.values(objects).
+        filter((c) => {
+          const authoritative = c[defaultLanguage];
+          if (!authoritative) {
+            return false;
+          }
+          const localized = c[lang];
+          if (!localized) {
+            return false;
+          }
+          const latestAuthRevisionTime = authoritative._revisions.tree[authoritative._revisions.current]?.timeCreated;
+          const latestLocalizedRevisionTime = localized._revisions.tree[localized._revisions.current]?.timeCreated;
+          if (!latestAuthRevisionTime || !latestLocalizedRevisionTime) {
+            return false;
+          }
+          return latestAuthRevisionTime > latestLocalizedRevisionTime;
+        }).
         reduce((objs: object, obj: MultiLanguageConcept<any>) => ({ ...objs, [obj.termid]: obj }), {});
       }
     }
