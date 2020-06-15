@@ -20,6 +20,11 @@ const Panel: React.FC<{}> = function () {
     label: 'Pending review',
     isSelected: src.type === 'catalog-preset' && src.presetName === 'pendingReview',
     nodeData: { presetName: 'pendingReview' },
+  }, {
+    id: 'incomplete',
+    label: 'Incomplete items',
+    disabled: true,
+    secondaryLabel: '(coming soon)'
   }];
 
   function handleNodeClick(node: ITreeNode) {
