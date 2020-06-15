@@ -18,10 +18,6 @@ const Panel: React.FC<{}> = function () {
   const source = useContext(SourceContext);
   const collections = app.useMany<ConceptCollection, {}>('collections', {});
 
-  if (Object.keys(collections.objects).length > 0) {
-    console.debug("Updating collections", Object.values(collections.objects)[0].items.length);
-  }
-
   // Adding new items
 
   const panel = useContext(PanelContext);
