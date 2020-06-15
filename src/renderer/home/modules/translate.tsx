@@ -225,5 +225,7 @@ export default {
     panels.lifecycle,
     panels.status,
     panels.lineage,
+    panels.revision,
+    panels.relationships,
   ],
 } as ModuleConfig;

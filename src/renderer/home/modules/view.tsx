@@ -61,9 +61,10 @@ export default {
 
   rightSidebar: [
     panels.lifecycle,
-    panels.relationships,
     panels.reviews,
     panels.status,
     panels.lineage,
+    panels.revision,
+    panels.relationships,
   ],
 } as ModuleConfig;
