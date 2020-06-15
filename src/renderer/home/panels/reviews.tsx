@@ -30,5 +30,5 @@ const Panel: React.FC<{}> = function () {
 
 export default {
   Contents: Panel,
-  title: "Pending review",
+  title: "Pending reviews",
 } as PanelConfig;

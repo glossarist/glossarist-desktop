@@ -79,7 +79,7 @@ const Panel: React.FC<{}> = function () {
 
 export default {
   Contents: Panel,
-  title: "Revision",
+  title: "Revisions",
 } as PanelConfig;
 
 
