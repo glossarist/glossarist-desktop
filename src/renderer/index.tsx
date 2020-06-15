@@ -25,6 +25,9 @@ export const conf: RendererConfig<typeof appConf> = {
       // NOTE: Default language is treated as authoritative language.
       // TODO: Support more than one authoritative language.
     }),
+  }, {
+    cls: () => import('coulomb/db/renderer/single-db-status-context-provider'),
+    getProps: () => ({ dbName: 'default' }),
   }],
 };
 

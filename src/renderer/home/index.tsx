@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import Mousetrap from 'mousetrap';
 // Import needed to define Mousetrap.bindGlobal() as a side-effect:
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 
-import { H1, Button, ButtonGroup } from '@blueprintjs/core';
+import { H1, Button, ButtonGroup, NonIdealState } from '@blueprintjs/core';
 
 import { WindowComponentProps } from 'coulomb/config/renderer';
 import { useIPCValue } from 'coulomb/ipc/renderer';
@@ -26,6 +26,8 @@ import { default as browse } from './modules/browse';
 import { default as view } from './modules/view';
 import { default as map } from './modules/map';
 import { default as translate } from './modules/translate';
+import { SingleDBStatusContext } from 'coulomb/db/renderer/single-db-status-context-provider';
+import { DBSyncScreen } from 'coulomb/db/isogit-yaml/renderer/status';
 
 const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
   review,
@@ -51,6 +53,8 @@ const MODULES: (keyof typeof MODULE_CONFIG)[] = [
 const Window: React.FC<WindowComponentProps> = function () {
   const [activeModuleID, activateModule] = useState(MODULES[0]);
   const [moduleOptions, setModuleOptions] = useState<any>({});
+
+  const db = useContext(SingleDBStatusContext);
 
   const branding = useIPCValue<{ objectID: string }, { object: { name: string, symbol?: string } | null }>
   ('db-default-read', { object: null }, { objectID: 'branding' }).value.object;
@@ -79,6 +83,27 @@ const Window: React.FC<WindowComponentProps> = function () {
     callIPC('open-predefined-window', { id: 'settings' });
   };
 
+  const [syncScreenRequested, requestSyncScreen] = useState(false);
+
+  useEffect(() => {
+    const showInitializationScreen = (
+      db?.status === undefined ||
+      db.status.needsPassword ||
+      db.status.isPushing ||
+      db.status.isPulling ||
+      (db.status.lastSynchronized === null && db.status.hasLocalChanges === false));
+
+    if (showInitializationScreen) {
+      requestSyncScreen(true);
+    }
+
+  }, [JSON.stringify(db)]);
+
+  if (db === null) {
+    return <NonIdealState title="Preparing DB synchronization…" />;
+  } else if (syncScreenRequested) {
+    return <DBSyncScreen onDismiss={() => requestSyncScreen(false)} dbName="default" db={db} />;
+  }
 
   return (
     <div className={styles.homeWindowLayout}>
