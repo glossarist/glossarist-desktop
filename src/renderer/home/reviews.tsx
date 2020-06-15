@@ -5,7 +5,8 @@ import { Review } from 'models/reviews';
 import styles from './styles.scss';
 
 
-export const ReviewIcon: React.FC<{ review: Review }> = function ({ review }) {
+export const ReviewIcon: React.FC<{ htmlTitle?: string, review: Review }> =
+function ({ htmlTitle, review }) {
   let icon: IconName;
   if (review.approved === undefined) {
     icon = 'issue';
@@ -15,7 +16,7 @@ export const ReviewIcon: React.FC<{ review: Review }> = function ({ review }) {
     icon = 'cross';
   }
   return <Icon
-    htmlTitle={`Review ${review.approved !== undefined ? 'had been completed' : 'is pending'}`}
+    htmlTitle={htmlTitle}
     intent={review.approved === false ? 'danger' : undefined}
     icon={icon}
   />;
@@ -32,7 +33,7 @@ function ({ reviews, selected, onSelect }) {
 
   const reviewNodes: ITreeNode[] = Object.values(reviews).map(r => ({
     id: r.id,
-    icon: <ReviewIcon review={r} />,
+    icon: <ReviewIcon htmlTitle="Review status" review={r} />,
 
     label: getLanguageLabel(r.id),
 
