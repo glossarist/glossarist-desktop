@@ -11,3 +11,4 @@ export { default as status } from './status';
 export { default as system } from './system';
 export { default as reviews } from './reviews';
 export { default as lifecycle } from './lifecycle';
+export { default as revision } from './revision';
