@@ -126,6 +126,17 @@ html, body, #app {
       max-height: 33vh;
       display: flex;
       flex-flow: column nowrap;
+      margin: -($pt-grid-size / 2);
+      padding: ($pt-grid-size / 2) ($pt-grid-size / 4);
+      z-index: 2;
+
+      &:first-child {
+        padding-top: $pt-grid-size / 4;
+      }
+
+      &:last-child {
+        padding-bottom: $pt-grid-size / 4;
+      }
     }
 
     .restOfPanels {
