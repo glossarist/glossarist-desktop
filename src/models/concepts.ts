@@ -13,6 +13,11 @@ export interface Revision<T> {
   // parent revision IDs
 
   timeCreated: Date
+
+  author?: {
+    name: string
+    email: string
+  }
 }
 
 export type WithRevisions<T> = T & {

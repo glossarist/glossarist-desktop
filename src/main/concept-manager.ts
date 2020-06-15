@@ -36,6 +36,7 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
   }
 
   public async saveRevision(objID: number, lang: keyof SupportedLanguages, parentRev: string, data: Concept<any, any>) {
+    const authorInfo = await this.db.getCurrentCommitterInformation();
     const concept = await this.read(objID);
 
     const langEntry: WithRevisions<Concept<any, any>> | undefined = concept[lang];
@@ -66,6 +67,7 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
       object: data,
       timeCreated: new Date(),
       parents: [parentRev],
+      author: authorInfo,
     };
 
     const newRevisionTree = {
