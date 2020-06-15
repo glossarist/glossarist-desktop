@@ -6,7 +6,7 @@ import { availableLanguages } from '../../../app';
 import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
 import { app } from 'renderer/index';
 
-import styles from './styles.scss';
+import styles from '../styles.scss';
 import { RepresentingDesignation } from './designation';
 
 
