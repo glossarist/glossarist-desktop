@@ -6,7 +6,9 @@ import { app } from 'renderer';
 import { SourceContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { PanelContext } from 'coulomb-panel/panel';
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
+import { remote } from 'electron';
+import { CommitterPic } from '../widgets';
 
 
 interface PanelState {
@@ -17,6 +19,8 @@ interface PanelState {
 const Panel: React.FC<{}> = function () {
   const source = useContext(SourceContext);
   const collections = app.useMany<ConceptCollection, {}>('collections', {});
+  const committerEmail = useIPCValue<{}, { email: string }>('db-default-get-current-committer-info', { email: '' }).value.email;
+
 
   // Adding new items
 
@@ -29,10 +33,6 @@ const Panel: React.FC<{}> = function () {
   const alreadyExists = Object.values(collections.objects).
         find(c => c.label === newItemLabel.trim()) !== undefined;
 
-  useEffect(() => {
-    newItemLabelInputRef.current?.focus();
-  }, [addingItem]);
-
   function toggleAddingLink(state: boolean) {
     panel.setState({ addingItem: state });
   }
@@ -44,7 +44,7 @@ const Panel: React.FC<{}> = function () {
   async function addNewItem() {
     const label = (newItemLabel || '').trim();
 
-    if (label !== '' && alreadyExists === false) {
+    if (label !== '' && alreadyExists === false && committerEmail !== '') {
       setCommitInProgress(true);
 
       const newCollectionID = crypto.randomBytes(3).toString('hex');
@@ -52,7 +52,7 @@ const Panel: React.FC<{}> = function () {
       await callIPC
         <{ commit: boolean, object: ConceptCollection }, { success: true }>
         ('model-collections-create-one', {
-          object: { id: newCollectionID, label, items: [] },
+          object: { id: newCollectionID, label, creatorEmail: committerEmail, items: [] },
           commit: true,
         });
 
@@ -61,6 +61,47 @@ const Panel: React.FC<{}> = function () {
       toggleAddingLink(false);
     }
   }
+
+
+  // Renaming items
+
+  const [renamedItemID, setRenamedItemID] = useState<string | null>(null);
+  const [renamedItemLabel, setRenamedItemLabel] = useState<string>('');
+
+  useEffect(() => {
+    if (renamedItemID === null) {
+      setRenamedItemLabel('');
+    }
+  }, [renamedItemID]);
+
+  async function renameItem() {
+    const label = (renamedItemLabel || '').trim();
+
+    if (label !== '' && alreadyExists === false && renamedItemID !== null) {
+      setCommitInProgress(true);
+
+      await callIPC
+        <{ objectID: string, commit: boolean, object: ConceptCollection }, { success: true }>
+        ('model-collections-update-one', {
+          objectID: renamedItemID,
+          object: { id: renamedItemID, label, creatorEmail: committerEmail, items: [] },
+          commit: true,
+        });
+
+      setRenamedItemLabel('');
+      setCommitInProgress(false);
+      setRenamedItemID(null);
+    }
+  }
+
+
+  // Common to creating and renaming items
+
+  useEffect(() => {
+    if (addingItem || renamedItemID !== null) {
+      newItemLabelInputRef.current?.focus();
+    }
+  }, [addingItem, renamedItemID]);
 
 
   // Showing existing items
@@ -86,6 +127,22 @@ const Panel: React.FC<{}> = function () {
     }
   }
 
+  function invokeCollectionMenu(collection: ConceptCollection) {
+    const m = new remote.Menu();
+    m.append(new remote.MenuItem({
+      label: 'Rename',
+      enabled:
+        addingItem === false &&
+        committerEmail !== '' &&
+        committerEmail === (collection.creatorEmail || ''),
+      click: async () => {
+        setRenamedItemLabel(collection.label);
+        setRenamedItemID(collection.id);
+      }
+    }));
+    m.popup({ window: remote.getCurrentWindow() });
+  }
+
   function collectionToNode([_, collection]: [number | string, ConceptCollection]): ITreeNode {
     const children = Object.values(collections.objects).
     filter(c => c.parentID !== undefined).
@@ -103,9 +160,38 @@ const Panel: React.FC<{}> = function () {
       id: collection.id,
       hasCaret: hasChildren,
       isExpanded: hasChildren,
-      label: collection.label,
+      label: renamedItemID !== collection.id
+        ? <div onContextMenu={() => invokeCollectionMenu(collection)}>
+            {collection.creatorEmail
+              ? <CommitterPic email={collection.creatorEmail} style={{ verticalAlign: 'middle' }} />
+              : null}
+            {collection.label}
+          </div>
+        : <InputGroup small
+            type="text"
+            inputRef={(ref) => { newItemLabelInputRef.current = ref }}
+            onBlur={() => renamedItemLabel.trim() === collection.label ? setRenamedItemID(null) : void 0}
+            readOnly={commitInProgress || addingItem}
+            rightElement={
+              <>
+                <Button
+                  small minimal intent="primary"
+                  icon="tick-circle"
+                  loading={commitInProgress}
+                  disabled={commitInProgress || renamedItemLabel.trim() === ''}
+                  onClick={renameItem}
+                  title="Commit new label" />
+              </>
+            }
+            onChange={(evt: React.FormEvent<HTMLInputElement>) => setRenamedItemLabel(evt.currentTarget.value)}
+            value={renamedItemLabel}
+            placeholder="New collection label" />,
       childNodes: [...children.entries()].map(collectionToNode),
-      secondaryLabel: hasItems ? <Tag>{itemCount}</Tag> : undefined,
+      secondaryLabel: <>
+        {hasItems
+          ? <Tag>{itemCount}</Tag>
+          : null}
+      </>,
       isSelected: isSelected,
       nodeData: { collectionID: collection.id },
     };
@@ -128,7 +214,7 @@ const Panel: React.FC<{}> = function () {
                   small minimal intent="primary"
                   icon="tick-circle"
                   loading={commitInProgress}
-                  disabled={newItemLabel.trim() === ''}
+                  disabled={newItemLabel.trim() === '' || committerEmail === ''}
                   onClick={addNewItem}
                   title="Commit new collection" />
               </>

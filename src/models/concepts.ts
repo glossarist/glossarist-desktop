@@ -175,6 +175,8 @@ export interface ConceptCollection {
   // ID is global across all collections,
   // regardless of nesting
 
+  creatorEmail?: string
+
   parentID?: string
   // May not be supported in the widget initially.
 
