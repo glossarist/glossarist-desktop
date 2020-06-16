@@ -2,11 +2,11 @@ import moment from 'moment';
 import * as crypto from 'crypto';
 import React, { useContext, useState } from 'react';
 import { Icon, FormGroup, InputGroup, Button, Intent } from '@blueprintjs/core';
+import { callIPC } from 'coulomb/ipc/renderer';
 import { app } from 'renderer';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { ReviewIcon } from '../reviews';
-import { callIPC } from 'coulomb/ipc/renderer';
 import { Review } from 'models/reviews';
 
 
