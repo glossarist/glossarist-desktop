@@ -160,11 +160,11 @@ const Panel: React.FC<{}> = function () {
       id: collection.id,
       hasCaret: hasChildren,
       isExpanded: hasChildren,
+      icon: collection.creatorEmail
+        ? <CommitterPic email={collection.creatorEmail} />
+        : undefined,
       label: renamedItemID !== collection.id
         ? <div onContextMenu={() => invokeCollectionMenu(collection)}>
-            {collection.creatorEmail
-              ? <CommitterPic email={collection.creatorEmail} style={{ verticalAlign: 'middle' }} />
-              : null}
             {collection.label}
           </div>
         : <InputGroup small
