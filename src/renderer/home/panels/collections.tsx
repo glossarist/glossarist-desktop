@@ -130,7 +130,7 @@ const Panel: React.FC<{}> = function () {
                   loading={commitInProgress}
                   disabled={newItemLabel.trim() === ''}
                   onClick={addNewItem}
-                  title="Commit new outgoing link" />
+                  title="Commit new collection" />
               </>
             }
             onChange={handleNewLinkChange}
