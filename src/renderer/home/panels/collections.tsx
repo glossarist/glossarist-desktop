@@ -187,11 +187,7 @@ const Panel: React.FC<{}> = function () {
             value={renamedItemLabel}
             placeholder="New collection label" />,
       childNodes: [...children.entries()].map(collectionToNode),
-      secondaryLabel: <>
-        {hasItems
-          ? <Tag>{itemCount}</Tag>
-          : null}
-      </>,
+      secondaryLabel: hasItems ? <Tag>{itemCount}</Tag> : undefined,
       isSelected: isSelected,
       nodeData: { collectionID: collection.id },
     };
