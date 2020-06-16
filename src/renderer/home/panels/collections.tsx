@@ -38,7 +38,7 @@ const Panel: React.FC<{}> = function () {
   }
 
   function handleNewLinkChange(evt: React.FormEvent<HTMLInputElement>) {
-    setNewItemLabel((evt.target as HTMLInputElement).value.trim());
+    setNewItemLabel((evt.target as HTMLInputElement).value);
   }
 
   async function addNewItem() {
