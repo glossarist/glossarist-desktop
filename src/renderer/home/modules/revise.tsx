@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from 'react';
-import { NonIdealState } from '@blueprintjs/core';
+import { NonIdealState, Icon } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { availableLanguages } from 'app';
 import * as panels from '../panels';
@@ -61,8 +61,11 @@ export default {
   rightSidebar: [
     panels.lifecycle,
     panels.status,
+    panels.relationships,
+    { className: sharedStyles.flexiblePanelSeparator,
+      Contents: () => <span><Icon icon="chevron-down" />{" "}Lineage</span>,
+      collapsed: 'never' },
     panels.lineage,
     panels.revision,
-    panels.relationships,
   ],
 } as ModuleConfig;

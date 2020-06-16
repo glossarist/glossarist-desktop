@@ -6,7 +6,7 @@ import {
   Button,
   InputGroup,
   NonIdealState,
-  Callout, FormGroup, Toaster, Position,
+  Callout, FormGroup, Toaster, Position, Icon,
  } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
@@ -224,8 +224,11 @@ export default {
   rightSidebar: [
     panels.lifecycle,
     panels.status,
+    panels.relationships,
+    { className: sharedStyles.flexiblePanelSeparator,
+      Contents: () => <span><Icon icon="chevron-down" />{" "}Lineage</span>,
+      collapsed: 'never' },
     panels.lineage,
     panels.revision,
-    panels.relationships,
   ],
 } as ModuleConfig;

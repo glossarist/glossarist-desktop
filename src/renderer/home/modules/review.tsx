@@ -264,7 +264,7 @@ export default {
     { className: sharedStyles.flexiblePanelSeparator,
       Contents: () => <span><Icon icon="chevron-down" />{" "}Comparison target</span>,
       collapsed: 'never' },
-    { ...panels.languages, collapsed: 'by-default' },
     panels.lineage,
+    { ...panels.languages, collapsed: 'by-default' },
   ],
 } as ModuleConfig;
