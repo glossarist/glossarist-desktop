@@ -1,5 +1,4 @@
 import moment from 'moment';
-import * as crypto from 'crypto';
 import React, { useContext, useState } from 'react';
 import { Icon, FormGroup, InputGroup, Button, Intent } from '@blueprintjs/core';
 import { callIPC } from 'coulomb/ipc/renderer';
@@ -7,10 +6,8 @@ import { app } from 'renderer';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { ReviewIcon } from '../reviews';
+import { CommitterPic } from '../widgets';
 import { Review } from 'models/reviews';
-
-
-export const md5 = (contents: string) => crypto.createHash('md5').update(contents).digest("hex");
 
 
 const Panel: React.FC<{}> = function () {
@@ -48,9 +45,7 @@ const Panel: React.FC<{}> = function () {
           type="text"
           value={authorString}
           leftElement={revision.author !== undefined
-            ? <img
-                style={{ marginRight: 6, height: 20, width: 20, verticalAlign: '-webkit-baseline-middle' }}
-                src={`https://www.gravatar.com/avatar/${md5(revision.author.email)}?s=48`} />
+            ? <CommitterPic email={revision.author.email} />
             : undefined} />
       </FormGroup>
       <FormGroup label="Time" inline>

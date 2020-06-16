@@ -1,5 +1,23 @@
+import * as crypto from 'crypto';
+
 import React, { useRef, useEffect } from 'react';
 import { TextArea, ITextAreaProps } from '@blueprintjs/core';
+
+
+export const md5 = (contents: string) => crypto.createHash('md5').update(contents).digest("hex");
+
+
+interface CommitterPicProps {
+  email: string
+  style?: React.CSSProperties
+  className?: string 
+}
+export const CommitterPic: React.FC<CommitterPicProps> = function ({ email, style, className }) {
+  return <img
+    style={{ marginRight: 6, height: 20, width: 20, verticalAlign: '-webkit-baseline-middle', ...style }}
+    className={className}
+    src={`https://www.gravatar.com/avatar/${md5(email)}?s=48`} />
+}
 
 
 export const AutoSizedTextArea: React.FC<ITextAreaProps> = function (props) {
