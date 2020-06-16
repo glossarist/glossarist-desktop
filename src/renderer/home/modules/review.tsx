@@ -261,7 +261,7 @@ export default {
 
   rightSidebar: [
     reviewDetails,
-    { className: styles.reviewTargetsPanelSeparator,
+    { className: sharedStyles.flexiblePanelSeparator,
       Contents: () => <span><Icon icon="chevron-down" />{" "}Comparison target</span>,
       collapsed: 'never' },
     { ...panels.languages, collapsed: 'by-default' },

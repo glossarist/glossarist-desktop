@@ -16,22 +16,3 @@
     flex: 1;
   }
 }
-
-:local .reviewTargetsPanelSeparator {
-  margin-top: $pt-grid-size;
-  margin-bottom: $pt-grid-size;
-  background: transparent;
-  min-height: unset !important;
-  box-shadow: none !important;
-  text-transform: uppercase;
-  text-align: center;
-  font-size: $pt-font-size-small;
-  text-transform: uppercase;
-  color: $pt-text-color-muted;
-  flex: 1; 
-  justify-content: flex-end;
-
-  > * {
-    background: transparent !important;
-  }
-}
