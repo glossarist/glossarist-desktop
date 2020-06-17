@@ -244,6 +244,7 @@ const AddCollection: React.FC<{ isCollapsed?: boolean }> = function ({ isCollaps
   }
 
   return <Button icon="add" title="Add collection" small minimal
+    active={addingItem}
     onClick={(evt: React.MouseEvent<HTMLElement>) => {
       evt.stopPropagation();
       toggleAddingItem(!addingItem);
