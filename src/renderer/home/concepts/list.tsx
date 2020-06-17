@@ -10,7 +10,7 @@ import { ConceptContext, SourceContext } from '../contexts';
 import { ConceptItem } from './item';
 
 import styles from './styles.scss';
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
 
 
 interface ConceptListProps {
@@ -48,6 +48,8 @@ function ({
   const listEl = useRef<List>(null);
 
   const sourceCtx = useContext(SourceContext);
+  const committerEmail = useIPCValue<{}, { email: string }>
+  ('db-default-get-current-committer-info', { email: '' }).value.email;
 
   useEffect(() => {
     const updateListHeight = debounce(100, () => {
@@ -116,7 +118,9 @@ function ({
     for (const collection of sourceCtx.collections) {
       cm.append(new remote.MenuItem({
         label: collection.label,
-        enabled: sourceCtx.active.type !== 'collection' || collection.id !== sourceCtx.active.collectionID,
+        enabled:
+          collection.creatorEmail === committerEmail &&
+          (sourceCtx.active.type !== 'collection' || collection.id !== sourceCtx.active.collectionID),
         click: async () => await addToCollection(collection.id, refsActedUpon),
       }));
     }
@@ -129,7 +133,12 @@ function ({
     }));
     m.append(new remote.MenuItem({
       label: refsActedUpon.length > 1 ? `Remove ${refsActedUpon.length} concepts from current collection` : "Remove from current collection",
-      enabled: sourceCtx.active.type === 'collection' && refsActedUpon.length > 0,
+      enabled:
+        refsActedUpon.length > 0 &&
+        committerEmail !== '' &&
+        sourceCtx.collections.find(c =>
+          sourceCtx.active.type === 'collection' &&
+          c.id === sourceCtx.active.collectionID)?.creatorEmail === committerEmail,
       click: async () => {
         if (sourceCtx.active.type === 'collection') {
           await removeFromCollection(sourceCtx.active.collectionID, refsActedUpon);
