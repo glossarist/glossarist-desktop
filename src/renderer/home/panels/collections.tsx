@@ -19,7 +19,8 @@ interface PanelState {
 const Panel: React.FC<{}> = function () {
   const source = useContext(SourceContext);
   const collections = app.useMany<ConceptCollection, {}>('collections', {});
-  const committerEmail = useIPCValue<{}, { email: string }>('db-default-get-current-committer-info', { email: '' }).value.email;
+  const committerEmail = useIPCValue<{}, { email: string }>
+  ('db-default-get-current-committer-info', { email: '' }).value.email;
 
 
   // Adding new items
