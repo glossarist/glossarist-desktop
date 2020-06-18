@@ -30,7 +30,6 @@ const Panel: React.FC<{}> = function () {
   const reviewObjectID = `${entry.id}_${entry.language_code}`;
 
   let authorString: string;
-  console.debug(revision.author, revision);
   if (revision.author !== undefined) {
     authorString = `${revision.author.name} <${revision.author.email}>`;
   } else {
