@@ -168,12 +168,14 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                     <InputGroup
                       className={styles.usageArea}
                       placeholder="Area…"
+                      disabled={!props.onDesignationEdit}
                       onChange={(evt: React.FormEvent<HTMLInputElement>) =>
                         handleExpressionArea(idx, evt.currentTarget.value)}
                       maxLength={5} />
 
                     <HTMLSelect
                         value={d.partOfSpeech}
+                        disabled={!props.onDesignationEdit}
                         onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
                           handleExpressionPartOfSpeech(idx, evt.currentTarget.value as Expression["partOfSpeech"])}>
                       <option value={undefined}>PoS</option>
@@ -194,6 +196,7 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
 
                     <Button small
                         title="This is an abbreviated form"
+                        disabled={!props.onDesignationEdit}
                         onClick={() => handleExpAbbrToggle(idx)}
                         active={d.isAbbreviation}>
                       abbr.
