@@ -21,7 +21,7 @@ const Panel: React.FC<{}> = function () {
   return (
     <div>
       <FormGroup label="ID" inline={true}>
-        <InputGroup readOnly={true} value={ref} />
+        <InputGroup disabled value={ref} />
       </FormGroup>
       <FormGroup label="File" inline={true}>
         <Button
