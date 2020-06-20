@@ -29,9 +29,12 @@ export const availableLanguages = {
 };
 
 
+export type CatalogPresetName = 'all' | 'current-proposal';
+
 export type ObjectSource =
   { type: 'collection', collectionID: string } |
-  { type: 'catalog-preset', presetName: string };
+  { type: 'change-request', crID: string } |
+  { type: 'catalog-preset', presetName: CatalogPresetName };
 
 
 export const conf: AppConfig = {
@@ -41,10 +44,10 @@ export const conf: AppConfig = {
       verboseName: 'concept',
       verboseNamePlural: 'concepts',
     },
-    reviews: {
-      shortName: 'review',
-      verboseName: 'concept review',
-      verboseNamePlural: 'concept reviews',
+    changeRequests: {
+      shortName: 'cr',
+      verboseName: 'change request',
+      verboseNamePlural: 'change requests',
     },
     relations: {
       shortName: 'relation',

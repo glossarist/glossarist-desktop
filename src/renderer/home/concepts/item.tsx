@@ -3,7 +3,7 @@ import React from 'react';
 import { Classes } from '@blueprintjs/core';
 
 import { availableLanguages } from '../../../app';
-import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
+import { MultiLanguageConcept, ConceptRef, Concept } from 'models/concepts';
 import { app } from 'renderer/index';
 
 import styles from '../styles.scss';
@@ -30,6 +30,24 @@ function ({ lang, concept, className }) {
           ${designationValidityClass}
         `}>
       {c ? <RepresentingDesignation entry={c} /> : <i>missing designation</i>}
+    </span>
+  );
+};
+
+
+interface LocalizedEntryProps {
+  entry: Concept<any, any>
+  className?: string
+}
+export const LocalizedEntry: React.FC<LocalizedEntryProps> =
+function ({ entry, className }) {
+
+  return (
+    <span
+        className={`
+          ${styles.conceptItem} ${className || ''}
+        `}>
+      <RepresentingDesignation entry={entry} />
     </span>
   );
 };

@@ -3,23 +3,31 @@ import React, { useState, useContext, useMemo, useEffect } from 'react';
 import MathJax from 'react-mathjax2';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { ObjectSource, availableLanguages } from 'app';
-import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/concepts';
+import { MultiLanguageConcept, ConceptRef, ConceptCollection, Concept } from 'models/concepts';
 import { app } from 'renderer';
-import { ConceptContext, SourceContext, ReviewContext, ObjectQueryContext } from './contexts';
+import {
+  ConceptContext, SourceContext,
+  ObjectQueryContext, ChangeRequestContext,
+} from './contexts';
 import { ModuleConfig } from './module-config';
 import { Sidebar } from './module-sidebar';
 import { Query as ConceptQuery } from 'main/concept-manager'
 import styles from './styles.scss';
+import { ChangeRequest } from 'models/change-requests';
 
 
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
 export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, MainView, mainToolbar }) {
   const lang = useContext(LangConfigContext);
 
-  const [selectedConceptRef, selectConceptRef] = useState(null as null | ConceptRef);
+  const [selectedConceptRef, selectConceptRef] = useState<ConceptRef | null>(null);
+  const [selectedCRID, selectCRID] = useState<string | null>(null);
+
+  // NOTE: CR item here is specific to single-registry concepts, with languages as subkeys.
+  // TODO: Once MLGT is migrated to subregistries, CR item must specify registry (subregistry?), item type, and item ID.
+  const [selectedCRItem, selectCRItem] = useState<string | null>(null);
   const [highlightedConceptRefs, updateHighlightedConceptRefs] = useState<ConceptRef[]>([]);
   const [selectedRevisionID, selectRevisionID] = useState(null as null | string);
-  const [selectedReviewID, selectReviewID] = useState<string | null>(null);
 
   const DEFAULT_SOURCE = { type: 'catalog-preset', presetName: 'all' } as const;
   const [query, setQuery] = useState<ConceptQuery>({ inSource: DEFAULT_SOURCE });
@@ -41,6 +49,8 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       map(c => update(c, { $unset: ['items' ]})),
   };
 
+  const cr = app.useOne<ChangeRequest, string>('changeRequests', selectedCRID).object;
+
   useEffect(() => {
     if (localizedConcept !== undefined && localizedConcept !== null) {
       if (selectedRevisionID === null) {
@@ -59,6 +69,17 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       }
     }
   }, [selectedRevisionID]);
+
+  useEffect(() => {
+    if (cr !== null) {
+      const obj: null | Concept<any, any> = Object.values(cr.revisions.concepts || {})[0]?.object;
+      if (obj) {
+        selectCRItem(`${obj.id}-${obj.language_code}`);
+        selectConceptRef(obj.id);
+        updateHighlightedConceptRefs([ obj.id ]);
+      }
+    }
+  }, [cr?.id]);
 
   // One-off collection migration call
   //const collectionsMigrated = useRef({ yes: false });
@@ -117,7 +138,13 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     : null;
 
   return (
-    <ReviewContext.Provider value={{ reviewID: selectedReviewID, selectReviewID: selectReviewID }}>
+    <ChangeRequestContext.Provider
+      value={{
+        selected: selectedCRID,
+        select: selectCRID,
+        selectedItem: selectedCRItem,
+        selectItem: selectCRItem,
+      }}>
     <MathJax.Context
         options={{
           asciimath2jax: {
@@ -197,6 +224,6 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       </SourceContext.Provider>
     </ConceptContext.Provider>
     </MathJax.Context>
-    </ReviewContext.Provider>
+    </ChangeRequestContext.Provider>
   );
 };

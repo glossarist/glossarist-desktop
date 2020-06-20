@@ -255,7 +255,7 @@ const CONCEPT_MAP_ELEMENT_STYLES = [
 
 export default {
   hotkey: 'm',
-  title: "Map",
+  title: "Graph",
 
   leftSidebar: [
     panels.system,

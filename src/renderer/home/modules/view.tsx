@@ -47,7 +47,7 @@ const MainView: React.FC<{}> = function () {
 
 export default {
   hotkey: 'v',
-  title: "View",
+  title: "Item",
 
   leftSidebar: [
     panels.system,

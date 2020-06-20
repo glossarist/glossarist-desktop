@@ -1,14 +1,18 @@
-//import * as yaml from 'js-yaml';
 import * as crypto from 'crypto';
 import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 
-import { MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRelation, Concept, Revision, SupportedLanguages, WithRevisions } from '../models/concepts';
+import {
+  MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRelation,
+  Concept, SupportedLanguages,
+} from '../models/concepts';
+
+import { Revision, WithRevisions } from 'models/revisions'
+
 import { ObjectSource, defaultLanguage } from '../app';
 import { app } from '.';
 import { listen } from 'coulomb/ipc/main';
 import { migrateConcept } from './legacy';
-import ConceptReviewManager from './review-manager';
 
 
 export interface Query {
@@ -35,7 +39,7 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
     return parseInt(filename.replace('concept-', ''), 10);
   }
 
-  public async saveRevision(objID: number, lang: keyof SupportedLanguages, parentRev: string, data: Concept<any, any>) {
+  public async saveRevision(objID: number, lang: keyof SupportedLanguages, parentRev: string, data: Concept<any, any>, changeRequestID: string | undefined) {
     const authorInfo = await this.db.getCurrentCommitterInformation();
     const concept = await this.read(objID);
 
@@ -65,6 +69,7 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
 
     const newRevision: Revision<Concept<any, any>> = {
       object: data,
+      changeRequestID,
       timeCreated: new Date(),
       parents: [parentRev],
       author: authorInfo,
@@ -108,17 +113,9 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
     const src = query?.inSource || { type: 'catalog-preset', presetName: 'all' };
     const _app = await app;
     const collectionManager = _app.managers.collections as Manager<ConceptCollection, string>;
-    const reviewManager = _app.managers.reviews as ConceptReviewManager;
 
     if (src) {
       if (src.type === 'catalog-preset') {
-        if (src.presetName === 'pendingReview') {
-          const reviewIDs = await reviewManager.listIDs({ completed: false });
-          const conceptIDs = reviewIDs.
-            filter(rid => rid.startsWith('concepts-')).
-            map(crid => parseInt(crid.replace('concepts-', '').split('_')[0], 10));
-          return ids.filter(cid => conceptIDs.indexOf(cid) >= 0);
-        }
       } else if (src.type === 'collection') {
         const collection = await collectionManager.read(src.collectionID);
         const collectionItemIDs = collection.items;
@@ -217,9 +214,9 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
       return { relations: await this.findIncomingRelations(objID) };
     });
 
-    listen<{ objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string }, { newRevisionID: string }>
-    (`${prefix}-create-revision`, async ({ objID, lang, parentRevision, data }) => {
-      const newRevisionID = await this.saveRevision(objID, lang, parentRevision, data);
+    listen<{ objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string, changeRequestID?: string }, { newRevisionID: string }>
+    (`${prefix}-create-revision`, async ({ objID, lang, parentRevision, data, changeRequestID }) => {
+      const newRevisionID = await this.saveRevision(objID, lang, parentRevision, data, changeRequestID);
       return { newRevisionID };
     });
   }

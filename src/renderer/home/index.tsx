@@ -45,7 +45,13 @@ const MODULES: (keyof typeof MODULE_CONFIG)[] = [
   'review',
   'translate',
   'map',
-]
+];
+
+const MODULE_GROUPS: (keyof typeof MODULE_CONFIG)[][] = [
+  ['browse', 'view', 'map'],
+  ['edit', 'translate'],
+  ['review'],
+];
 
 
 /* Main window */
@@ -134,17 +140,19 @@ const Window: React.FC<WindowComponentProps> = function () {
             />
           </div>
 
-        <ButtonGroup large className={styles.moduleSelector}>
-          {MODULES.map(moduleID =>
-            <Button
-                disabled={MODULE_CONFIG[moduleID].disabled === true}
-                active={moduleID === activeModuleID}
-                key={moduleID}
-                onClick={() => activateModule(moduleID)}>
-              {MODULE_CONFIG[moduleID].title}
-            </Button>
-          )}
-        </ButtonGroup>
+        {MODULE_GROUPS.map(group =>
+          <ButtonGroup large className={styles.moduleSelector}>
+            {group.map(moduleID =>
+              <Button
+                  disabled={MODULE_CONFIG[moduleID].disabled === true}
+                  active={moduleID === activeModuleID}
+                  key={moduleID}
+                  onClick={() => activateModule(moduleID)}>
+                {MODULE_CONFIG[moduleID].title}
+              </Button>
+            )}
+          </ButtonGroup>
+        )}
       </Panel>
 
       <ModuleContext.Provider value={{ opts: moduleOptions, setOpts: setModuleOptions }}>

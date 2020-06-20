@@ -1,13 +1,12 @@
 import moment from 'moment';
 import React, { useContext } from 'react';
-import { Text, ITreeNode, Tree, Icon } from '@blueprintjs/core';
-import { Revision, Concept } from 'models/concepts';
-import { app } from 'renderer';
+import { Text, ITreeNode, Tree } from '@blueprintjs/core';
+import { Concept } from 'models/concepts';
+import { Revision } from 'models/revisions';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
+import sharedStyles from '../styles.scss';
 import styles from './lineage.scss';
-import { ReviewIcon } from '../reviews';
-import { Review } from 'models/reviews';
 
 
 type RevisionNodeData = {
@@ -23,8 +22,6 @@ const Panel: React.FC<{}> = function () {
   if (!entry) {
     return null;
   }
-
-  const reviewObjectID = `${entry.id}_${entry.language_code}`;
 
   var revisionNodes: ITreeNode[] = [];
   var rev: string | null = entry._revisions.current;
@@ -43,13 +40,8 @@ const Panel: React.FC<{}> = function () {
       label: rev,
       className: styles.revisionNode,
       isSelected: ctx.revisionID === rev,
-      icon:
-        <ReviewionReviewStatusIcon
-          objectType="concepts"
-          objectID={reviewObjectID}
-          revisionID={rev} />,
       secondaryLabel:
-        <Text ellipsize className={styles.revisionNodeTimestamp}>
+        <Text ellipsize className={sharedStyles.treeNodeTimestamp}>
           {moment(revData.timeCreated).toLocaleString()}
         </Text>,
       nodeData: {
@@ -80,19 +72,3 @@ export default {
   Contents: Panel,
   title: "Revisions",
 } as PanelConfig;
-
-
-const ReviewionReviewStatusIcon: React.FC<{ objectType: string, objectID: string, revisionID: string }> =
-function ({ objectType, objectID, revisionID }) {
-  const reviewID = `${objectType}-${objectID}-${revisionID}`
-  const review = app.useOne<Review, string>('reviews', reviewID).object;
-
-  if (review) {
-    return <ReviewIcon review={review} />;
-  } else {
-    return <Icon
-      htmlTitle="Review had not been requested yet"
-      icon="circle"
-    />;
-  }
-};

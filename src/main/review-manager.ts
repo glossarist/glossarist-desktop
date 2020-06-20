@@ -3,7 +3,7 @@ import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 
 import { SupportedLanguages, Concept } from '../models/concepts';
 import { Review } from 'models/reviews';
-import { Revision, WithRevisions } from 'models/concepts';
+import { Revision, WithRevisions } from 'models/revisions';
 import { app, conf } from '.';
 import { listen } from 'coulomb/ipc/main';
 

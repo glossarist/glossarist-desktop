@@ -121,6 +121,17 @@ html, body, #app {
     flex-flow: column nowrap;
     overflow: hidden;
 
+    .panelToolbar {
+      background: $panelLightBg;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+
+      > :not(:last-child) {
+        margin-right: $pt-grid-size;
+      }
+    }
+
     .fixedPanel {
       flex-shrink: 0;
       max-height: 33vh;
@@ -313,6 +324,32 @@ html, body, #app {
   :global .bp3-icon {
     margin-right: $pt-grid-size;
   }
+}
+
+:local .moduleSelector {
+  &:not(:last-child) {
+    margin-right: $pt-grid-size;
+  }
+}
+
+:local .treeNodeWithTimestamp {
+  :global .bp3-tree-node-content {
+    overflow: hidden;
+  }
+  :global .bp3-tree-node-label {
+    flex-shrink: 0;
+  }
+  :global .bp3-icon {
+    margin-right: $pt-grid-size;
+  }
+  :global .bp3-tree-node-secondary-label {
+    overflow: hidden;
+  }
+}
+
+:local .treeNodeTimestamp {
+  font-size: $pt-font-size-small;
+  opacity: .5;
 }
 
 :local .flexiblePanelSeparator {

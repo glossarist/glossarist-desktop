@@ -5,13 +5,14 @@ import { availableLanguages } from 'app';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { EntryEdit } from '../concepts';
-import { ConceptContext } from '../contexts';
+import { ConceptContext, ChangeRequestContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 
 
 const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
+  const cr = useContext(ChangeRequestContext);
   const active = ctx.active;
 
   // Force switch to authoritative language
@@ -25,8 +26,16 @@ const MainView: React.FC<{}> = function () {
 
   if (active === null) {
     return <NonIdealState title="No concept is selected" />;
+  } else if (cr.selected === null) {
+    return <NonIdealState
+      icon="edit"
+      title="Change request, please!"
+      description="To make changes, select or create a draft CR." />;
   } else if (auth === undefined) {
-    return <NonIdealState icon="error" title="Concept is missing authoritative language entry" />;
+    return <NonIdealState
+      icon="error"
+      title="Missing entry in auth. language"
+      description="This is not something that should happen." />;
   } else if (ctx.revision === null || ctx.revisionID === null) {
     return <NonIdealState title="No revision is selected" />;
   }
@@ -34,11 +43,10 @@ const MainView: React.FC<{}> = function () {
   return (
     <div className={sharedStyles.backdrop}>
       <EntryEdit
-        concept={active}
+        changeRequestID={cr.selected}
         key={auth.id}
         entry={auth}
         parentRevisionID={ctx.revisionID}
-        onCreateRevision={(rev) => ctx.selectRevision(rev)}
         isLoading={ctx.isLoading} />
     </div>
   );
@@ -59,9 +67,7 @@ export default {
   mainToolbar: [],
 
   rightSidebar: [
-    panels.lifecycle,
-    panels.status,
-    panels.relationships,
+    panels.draftChangeRequests,
     { className: sharedStyles.flexiblePanelSeparator,
       Contents: () => <span><Icon icon="chevron-down" />{" "}Lineage</span>,
       collapsed: 'never' },

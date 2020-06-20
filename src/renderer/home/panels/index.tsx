@@ -12,3 +12,5 @@ export { default as system } from './system';
 export { default as reviews } from './reviews';
 export { default as lifecycle } from './lifecycle';
 export { default as revision } from './revision';
+export { default as changeRequestRevisions } from './change-request-revisions';
+export { default as draftChangeRequests } from './draft-change-requests';

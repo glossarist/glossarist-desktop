@@ -224,7 +224,7 @@ const LanguageMenu: ToolbarItem = function () {
 
 export default {
   hotkey: 'b',
-  title: "Browse",
+  title: "List",
 
   leftSidebar: [
     panels.system,
@@ -241,6 +241,7 @@ export default {
     panels.lifecycle,
     panels.relationships,
     panels.status,
+    panels.lineage,
     panels.revision,
   ],
 } as ModuleConfig;

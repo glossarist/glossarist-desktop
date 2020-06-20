@@ -11,10 +11,11 @@ import {
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
-import { AuthoritativeSource, Concept, WithRevisions } from 'models/concepts';
+import { AuthoritativeSource, Concept } from 'models/concepts';
+import { WithRevisions } from 'models/revisions';
 import { availableLanguages } from 'app';
 import * as panels from '../panels';
-import { ConceptContext, ModuleContext } from '../contexts';
+import { ConceptContext, ModuleContext, ChangeRequestContext } from '../contexts';
 import { EntryEdit, EntryDetails } from '../concepts';
 import { ToolbarItem, ModuleConfig } from '../module-config';
 import sharedStyles from '../styles.scss'
@@ -28,6 +29,7 @@ const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
   const mod = useContext(ModuleContext);
+  const cr = useContext(ChangeRequestContext);
 
   const active = ctx.active;
   const entry = active
@@ -63,6 +65,11 @@ const MainView: React.FC<{}> = function () {
 
   if (active === null) {
     return <NonIdealState title="No concept is selected" />;
+  } else if (cr.selected === null) {
+    return <NonIdealState
+      icon="edit"
+      title="Change request, please!"
+      description="To make changes, select or create a draft CR first." />;
   }
 
   function initializeAuthSourceDraft(authSource?: AuthoritativeSource) {
@@ -175,11 +182,10 @@ const MainView: React.FC<{}> = function () {
       <div>
         {entryWithSource && ctx.revisionID
           ? <EntryEdit
+              changeRequestID={cr.selected}
               key={`${active.termid}-${lang.selected}`}
-              concept={active}
               entry={entryWithSource}
               parentRevisionID={ctx.revisionID}
-              onCreateRevision={(rev) => ctx.selectRevision(rev)}
               isLoading={ctx.isLoading} />
           : authSourceForm}
       </div>
@@ -222,9 +228,7 @@ export default {
   mainToolbar: [CompareAuthoritative],
 
   rightSidebar: [
-    panels.lifecycle,
-    panels.status,
-    panels.relationships,
+    panels.draftChangeRequests,
     { className: sharedStyles.flexiblePanelSeparator,
       Contents: () => <span><Icon icon="chevron-down" />{" "}Lineage</span>,
       collapsed: 'never' },

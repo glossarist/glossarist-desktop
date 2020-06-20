@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { SourceContext } from '../contexts';
 import { ITreeNode, Tree } from '@blueprintjs/core';
 import { PanelConfig } from '../panel-config';
+import { CatalogPresetName } from 'app';
 
 
 type NodeData = { presetName: string };
@@ -16,10 +17,10 @@ const Panel: React.FC<{}> = function () {
     isSelected: src.type === 'catalog-preset' && src.presetName === 'all',
     nodeData: { presetName: 'all' },
   }, {
-    id: 'pendingReview',
-    label: 'Pending review',
-    isSelected: src.type === 'catalog-preset' && src.presetName === 'pendingReview',
-    nodeData: { presetName: 'pendingReview' },
+    id: 'currentProposal',
+    label: 'My current proposal',
+    isSelected: src.type === 'catalog-preset' && src.presetName === 'current-proposal',
+    nodeData: { presetName: 'currentProposal' },
   }, {
     id: 'incomplete',
     label: 'Incomplete items',
@@ -29,12 +30,14 @@ const Panel: React.FC<{}> = function () {
 
   function handleNodeClick(node: ITreeNode) {
     const data = node.nodeData as NodeData;
-    const presetName: string = data.presetName;
+    const presetName: CatalogPresetName = data.presetName as CatalogPresetName;
     source.select({ type: 'catalog-preset', presetName });
   }
 
   return (
-    <Tree contents={treeState} onNodeClick={handleNodeClick} />
+    <Tree
+      contents={treeState}
+      onNodeClick={handleNodeClick} />
   );
 };
 

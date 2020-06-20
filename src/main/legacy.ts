@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
-import { MultiLanguageConcept, SupportedLanguages, WithRevisions, Concept, Designation, Revision } from 'models/concepts';
+import { MultiLanguageConcept, SupportedLanguages, Concept, Designation } from 'models/concepts';
+import { WithRevisions, Revision } from 'models/revisions';
 import { availableLanguages } from '../app';
 
 

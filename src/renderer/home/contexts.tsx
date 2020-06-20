@@ -1,6 +1,11 @@
 import React, { useContext } from 'react';
 
-import { MultiLanguageConcept, ConceptRef, Concept, ConceptRelation, IncomingConceptRelation, WithRevisions, ConceptCollection } from '../../models/concepts';
+import {
+  MultiLanguageConcept, ConceptRef, Concept, ConceptRelation,
+  IncomingConceptRelation, ConceptCollection,
+} from '../../models/concepts';
+
+import { WithRevisions } from 'models/revisions';
 import { ObjectSource } from '../../app';
 import { useIPCValue } from 'coulomb/ipc/renderer';
 import { Query } from 'main/concept-manager';
@@ -8,7 +13,18 @@ import { Query } from 'main/concept-manager';
 
 export const ReviewContext =
   React.createContext<{ reviewID: string | null, selectReviewID: (id: string | null) => void }>
-  ({ reviewID: null, selectReviewID: () => {}})
+  ({ reviewID: null, selectReviewID: () => {}});
+
+
+interface ChangeRequestContextSpec {
+  selected: string | null
+  select: (id: string | null) => void
+  selectedItem: string | null
+  selectItem: (id: string | null) => void
+}
+export const ChangeRequestContext =
+  React.createContext<ChangeRequestContextSpec>
+  ({ selected: null, select: () => {}, selectedItem: null, selectItem: () => {} });
 
 
 export const ModuleContext =
@@ -89,7 +105,7 @@ export const ConceptContext = React.createContext<ConceptContextSpec>({
   revisionID: null,
   revision: null,
   selectRevision: () => {},
-})
+});
 
 
 interface ConceptRelationshipsContextSpec {

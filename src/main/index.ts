@@ -4,17 +4,18 @@ import { app as electronApp } from 'electron';
 import { MainConfig } from 'coulomb/config/main';
 import { initMain } from 'coulomb/app/main';
 
-import { default as Manager, ManagerOptions } from 'coulomb/db/isogit-yaml/main/manager';
 import { default as BackendCls } from 'coulomb/db/isogit-yaml/main/base';
 import { default as FSWrapper } from 'coulomb/db/isogit-yaml/main/yaml/file';
+import { ManagerOptions } from 'coulomb/db/isogit-yaml/main/manager';
+
 
 import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';
 import { conf as appConf } from '../app';
 
 import { default as ConceptManagerCls } from './concept-manager';
-import { default as ConceptReviewManagerCls } from './review-manager';
+import { default as ConceptChangeRequestManagerCls } from './change-request-manager';
 import { default as CollectionManagerCls } from './collection-manager';
-import { Review } from 'models/reviews';
+import { ChangeRequest } from 'models/change-requests';
 
 
 const appDataPath = electronApp.getPath('userData');
@@ -42,13 +43,13 @@ export const conf: MainConfig<typeof appConf> = {
   },
 
   managers: {
-    reviews: {
+    changeRequests: {
       dbName: 'default',
       options: {
-        cls: ConceptReviewManagerCls,
-        workDir: 'reviews',
+        cls: ConceptChangeRequestManagerCls,
+        workDir: 'change-requests',
         idField: 'id',
-      } as ManagerOptions<Review>,
+      } as ManagerOptions<ChangeRequest>,
     },
     concepts: {
       dbName: 'default',
@@ -71,4 +72,3 @@ export const conf: MainConfig<typeof appConf> = {
 
 
 export const app = initMain(conf);
-

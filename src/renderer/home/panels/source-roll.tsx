@@ -18,8 +18,6 @@ const SourceRollTitle: React.FC<{}> = function () {
   if (src.type === 'catalog-preset') {
     if (src.presetName === 'all') {
       sourceName = "All concepts";
-    } else if (src.presetName === 'pendingReview') {
-      sourceName = "Pending review";
     } else {
       sourceName = src.presetName;
     }

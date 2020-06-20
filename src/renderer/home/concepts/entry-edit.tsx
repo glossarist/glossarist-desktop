@@ -11,34 +11,43 @@ import { callIPC } from 'coulomb/ipc/renderer';
 
 import {
   Concept,
-  MultiLanguageConcept,
   Designation,
   NORMATIVE_STATUS_CHOICES,
-  WithRevisions,
 } from 'models/concepts';
+
+import { WithRevisions, Revision } from 'models/revisions';
+import { app } from 'renderer';
 
 import { EntryForm } from './entry-form';
 import styles from './styles.scss';
 import sharedStyles from '../styles.scss';
+import { ChangeRequest } from 'models/change-requests';
 
 
 interface EntryEditProps {
-  concept: MultiLanguageConcept<any>
+  changeRequestID: string
   entry: WithRevisions<Concept<any, any>>
   isLoading: boolean
   parentRevisionID: string
-  onCreateRevision?: (newRevisionID: string) => void
+  onUpdateCR?: (created?: boolean) => void
   className?: string
 }
 export const EntryEdit: React.FC<EntryEditProps> = function (props) {
-  const _revision =
-    props.entry._revisions.tree[props.parentRevisionID]?.object
-    // NOTE: this falls back to “naked” entry data,
-    // which may happen when entry was updated but parentRevisionID
-    // still points to a revision from another entry (e.g., during language switch).
-    // Proper parentRevisionID would load quickly after that with an effect
-    // on one of the parent components, so this would be a fleeting state:
-    || props.entry;
+  // NOTE: this falls back to “naked” entry data,
+  // which may happen when entry was updated but parentRevisionID
+  // still points to a revision from another entry (e.g., during language switch).
+  // Proper parentRevisionID would load quickly after that with an effect
+  // on one of the parent components, so this would be a fleeting state:
+  const cr = app.useOne<ChangeRequest, string>('changeRequests', props.changeRequestID).object;
+
+  const revisionInCR: null | Revision<Concept<any, any>> = (cr?.revisions.concepts || {})[`${props.entry.id}-${props.entry.language_code}`] || null;
+
+  const creating = revisionInCR === null;
+
+  const _revision = (
+    revisionInCR?.object ||
+    props.entry._revisions.tree[props.entry._revisions.current]?.object ||
+    props.entry);
 
   if (!_revision) {
     throw new Error("Failed to load revision");
@@ -54,22 +63,34 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
 
   useEffect(() => {
     updateEntry(_revision);
-  }, [props.parentRevisionID]);
+  }, [revisionInCR, props.parentRevisionID]);
+
+  const revertChanges = async () => {
+    await callIPC<{ changeRequestID: string, objectType: string, objectID: string }, { success: true }>
+    ('model-changeRequests-delete-revision', {
+      changeRequestID: props.changeRequestID,
+      objectType: 'concepts',
+      objectID: `${entry.id}-${entry.language_code}`,
+    });
+  };
 
   const commitChanges = async () => {
     if (sanitized !== undefined) {
       setCommitInProgress(true);
 
       try {
-        const { newRevisionID } = await callIPC<{ data: Concept<any, any>, objID: number, lang: string, parentRevision: string }, { newRevisionID: string }>
-        ('model-concepts-create-revision', {
-          objID: props.concept.termid,
+        await callIPC
+        <{ changeRequestID: string, objectType: string, objectID: string,
+           data: Concept<any, any>, parentRevisionID: string }, { newRevisionID: string }>
+        ('model-changeRequests-save-revision', {
+          changeRequestID: props.changeRequestID,
           data: sanitized,
-          lang: entry.language_code,
-          parentRevision: props.parentRevisionID,
+          objectType: 'concepts',
+          objectID: `${entry.id}-${entry.language_code}`,
+          parentRevisionID: props.parentRevisionID,
         });
         setCommitInProgress(false);
-        setImmediate(() => props.onCreateRevision ? props.onCreateRevision(newRevisionID) : void 0);
+        setImmediate(() => props.onUpdateCR ? props.onUpdateCR() : void 0);
       } catch (e) {
         setCommitInProgress(false);
       }
@@ -154,17 +175,21 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     };
   }
 
+  const canEdit =
+    props.parentRevisionID === props.entry._revisions.current &&
+    (revisionInCR === null || revisionInCR.parents[0] === props.parentRevisionID);
+
   const conceptForm = (
     <EntryForm
       entry={entry}
-      onDefinitionChange={handleDefChange}
-      onUsageInfoChange={handleUsageInfoChange}
-      onDesignationDeletion={handleItemDeletion('terms')}
-      onDesignationEdit={handleDesignationChange}
-      onExampleDeletion={handleItemDeletion('examples')}
-      onExampleEdit={handleItemEdit('examples')}
-      onNoteDeletion={handleItemDeletion('notes')}
-      onNoteEdit={handleItemEdit('notes')}
+      onDefinitionChange={canEdit ? handleDefChange : undefined}
+      onUsageInfoChange={canEdit ? handleUsageInfoChange : undefined}
+      onDesignationDeletion={canEdit ? handleItemDeletion('terms') : undefined}
+      onDesignationEdit={canEdit ? handleDesignationChange : undefined}
+      onExampleDeletion={canEdit ? handleItemDeletion('examples') : undefined}
+      onExampleEdit={canEdit ? handleItemEdit('examples') : undefined}
+      onNoteDeletion={canEdit ? handleItemDeletion('notes') : undefined}
+      onNoteEdit={canEdit ? handleItemEdit('notes') : undefined}
     />
   );
 
@@ -190,18 +215,16 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
 
       <div className={sharedStyles.moduleViewToolbarInner}>
         <ButtonGroup>
-          <Button icon="add" onClick={handleDesignationAddition} title="Add another designation/synonym">Designation</Button>
-          <Button icon="add" onClick={handleItemAddition('examples')} title="Add an EXAMPLE">EX.</Button>
-          <Button icon="add" onClick={handleItemAddition('notes')} title="Add a NOTE">NOTE</Button>
+          <Button icon="add" disabled={!canEdit} onClick={handleDesignationAddition} title="Add another designation/synonym">Designation</Button>
+          <Button icon="add" disabled={!canEdit} onClick={handleItemAddition('examples')} title="Add an EXAMPLE">EX.</Button>
+          <Button icon="add" disabled={!canEdit} onClick={handleItemAddition('notes')} title="Add a NOTE">NOTE</Button>
         </ButtonGroup>
 
         <ButtonGroup>
           <Button
-              onClick={() => updateEntry(props.entry)}
-              disabled={
-                props.isLoading ||
-                !entry ||
-                !hasUncommittedChanges}>
+              onClick={revertChanges}
+              title="Deletes changes to this entry from draft change request"
+              disabled={creating}>
             Revert
           </Button>
           <Tooltip
@@ -213,7 +236,8 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
             <Button
                 onClick={commitInProgress ? undefined : commitChanges}
                 active={commitInProgress}
-                icon="git-commit"
+                title="Add or update changes to this item in selected change request"
+                icon="confirm"
                 rightIcon={saveIconSecondary}
                 intent={saveIntent}
                 disabled={
@@ -221,7 +245,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
                   props.isLoading ||
                   !entry ||
                   !hasUncommittedChanges}>
-                Commit&nbsp;version
+                {creating ? "Add to change request" : "Update change request"}
             </Button>
           </Tooltip>
         </ButtonGroup>
