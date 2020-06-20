@@ -34,11 +34,11 @@ const Panel: React.FC<{}> = function () {
   const alreadyExists = Object.values(collections.objects).
         find(c => c.label === newItemLabel.trim()) !== undefined;
 
-  function toggleAddingLink(state: boolean) {
+  function toggleAddingItem(state: boolean) {
     panel.setState({ addingItem: state });
   }
 
-  function handleNewLinkChange(evt: React.FormEvent<HTMLInputElement>) {
+  function handleNewItemChange(evt: React.FormEvent<HTMLInputElement>) {
     setNewItemLabel((evt.target as HTMLInputElement).value);
   }
 
@@ -59,7 +59,7 @@ const Panel: React.FC<{}> = function () {
 
       setNewItemLabel('');
       setCommitInProgress(false);
-      toggleAddingLink(false);
+      toggleAddingItem(false);
     }
   }
 
@@ -216,7 +216,7 @@ const Panel: React.FC<{}> = function () {
                   title="Commit new collection" />
               </>
             }
-            onChange={handleNewLinkChange}
+            onChange={handleNewItemChange}
             value={newItemLabel}
             placeholder="New collection label"
           />
