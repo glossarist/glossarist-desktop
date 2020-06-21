@@ -74,7 +74,7 @@ const MainView: React.FC<{}> = function () {
 
   function initializeAuthSourceDraft(authSource?: AuthoritativeSource) {
     return {
-      ref: proposedAuthSource?.ref ||'',
+      ref: proposedAuthSource?.ref || '',
       clause: proposedAuthSource?.clause || '',
       link: proposedAuthSource?.link?.toString() || '',
     };
