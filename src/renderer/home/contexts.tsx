@@ -86,7 +86,7 @@ export interface ConceptContextSpec {
 
   revisionID: null | string
   revision: Concept<any, any> | null
-  selectRevision: (revID: string) => void
+  selectRevision: (revID: string | null) => void
 }
 export const ConceptContext = React.createContext<ConceptContextSpec>({
   isLoading: false,
