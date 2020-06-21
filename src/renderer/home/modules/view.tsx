@@ -60,7 +60,6 @@ export default {
   mainToolbar: [],
 
   rightSidebar: [
-    panels.lifecycle,
     panels.status,
     panels.relationships,
     panels.reviews,

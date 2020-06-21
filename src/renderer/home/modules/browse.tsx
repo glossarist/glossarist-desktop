@@ -28,13 +28,7 @@ const MainView: React.FC<{}> = function () {
     if (!entry) {
       return <Tag minimal icon="translate" intent="danger">Not translated</Tag>
     }
-    const lcStage = entry.lifecycle_stage;
-    if (!lcStage) {
-      return <Tag minimal icon="flow-linear" intent="danger">Missing lifecycle stage</Tag>
-    }
-    return <>
-      <Tag intent="primary" icon="flow-linear" className={styles.lifecycleStage}>{lcStage}</Tag>
-    </>;
+    return <></>;
   }
 
   return (
@@ -238,7 +232,6 @@ export default {
 
   rightSidebar: [
     panels.basics,
-    panels.lifecycle,
     panels.relationships,
     panels.status,
     panels.lineage,
