@@ -41,7 +41,7 @@ const Panel: React.FC<{}> = function () {
           inline
           helperText={cr !== null ? "Member who accepted the requested change." : undefined}>
         <InputGroup
-          disabled
+          readOnly
           type="text"
           value={authorString}
           leftElement={revision.author !== undefined
@@ -54,16 +54,16 @@ const Panel: React.FC<{}> = function () {
       {changeRequestID !== undefined && changeRequestID !== ''
         ? <FormGroup label="CR ID" inline>
             <InputGroup
-              disabled
+              readOnly
               type="text"
               title="ID of change request containing this revision"
               value={changeRequestID} />
           </FormGroup>
         : null}
       {cr !== null
-        ? <FormGroup label="CR author" inline>
+        ? <FormGroup label="CR&nbsp;author" inline>
             <InputGroup
-              disabled
+              readOnly
               title="Author of change request containing this revision"
               type="text"
               value={cr.meta.submitter.primaryPerson.name}
