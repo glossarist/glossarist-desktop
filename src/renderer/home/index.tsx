@@ -26,6 +26,7 @@ import { default as browse } from './modules/browse';
 import { default as view } from './modules/view';
 import { default as map } from './modules/map';
 import { default as translate } from './modules/translate';
+import { default as create } from './modules/create';
 import { SingleDBStatusContext } from 'coulomb/db/renderer/single-db-status-context-provider';
 import { DBSyncScreen } from 'coulomb/db/isogit-yaml/renderer/status';
 
@@ -36,6 +37,7 @@ const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
   view,
   map,
   translate,
+  create,
 };
 
 const MODULES: (keyof typeof MODULE_CONFIG)[] = [
@@ -49,7 +51,7 @@ const MODULES: (keyof typeof MODULE_CONFIG)[] = [
 
 const MODULE_GROUPS: (keyof typeof MODULE_CONFIG)[][] = [
   ['browse', 'view', 'map'],
-  ['edit', 'translate'],
+  ['create', 'edit', 'translate'],
   ['review'],
 ];
 

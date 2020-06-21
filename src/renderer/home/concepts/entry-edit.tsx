@@ -28,7 +28,7 @@ interface EntryEditProps {
   changeRequestID: string
   entry: WithRevisions<Concept<any, any>>
   isLoading: boolean
-  parentRevisionID: string
+  parentRevisionID: string | null
   onUpdateCR?: (created?: boolean) => void
   className?: string
 }
@@ -81,7 +81,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
       try {
         await callIPC
         <{ changeRequestID: string, objectType: string, objectID: string,
-           data: Concept<any, any>, parentRevisionID: string }, { newRevisionID: string }>
+           data: Concept<any, any>, parentRevisionID: string | null }, { newRevisionID: string }>
         ('model-changeRequests-save-revision', {
           changeRequestID: props.changeRequestID,
           data: sanitized,
@@ -176,8 +176,9 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   }
 
   const canEdit =
-    props.parentRevisionID === props.entry._revisions.current &&
-    (revisionInCR === null || revisionInCR.parents[0] === props.parentRevisionID);
+    (props.parentRevisionID === null && props.entry.id === -1) ||
+    (props.parentRevisionID === props.entry._revisions.current &&
+      (revisionInCR === null || revisionInCR.parents[0] === props.parentRevisionID));
 
   const conceptForm = (
     <EntryForm

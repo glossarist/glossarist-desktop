@@ -27,7 +27,7 @@ const ChangeRequestRevisions: React.FC<{}> = function () {
       buttonProps={{ small: true }}
       entries={Object.values((suggestedRevisions.value.concepts || {})).map(r => r.object)}
       itemMarker={(e: Concept<any, any>) =>
-        <span className={sharedStyles.conceptID}>{e.language_code}/{refToString(e.id)}</span>}
+        <span className={sharedStyles.conceptID}>{e.language_code}/{e.id >= 0 ? refToString(e.id) : "NEW"}</span>}
     />
   );
 };

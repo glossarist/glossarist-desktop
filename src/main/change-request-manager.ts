@@ -160,14 +160,14 @@ extends Manager<WithRevisions<ChangeRequest>, string, ChangeRequestManagerQuery>
       return { success: true };
     });
 
-    listen<{ changeRequestID: string, objectType: string, objectID: string, data: object, parentRevisionID: string }, { success: true }>
+    listen<{ changeRequestID: string, objectType: string, objectID: string, data: object, parentRevisionID: string | null }, { success: true }>
     (`${prefix}-save-revision`, async ({ changeRequestID, objectType, objectID, data, parentRevisionID }) => {
       var cr = await this.read(changeRequestID);
       cr.revisions[objectType] = {
         ...cr.revisions[objectType],
         [objectID]: {
           object: data,
-          parents: [parentRevisionID],
+          parents: parentRevisionID ? [parentRevisionID] : [],
           timeCreated: new Date(),
         },
       };

@@ -47,7 +47,14 @@ const MainView: React.FC<{}> = function () {
     if (reviewMaterial.toReview) {
       lang.select(reviewMaterial.toReview.object.language_code);
       ctx.select(reviewMaterial.toReview.object.id);
+      if (reviewMaterial.toReview.parents.length > 0) {
+        ctx.selectRevision(reviewMaterial.toReview.parents[0]);
+      } else {
+        ctx.selectRevision(null);
+      }
       //selectComparableRevision();
+    } else {
+      //ctx.select(null);
     }
   }, [reviewMaterial.toReview]);
 
@@ -63,7 +70,10 @@ const MainView: React.FC<{}> = function () {
   } else if (revisionToReview === null) {
     return <NonIdealState
       title="Nothing to show"
-      description="Looks like selected change request has no revisions yet." />;
+      description={<>
+        Please select a proposed revision on the left,<br />
+        or add a revision to this CR via Edit or Translate.
+      </>} />;
   }
 
   let material: JSX.Element;
@@ -114,7 +124,7 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
   const original = _original ? _original[revisionToReview.object.language_code as keyof SupportedLanguages] : null;
 
-  const suggestedRevisionParent = revisionToReview.parents[0];
+  const suggestedRevisionParent = revisionToReview.parents.length > 0 ? revisionToReview.parents[0] : null;
 
   const crIsUnderReview = cr ? (cr.timeSubmitted !== undefined && cr.timeResolved === undefined) : undefined;
 
@@ -128,8 +138,10 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
     ? original._revisions.tree[original._revisions.current].changeRequestID === crID
     : undefined;
 
+  const suggestedRevisionIsNewEntry = suggestedRevisionParent === null;
+
   const suggestedRevisionNeedsRebase = original
-    ? (suggestedRevisionWasAccepted === false && suggestedRevisionParent !== original._revisions.current)
+    ? (suggestedRevisionWasAccepted === false && suggestedRevisionParent !== null && suggestedRevisionParent !== original._revisions.current)
     : undefined;
 
   async function applyRevision() {
@@ -142,8 +154,39 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
     const parent = revisionToReview.parents[0];
 
-    await callIPC<{ objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string }, { newRevisionID: string }>
-    ('model-concepts-create-revision', { objID: original.id, data: revisionToReview.object, lang: revisionToReview.object.language_code, parentRevision: parent });
+    if (suggestedRevisionIsNewEntry) {
+      const newConceptID = 1234;
+      const newRevisionID = '123456';
+      await callIPC<
+        { object: MultiLanguageConcept<any>, commit: boolean },
+        { newRevisionID: string }
+      >('model-concepts-create-one', {
+        commit: true,
+        object: {
+          termid: newConceptID,
+          eng: {
+            ...revisionToReview.object,
+            id: newConceptID,
+            _revisions: {
+              current: newRevisionID,
+              tree: {
+                [newRevisionID]: revisionToReview,
+              }
+            },
+          },
+        },
+      });
+    } else {
+      await callIPC<
+        { objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string },
+        { newRevisionID: string }
+      >('model-concepts-create-revision', {
+        objID: original.id,
+        data: revisionToReview.object,
+        lang: revisionToReview.object.language_code,
+        parentRevision: parent,
+      });
+    }
 
     setAcceptInProgress(false);
   }
@@ -156,7 +199,11 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
   } else if (crIsUnderReview === false) {
     acceptHelperText = 'This change request is not under review, hence this change cannot be accepted.';
   } else if (cr && original) {
-    acceptHelperText = 'Add this revision to original item.';
+    if (suggestedRevisionIsNewEntry) {
+      acceptHelperText = 'Add this revision as a new item.';
+    } else {
+      acceptHelperText = 'Add this revision to original item.';
+    }
   } else {
     acceptHelperText = undefined;
   }
@@ -164,7 +211,6 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
   return (
     <>
       <FormGroup
-          label="Accept"
           intent={suggestedRevisionNeedsRebase ? 'warning' : undefined}
           helperText={acceptHelperText}
           inline>
@@ -175,24 +221,27 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
             loading={acceptInProgress}
             disabled={acceptInProgress || crIsUnderReview !== true || !original || suggestedRevisionWasAccepted || suggestedRevisionNeedsRebase}
             onClick={applyRevision}>
-          Accept revision
+          Accept
         </Button>
       </FormGroup>
-      <FormGroup label="Parent&nbsp;revision" inline>
-        <InputGroup
-          rightElement={
-            <Button
-              onClick={() => {
-                ctx.selectRevision(revisionToReview.parents[0]);
-                lang.select(revisionToReview.object.language_code);
-              }}
-              icon="locate"
-              title="Select parent revision as comparison target."
-            >diff</Button>
+      <FormGroup label="Supersedes&nbsp;revision" inline>
+        {suggestedRevisionIsNewEntry
+          ? <InputGroup type="text" disabled value="(new entry)" />
+          : <InputGroup
+              rightElement={
+                <Button
+                  onClick={() => {
+                    ctx.selectRevision(revisionToReview.parents[0]);
+                    lang.select(revisionToReview.object.language_code);
+                  }}
+                  icon="locate"
+                  title="Locate and select parent revision as comparison target."
+                />
+              }
+              disabled
+              type="text"
+              value={revisionToReview.parents[0]} />
           }
-          disabled
-          type="text"
-          value={revisionToReview.parents[0]} />
       </FormGroup>
     </>
   );
