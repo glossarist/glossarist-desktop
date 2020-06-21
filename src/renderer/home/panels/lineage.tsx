@@ -42,7 +42,7 @@ const Panel: React.FC<{}> = function () {
       isSelected: ctx.revisionID === rev,
       secondaryLabel:
         <Text ellipsize className={sharedStyles.treeNodeTimestamp}>
-          {moment(revData.timeCreated).toLocaleString()}
+          {moment(revData.timeCreated).format('D/M/YY')}
         </Text>,
       nodeData: {
         id: rev,

@@ -49,7 +49,7 @@ const Panel: React.FC<{}> = function () {
             : undefined} />
       </FormGroup>
       <FormGroup label="Time" inline>
-        <InputGroup readOnly type="text" defaultValue={moment(revision.timeCreated).toLocaleString()} />
+        <InputGroup readOnly type="text" defaultValue={moment(revision.timeCreated).format('D/M/YY')} />
       </FormGroup>
       {changeRequestID !== undefined && changeRequestID !== ''
         ? <FormGroup label="CR ID" inline>
