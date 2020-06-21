@@ -87,9 +87,6 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   // ?
   release?: string
 
-  //pending_review: ConceptReview
-  //review_history: AcceptedConceptReview[]
-
 
   // Deprecated:
 
@@ -102,21 +99,6 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   lineage_source?: string
   lineage_source_similarity?: number
 }
-
-// type ConceptReview = {
-//   /* Represents a completed (accepted) review. */
-//   review: ReviewRef
-//   reviewer_notes: string
-// }
-
-// type AcceptedConceptReview = ConceptReview & {
-//   accepted_version: GitHash
-// }
-
-// type LineageSource = {
-//   ref: StandardRef
-//   similarity: number
-// }
 
 export type AuthoritativeSource = {
   ref: StandardRef
