@@ -31,7 +31,7 @@ export const CommitterPic: React.FC<CommitterPicProps> = function ({ email, styl
   }, [email]);
 
   return <img
-    style={{ marginRight: 6, height: 20, width: 20, verticalAlign: '-webkit-baseline-middle', ...style }}
+    style={{ objectFit: 'cover', marginRight: 6, height: 20, width: 20, verticalAlign: '-webkit-baseline-middle', ...style }}
     className={className}
     src={pic} />
 }
