@@ -112,11 +112,18 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
     const ids = await super.listIDs();
     const src = query?.inSource || { type: 'catalog-preset', presetName: 'all' };
     const _app = await app;
-    const collectionManager = _app.managers.collections as Manager<ConceptCollection, string>;
+
+    let collectionManager: Manager<ConceptCollection, string> | null;
+
+    try {
+      collectionManager = _app.managers.collections as Manager<ConceptCollection, string>;
+    } catch (e) {
+      collectionManager = null;
+    }
 
     if (src) {
       if (src.type === 'catalog-preset') {
-      } else if (src.type === 'collection') {
+      } else if (src.type === 'collection' && collectionManager !== null) {
         const collection = await collectionManager.read(src.collectionID);
         const collectionItemIDs = collection.items;
         const idsInCollection = ids.filter(id => collectionItemIDs.includes(id));
