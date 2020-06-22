@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as http from 'https';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { TextArea, ITextAreaProps } from '@blueprintjs/core';
+import { TextArea, ITextAreaProps, Icon } from '@blueprintjs/core';
 
 
 const md5 = (contents: string) => crypto.createHash('md5').update(contents).digest("hex");
@@ -15,8 +15,9 @@ interface CommitterPicProps {
   email: string
   style?: React.CSSProperties
   className?: string 
+  size?: number
 }
-export const CommitterPic: React.FC<CommitterPicProps> = function ({ email, style, className }) {
+export const CommitterPic: React.FC<CommitterPicProps> = function ({ email, style, className, size }) {
   const [pic, setPic] = useState<string>(DEFAULT_COMMITTER_PIC);
 
   useEffect(() => {
@@ -30,8 +31,17 @@ export const CommitterPic: React.FC<CommitterPicProps> = function ({ email, styl
     req.end();
   }, [email]);
 
+  const effectiveStyle: React.CSSProperties = {
+    objectFit: 'cover',
+    marginRight: 6,
+    height: size || Icon.SIZE_LARGE,
+    width: size || Icon.SIZE_LARGE,
+    verticalAlign: '-webkit-baseline-middle',
+    ...style,
+  };
+
   return <img
-    style={{ objectFit: 'cover', marginRight: 6, height: 20, width: 20, verticalAlign: '-webkit-baseline-middle', ...style }}
+    style={effectiveStyle}
     className={className}
     src={pic} />
 }
