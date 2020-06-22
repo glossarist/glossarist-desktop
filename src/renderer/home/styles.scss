@@ -165,6 +165,9 @@ html, body, #app {
         height: $pt-button-height * 0.75;
         font-size: $pt-font-size * 0.9;
       }
+      :global .bp3-inline > .bp3-form-content {
+        flex: 1;
+      }
     }
   }
 
