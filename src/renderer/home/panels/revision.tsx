@@ -46,7 +46,7 @@ const Panel: React.FC<{}> = function () {
           type="text"
           value={authorString}
           leftElement={revision.author !== undefined
-            ? <CommitterPic email={revision.author.email} />
+            ? <CommitterPic email={revision.author.email} size={30} />
             : undefined} />
       </FormGroup>
       <FormGroup label="Time" inline>
