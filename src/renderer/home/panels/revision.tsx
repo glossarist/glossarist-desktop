@@ -42,6 +42,7 @@ const Panel: React.FC<{}> = function () {
           helperText={cr !== null ? "Member who accepted the requested change." : undefined}>
         <InputGroup
           readOnly
+          fill
           type="text"
           value={authorString}
           leftElement={revision.author !== undefined
@@ -49,7 +50,11 @@ const Panel: React.FC<{}> = function () {
             : undefined} />
       </FormGroup>
       <FormGroup label="Time" inline>
-        <InputGroup readOnly type="text" defaultValue={moment(revision.timeCreated).format('D/M/YY')} />
+        <InputGroup
+          readOnly
+          type="text"
+          fill
+          defaultValue={moment(revision.timeCreated).format('D/M/YY')} />
       </FormGroup>
       {changeRequestID !== undefined && changeRequestID !== ''
         ? <FormGroup label="CR ID" inline>
