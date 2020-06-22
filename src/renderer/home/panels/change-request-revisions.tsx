@@ -19,8 +19,6 @@ const ChangeRequestRevisions: React.FC<{}> = function () {
   <{ changeRequestID: string | null }, { [objectType: string]: { [objectID: string]: Revision<Concept<any, any>> } }>
   ('model-changeRequests-list-revisions', { concepts: {} }, { changeRequestID: crID });
 
-  console.debug(crID, suggestedRevisions.value.concepts)
-
   return (
     <LocalizedEntryList
       itemHeight={24}
