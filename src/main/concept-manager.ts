@@ -34,6 +34,44 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
     return super.getDBRef(`concept-${objID}`);
   }
 
+  async init() {
+    await super.init();
+
+    // Async migration
+    //objects = (await Promise.all(
+    //  Object.values(objects).map(async (c) => await this.migrate(c))
+    //)).reduce((objs, obj) => ({ ...objs, [obj.termid]: obj }), {});
+
+    log.debug("ConceptManager: Migration start");
+
+    const objs = await this.readAll();
+
+    log.debug("ConceptManager: Read source data");
+
+    const migratedObjects = Object.values(objs).
+    map(migrateConcept);
+
+    const migratedObjectIDs: number[] = migratedObjects.
+    filter(([_, didMigrate]) => {
+      return didMigrate;
+    }).
+    map(([object, _]) => {
+      return object.termid;
+    });
+
+    for (const [obj, didMigrate] of migratedObjects) {
+      if (didMigrate) {
+        await this.rawUpdate(obj.termid, obj);
+      }
+    }
+
+    log.debug("ConceptManager: Migration: IDs affected by migration", migratedObjectIDs);
+
+    if (migratedObjectIDs.length > 0) {
+      await this.db.commitAll("Bulk migration", false);
+    }
+  }
+
   protected getObjID(dbRef: string) {
     const filename = super.getObjID(dbRef) as unknown as string;
     return parseInt(filename.replace('concept-', ''), 10);
@@ -93,29 +131,24 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
       [lang]: newEntry,
     };
 
-    //log.debug("saving concept1", yaml.dump(newConcept))
-    //log.debug("saving concept1", yaml.dump(data))
-
     await this.update(objID, newConcept, true);
 
     return newRevisionID;
   }
 
-  public async read(objID: number) {
-    const obj = (await super.read(objID)) as MultiLanguageConcept<any>;
-    // Possibly legacy data.
-
-    return migrateConcept(obj);
-  }
-
   public async listIDs(query?: Omit<Query, 'matchingText' | 'onlyIDs'>) {
     const ids = await super.listIDs();
+
+    if (query === undefined) {
+      return ids;
+    }
+
     const src = query?.inSource || { type: 'catalog-preset', presetName: 'all' };
-    const _app = await app;
 
     let collectionManager: Manager<ConceptCollection, string> | null;
 
     try {
+      const _app = await app;
       collectionManager = _app.managers.collections as Manager<ConceptCollection, string>;
     } catch (e) {
       collectionManager = null;
@@ -159,14 +192,9 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
     const ids = await this.listIDs(query);
     var objects = (await super.readAll({ onlyIDs: ids }));
 
-    // Async migration
-    //objects = (await Promise.all(
-    //  Object.values(objects).map(async (c) => await this.migrate(c))
-    //)).reduce((objs, obj) => ({ ...objs, [obj.termid]: obj }), {});
-
-    objects = Object.values(objects).
-    map(migrateConcept).
-    reduce((objs, obj) => ({ ...objs, [obj.termid]: obj }), {});
+    if (query === undefined) {
+      return objects;
+    }
 
     const textQuery = (query?.matchingText || '').trim();
 

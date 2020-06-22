@@ -4,8 +4,9 @@ import { WithRevisions, Revision } from 'models/revisions';
 import { availableLanguages } from '../app';
 
 
-export function migrateConcept(obj: MultiLanguageConcept<any>): MultiLanguageConcept<any> {
+export function migrateConcept(obj: MultiLanguageConcept<any>): [MultiLanguageConcept<any>, boolean] {
   var migrated: MultiLanguageConcept<any> = { ...obj };
+  var didMigrate = false;
 
   for (const langID in availableLanguages) {
     const localized = obj[langID as keyof SupportedLanguages];
@@ -13,27 +14,39 @@ export function migrateConcept(obj: MultiLanguageConcept<any>): MultiLanguageCon
       // Entry for this language is not present on this concept.
       continue;
     }
+
     const withMultipleTerms = migrateTerms(localized);
-    const withDomain = migrateDomain(withMultipleTerms);
-    const withRevisions = initializeRevisionsForLanguageEntry(withDomain);
+    if (withMultipleTerms !== null) {
+      didMigrate = true;
+    }
+
+    const withDomain = migrateDomain(withMultipleTerms || localized);
+    if (withDomain !== null) {
+      didMigrate = true;
+    }
+
+    const withRevisions = initializeRevisionsForLanguageEntry(withDomain || withMultipleTerms || localized);
+    if (withRevisions !== null) {
+      didMigrate = true;
+    }
 
     // @ts-ignore
-    migrated[langID as keyof SupportedLanguages] = withRevisions;
+    migrated[langID as keyof SupportedLanguages] = withRevisions || withDomain || withMultipleTerms || localized;
   }
 
-  return migrated;
+  return [migrated, didMigrate];
 }
 
 
 function initializeRevisionsForLanguageEntry
 <L extends keyof SupportedLanguages>(e: WithRevisions<Concept<number, L>>):
-WithRevisions<Concept<number, L>> {
+WithRevisions<Concept<number, L>> | null {
   /* Prepares revision history scaffolding for given entry,
   if its revision history is missing. */
 
   if (e.hasOwnProperty('_revisions') && e._revisions.current !== undefined) {
     // Entry already has revisions.
-    return e as WithRevisions<Concept<number, L>>;
+    return null;
 
   } else {
     // Entry doesn’t have revisions yet.
@@ -45,6 +58,10 @@ WithRevisions<Concept<number, L>> {
       object: e,
       parents: [],
       timeCreated: e.date_accepted || new Date(),
+      author: {
+        name: "Glossarist bot",
+        email: "glossarist@ribose.com",
+      }
     };
 
     return {
@@ -61,14 +78,7 @@ WithRevisions<Concept<number, L>> {
 
 
 function migrateDomain(e: WithRevisions<Concept<number, any>>):
-WithRevisions<Concept<number, any>> {
-  /* Migrates current concept revision history for given language,
-  if it’s translated to it and revision history is missing. */
-
-  if (e.domain !== undefined) {
-    return e;
-  }
-
+WithRevisions<Concept<number, any>> | null {
   const domainRegex = /\<([^)]+)\>/;
   var domain = undefined;
   for (const [idx, { designation }] of e.terms.entries()) {
@@ -79,10 +89,10 @@ WithRevisions<Concept<number, any>> {
     }
   }
 
-  if (domain) {
+  if (domain !== undefined && e.domain === undefined) {
     return { ...e, domain }
   } else {
-    return e;
+    return null;
   }
 }
 
@@ -94,43 +104,54 @@ type LegacyFields = {
 }
 
 function migrateTerms(e: WithRevisions<Concept<number, any>>):
-WithRevisions<Concept<number, any>> {
+WithRevisions<Concept<number, any>> | null {
   /* Migrates current concept revision history for given language,
   if it’s translated to it and revision history is missing. */
 
-  if (e.terms !== undefined) {
-    return e;
+  type LegacyType = Exclude<WithRevisions<Concept<number, any>>, "terms"> & LegacyFields;
+
+  if (e.terms !== undefined && e.hasOwnProperty('synonyms') === false) {
+    // Assume term and synonyms were migrated…
+    return null;
   }
 
-  var legacy = e as Exclude<WithRevisions<Concept<number, any>>, "terms"> & LegacyFields;
+  var legacy = e as LegacyType;
 
-  var designation: Designation = {
-    designation: legacy.term,
-    type: 'expression',
-  };
+  var terms: Designation[] = [];
 
-  if (legacy.classification) {
-    designation.normativeStatus = legacy.classification;
+  if (legacy.terms === undefined) {
+    var designation: Designation = {
+      designation: legacy.term,
+      type: 'expression',
+    };
+
+    if (legacy.classification) {
+      designation.normativeStatus = legacy.classification;
+    }
+
+    terms = [designation];
+
+    delete legacy.term;
+    delete legacy.classification;
+
+  } else {
+    terms = [ ...legacy.terms ];
   }
 
-  const synonyms = (legacy.synonyms || '').split(',').map(s => s.trim());
+  if (legacy.synonyms !== undefined) {
+    const legacySynonyms = (legacy.synonyms || '').split(',').map(s => s.trim());
+    const synonyms = legacySynonyms.filter(s => s !== '').map((s): Designation => ({
+      designation: s,
+      type: 'expression',
+    }));
 
-  delete legacy.term;
-  delete legacy.classification;
-  delete legacy.synonyms;
+    for (const syn of synonyms) {
+      terms.push(syn);
+    }
 
-  const terms = [designation, ...synonyms.filter(s => s !== '').map((s): Designation => ({
-    designation: s,
-    type: 'expression',
-  }))];
+    delete legacy.synonyms;
+  }
 
   const migrated: WithRevisions<Concept<number, any>> = { ...legacy, terms };
   return migrated;
 }
-
-
-// type MaybeLegacy<CurrentModel, NewProperties extends keyof Partial<CurrentModel>> = {
-//   [P in Exclude<keyof CurrentModel, NewProperties>]: CurrentModel[P]
-// } & {
-//   [N in NewProperties]?: CurrentModel[N]
-// };
