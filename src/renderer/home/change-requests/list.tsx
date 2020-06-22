@@ -53,7 +53,7 @@ function ({ submitted, resolved, createdBy }) {
       </>,
       secondaryLabel:
         <Text ellipsize className={sharedStyles.treeNodeTimestamp}>
-          {moment(cr.timeCreated).toLocaleString()}
+          {moment(cr.timeCreated).format('D/M/YY')}
         </Text>,
       nodeData: { crID: cr.id },
     }
