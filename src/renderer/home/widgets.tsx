@@ -21,12 +21,14 @@ export const CommitterPic: React.FC<CommitterPicProps> = function ({ email, styl
   const [pic, setPic] = useState<string>(DEFAULT_COMMITTER_PIC);
 
   useEffect(() => {
-    setPic(DEFAULT_COMMITTER_PIC);
     const gravatarURL = `https://www.gravatar.com/avatar/${md5(email)}`;
+
     const req = http.request(
       `${gravatarURL}?d=404`,
       { method: 'HEAD' },
-      () => { setPic(`${gravatarURL}?s=48`) });
+      () => { setPic(`${gravatarURL}?s=48`) }).
+    on('error', () => { setPic(DEFAULT_COMMITTER_PIC); });
+
     req.write('');
     req.end();
   }, [email]);
