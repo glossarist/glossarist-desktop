@@ -62,7 +62,6 @@ export default {
   rightSidebar: [
     panels.status,
     panels.relationships,
-    panels.reviews,
     { className: sharedStyles.flexiblePanelSeparator,
       Contents: () => <span><Icon icon="chevron-down" />{" "}Lineage</span>,
       collapsed: 'never' },

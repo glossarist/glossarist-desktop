@@ -9,7 +9,6 @@ export { authoritative as sourceRollAuthoritative } from './source-roll';
 export { translated as sourceRollTranslated } from './source-roll';
 export { default as status } from './status';
 export { default as system } from './system';
-export { default as reviews } from './reviews';
 export { default as lifecycle } from './lifecycle';
 export { default as revision } from './revision';
 export { default as changeRequestRevisions } from './change-request-revisions';
