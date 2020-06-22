@@ -70,17 +70,6 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     }
   }, [selectedRevisionID]);
 
-  useEffect(() => {
-    if (cr !== null) {
-      const obj: null | Concept<any, any> = Object.values(cr.revisions.concepts || {})[0]?.object;
-      if (obj) {
-        selectCRItem(`${obj.id}-${obj.language_code}`);
-        selectConceptRef(obj.id);
-        updateHighlightedConceptRefs([ obj.id ]);
-      }
-    }
-  }, [cr?.id]);
-
   // One-off collection migration call
   //const collectionsMigrated = useRef({ yes: false });
   //useEffect(() => {
