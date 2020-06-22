@@ -1,7 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { NonIdealState, Toaster, Position, Callout, FormGroup, InputGroup, Button } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { availableLanguages } from 'app';
 import { AuthoritativeSource, Concept } from 'models/concepts';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
@@ -28,7 +27,6 @@ const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
   const cr = useContext(ChangeRequestContext);
-  const active = ctx.active;
 
   const [proposedAuthSource, setProposedAuthSource] =
     useState<undefined | AuthoritativeSource>
@@ -47,8 +45,6 @@ const MainView: React.FC<{}> = function () {
       lang.select(lang.default);
     }
   }, [lang.selected]);
-
-  const auth = active ? active[lang.default as keyof typeof availableLanguages] : undefined;
 
   function handleAuthSourceStringPropertyChange(field: keyof AuthoritativeSource) {
     return (evt: React.FormEvent<HTMLInputElement>) => {
