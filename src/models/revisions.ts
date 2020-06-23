@@ -1,3 +1,7 @@
+import * as crypto from 'crypto';
+
+export const getNewRevisionID = () => crypto.randomBytes(3).toString('hex');
+
 export interface Revision<T> {
   object: T
 
