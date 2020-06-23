@@ -172,7 +172,8 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
 
   const canEdit =
     cr?.timeSubmitted === undefined &&
-    props.latestRevisionID === props.parentRevisionID &&
+    props.latestRevisionID === props.parentRevisionID ||
+    (props.parentRevisionID === null && props.latestRevisionID === null) ||
     (props.parentRevisionID === null || revisionInCR === null || revisionInCR.parents[0] === props.parentRevisionID);
 
   const conceptForm = (
