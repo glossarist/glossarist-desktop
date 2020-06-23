@@ -49,8 +49,6 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       map(c => update(c, { $unset: ['items' ]})),
   };
 
-  const cr = app.useOne<ChangeRequest, string>('changeRequests', selectedCRID).object;
-
   useEffect(() => {
     if (localizedConcept !== undefined && localizedConcept !== null) {
       if (selectedRevisionID === null) {
