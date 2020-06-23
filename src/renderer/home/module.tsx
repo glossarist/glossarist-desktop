@@ -3,7 +3,7 @@ import React, { useState, useContext, useMemo, useEffect } from 'react';
 import MathJax from 'react-mathjax2';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { ObjectSource, availableLanguages } from 'app';
-import { MultiLanguageConcept, ConceptRef, ConceptCollection, Concept } from 'models/concepts';
+import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/concepts';
 import { app } from 'renderer';
 import {
   ConceptContext, SourceContext,
