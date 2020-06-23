@@ -43,7 +43,7 @@ const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isC
 
 
 export default {
-  title: "Concept",
+  title: "Item",
   Contents: Panel,
   TitleComponentSecondary: PanelTitleSecondary,
 } as PanelConfig;
