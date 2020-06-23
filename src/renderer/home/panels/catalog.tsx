@@ -17,11 +17,6 @@ const Panel: React.FC<{}> = function () {
     isSelected: src.type === 'catalog-preset' && src.presetName === 'all',
     nodeData: { presetName: 'all' },
   }, {
-    id: 'currentProposal',
-    label: 'My current proposal',
-    isSelected: src.type === 'catalog-preset' && src.presetName === 'current-proposal',
-    nodeData: { presetName: 'currentProposal' },
-  }, {
     id: 'incomplete',
     label: 'Incomplete items',
     disabled: true,
