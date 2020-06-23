@@ -72,7 +72,7 @@ const Panel: React.FC<{}> = function () {
               title="Author of change request containing this revision"
               type="text"
               value={cr.meta.submitter.primaryPerson.name}
-              leftElement={<CommitterPic email={cr.meta.submitter.primaryPerson.email} />} />
+              leftElement={<CommitterPic email={cr.meta.submitter.primaryPerson.email} size={30} />} />
           </FormGroup>
         : null}
     </>
