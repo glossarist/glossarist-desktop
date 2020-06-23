@@ -12,7 +12,6 @@ import {
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { AuthoritativeSource, Concept } from 'models/concepts';
-import { WithRevisions } from 'models/revisions';
 import { availableLanguages } from 'app';
 import * as panels from '../panels';
 import { ConceptContext, ModuleContext, ChangeRequestContext } from '../contexts';
@@ -107,30 +106,20 @@ const MainView: React.FC<{}> = function () {
     });
   }
 
-  let entryWithSource: WithRevisions<Concept<any, any>> | undefined
-  if (entry) {
+  let entryWithSource: Concept<any, any> | undefined
+  if (entry !== undefined) {
     entryWithSource = entry;
-  } else if (proposedAuthSource) {
-    return <Callout intent="danger" title="Adding new entries is not supported yet">
-      <p>
-        Sorry about that! This functionality is being updated
-        to work with the new revision and review model.
-      </p>
-    </Callout>
-    // entryWithSource = {
-    //   id: active?.termid,
-    //   language_code: lang.selected,
-    //   entry_status: 'proposed',
-    //   terms: [{ designation: '', type: 'expression', partOfSpeech: undefined }],
-    //   definition: '',
-    //   notes: [],
-    //   examples: [],
-    //   authoritative_source: proposedAuthSource,
-    //   _revisions: {
-    //     current: undefined,
-    //     tree: [],
-    //   },
-    // };
+  } else if (proposedAuthSource !== undefined) {
+    entryWithSource = {
+      id: active?.termid,
+      language_code: lang.selected,
+      entry_status: 'valid',
+      terms: [{ designation: '', type: 'expression', partOfSpeech: undefined }],
+      definition: '',
+      notes: [],
+      examples: [],
+      authoritative_source: proposedAuthSource,
+    };
   } else {
     entryWithSource = undefined;
   };
@@ -180,12 +169,13 @@ const MainView: React.FC<{}> = function () {
     <div className={sharedStyles.backdrop}>
 
       <div>
-        {entryWithSource && ctx.revisionID
+        {entryWithSource !== undefined
           ? <EntryEdit
               changeRequestID={cr.selected}
               key={`${active.termid}-${lang.selected}`}
               entry={entryWithSource}
               parentRevisionID={ctx.revisionID}
+              latestRevisionID={entry?._revisions.current || null}
               isLoading={ctx.isLoading} />
           : authSourceForm}
       </div>

@@ -8,7 +8,6 @@ import { EntryEdit } from '../concepts';
 import { ConceptContext, ChangeRequestContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 import styles from './translate.scss';
-import { WithRevisions } from 'models/revisions';
 
 
 const toaster = Toaster.create({ position: Position.TOP });
@@ -73,13 +72,10 @@ const MainView: React.FC<{}> = function () {
     });
   }
 
-  let entryWithSource: WithRevisions<Concept<any, any>> | undefined
+  let entryWithSource: Concept<any, any> | undefined
   if (proposedAuthSource) {
 
-    const revisionID: string = '123456';
-    // TODO: Generate hex
-
-    const entry: Concept<any, any> = {
+    entryWithSource = {
       id: -1,
       language_code: lang.default,
       entry_status: 'valid',
@@ -88,19 +84,6 @@ const MainView: React.FC<{}> = function () {
       notes: [],
       examples: [],
       authoritative_source: proposedAuthSource,
-    };
-    entryWithSource = {
-      ...entry,
-      _revisions: {
-        current: revisionID,
-        tree: {
-          [revisionID]: {
-            parents: [],
-            timeCreated: new Date(),
-            object: entry,
-          },
-        },
-      },
     };
   } else {
     entryWithSource = undefined;
@@ -144,7 +127,7 @@ const MainView: React.FC<{}> = function () {
           onChange={handleAuthSourceStringPropertyChange('link')} />
       </FormGroup>
       <Button large intent="primary" onClick={handleAcceptAuthSourceDraft}>
-        Proceed to translation
+        Proceed
       </Button>
     </Callout>
   );
@@ -158,6 +141,7 @@ const MainView: React.FC<{}> = function () {
               key={`-1-${lang.default}`}
               entry={entryWithSource}
               parentRevisionID={null}
+              latestRevisionID={null}
               isLoading={ctx.isLoading} />
           : authSourceForm}
       </div>

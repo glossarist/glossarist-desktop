@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 
@@ -7,7 +6,7 @@ import {
   Concept, SupportedLanguages,
 } from '../models/concepts';
 
-import { Revision, WithRevisions } from 'models/revisions'
+import { Revision, WithRevisions, getNewRevisionID } from 'models/revisions'
 
 import { ObjectSource, defaultLanguage } from '../app';
 import { app } from '.';
@@ -77,44 +76,53 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
     return parseInt(filename.replace('concept-', ''), 10);
   }
 
-  public async saveRevision(objID: number, lang: keyof SupportedLanguages, parentRev: string, data: Concept<any, any>, changeRequestID: string | undefined) {
+  public async saveRevision(objID: number, lang: keyof SupportedLanguages, parentRev: string | null, data: Concept<any, any>, changeRequestID: string | undefined) {
     const authorInfo = await this.db.getCurrentCommitterInformation();
     const concept = await this.read(objID);
 
     const langEntry: WithRevisions<Concept<any, any>> | undefined = concept[lang];
 
-    if (!langEntry) {
+    if (parentRev !== null && !langEntry) {
       log.error("Glossarist: Failed to save revision, unable to locate concept language entry", objID, lang);
       throw new Error("Failed to save revision: Unable to read localized concept entry");
     }
 
-    if (!langEntry._revisions?.tree[parentRev]) {
-      log.warn("Glossarist: Unable to locate parent revision, auto-filling", objID, lang, parentRev);
-      delete langEntry._revisions;
-      langEntry._revisions = {
-        tree: {
-          [parentRev]: {
-            object: { ...langEntry } as Concept<any, any>,
-            parents: [],
-            timeCreated: new Date()
-          },
-        },
-        current: parentRev,
-      };
+    if (parentRev === null && langEntry) {
+      log.error("Glossarist: Failed to save revision, language entry already exists but no parent revision was given", objID, lang);
+      throw new Error("Failed to save revision: Language entry already exists but no parent revision was given");
     }
 
-    const newRevisionID = crypto.randomBytes(3).toString('hex');
+    if (parentRev !== null && !langEntry?._revisions?.tree[parentRev]) {
+      log.error("Glossarist: Unable to locate parent revision", objID, lang, parentRev);
+      throw new Error("Failed to save revision: Unable to locate parent revision");
+      //delete langEntry._revisions;
+      //langEntry._revisions = {
+      //  tree: {
+      //    [parentRev]: {
+      //      object: { ...langEntry } as Concept<any, any>,
+      //      parents: [],
+      //      timeCreated: new Date(),
+      //    },
+      //  },
+      //  current: parentRev,
+      //};
+    }
 
-    const newRevision: Revision<Concept<any, any>> = {
+    const newRevisionID: string = getNewRevisionID();
+
+    var newRevision: Revision<Concept<any, any>> = {
       object: data,
-      changeRequestID,
       timeCreated: new Date(),
-      parents: [parentRev],
+      parents: parentRev ? [parentRev] : [],
       author: authorInfo,
     };
 
+    if (changeRequestID) {
+      newRevision.changeRequestID = changeRequestID;
+    }
+
     const newRevisionTree = {
-      ...langEntry._revisions.tree,
+      ...(langEntry?._revisions.tree || {}),
       [newRevisionID]: newRevision,
     };
 
@@ -249,7 +257,7 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
       return { relations: await this.findIncomingRelations(objID) };
     });
 
-    listen<{ objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string, changeRequestID?: string }, { newRevisionID: string }>
+    listen<{ objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string | null, changeRequestID?: string }, { newRevisionID: string }>
     (`${prefix}-create-revision`, async ({ objID, lang, parentRevision, data, changeRequestID }) => {
       const newRevisionID = await this.saveRevision(objID, lang, parentRevision, data, changeRequestID);
       return { newRevisionID };

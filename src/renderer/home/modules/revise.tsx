@@ -45,8 +45,9 @@ const MainView: React.FC<{}> = function () {
       <EntryEdit
         changeRequestID={cr.selected}
         key={auth.id}
-        entry={auth}
+        entry={auth._revisions.tree[auth._revisions.current].object}
         parentRevisionID={ctx.revisionID}
+        latestRevisionID={auth._revisions.current}
         isLoading={ctx.isLoading} />
     </div>
   );

@@ -5,11 +5,11 @@ import VisualDiff from 'react-visual-diff';
 
 import {
   NonIdealState, Icon, Callout, FormGroup,
-  InputGroup, Button, ButtonGroup,
+  InputGroup, Button, ButtonGroup, NumericInput,
 } from '@blueprintjs/core';
 import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
 import { Concept, MultiLanguageConcept, SupportedLanguages, LifecycleStage, ConceptRef } from 'models/concepts';
-import { Revision } from 'models/revisions';
+import { Revision, getNewRevisionID } from 'models/revisions';
 import { app } from 'renderer';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import * as panels from '../panels';
@@ -104,8 +104,31 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
   const [acceptInProgress, setAcceptInProgress] = useState<boolean>(false);
 
+  const [newItemID, setNewItemID] = useState<number | undefined>(undefined);
+  const [newItemIDIsAvailable, setNewItemIDIsAvailable] = useState<boolean | undefined>(undefined);
+
   const crID = crCtx.selected;
   const crObjectID = crCtx.selectedItem;
+
+  useEffect(() => {
+    setNewItemID(undefined);
+  }, [crObjectID]);
+
+  useEffect(() => {
+    (async () => {
+      if (newItemID !== undefined) {
+        try {
+          const available = (
+            await callIPC<{ objectID: number | null }, { object: MultiLanguageConcept<any> | null }>
+            ('model-concepts-read-one', { objectID: newItemID })
+          ).object === null;
+          setNewItemIDIsAvailable(available);
+        } catch (e) {
+          setNewItemIDIsAvailable(true);
+        }
+      }
+    })();
+  }, [newItemID]);
 
   const cr = app.useOne<ChangeRequest, string>('changeRequests', crID || null).object;
 
@@ -145,18 +168,18 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
     : undefined;
 
   async function applyRevision() {
-    if (revisionToReview === null || !original || acceptInProgress) {
+    if (revisionToReview === null || acceptInProgress || !crID) {
       log.error("Cannot apply revision: No revision to review");
       throw new Error("Cannot apply revision: No revision to review");
     }
 
     setAcceptInProgress(true);
 
-    const parent = revisionToReview.parents[0];
+    const parent = suggestedRevisionParent;
 
-    if (suggestedRevisionIsNewEntry) {
-      const newConceptID = 1234;
-      const newRevisionID = '123456';
+    if (suggestedRevisionIsNewEntry && _original === null || newItemID !== undefined) {
+      const newConceptID = newItemID;
+      const newRevisionID: string = getNewRevisionID();
       await callIPC<
         { object: MultiLanguageConcept<any>, commit: boolean },
         { newRevisionID: string }
@@ -170,20 +193,24 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
             _revisions: {
               current: newRevisionID,
               tree: {
-                [newRevisionID]: revisionToReview,
-              }
+                [newRevisionID]: {
+                  ...revisionToReview,
+                  changeRequestID: crID,
+                },
+              },
             },
           },
         },
       });
-    } else {
+    } else if (_original) {
       await callIPC<
-        { objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string },
+        { objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string | null, changeRequestID?: string },
         { newRevisionID: string }
       >('model-concepts-create-revision', {
-        objID: original.id,
+        objID: _original.termid,
         data: revisionToReview.object,
         lang: revisionToReview.object.language_code,
+        changeRequestID: crID,
         parentRevision: parent,
       });
     }
@@ -210,26 +237,33 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
   return (
     <>
-      <FormGroup
-          intent={suggestedRevisionNeedsRebase ? 'warning' : undefined}
-          helperText={acceptHelperText}
-          inline>
-        <Button
-            intent={suggestedRevisionNeedsRebase ? "warning" : "primary"}
-            icon={suggestedRevisionWasAccepted ? 'tick-circle' : 'confirm'}
-            rightIcon={(suggestedRevisionWasAccepted === false && suggestedRevisionNeedsRebase === true) ? 'warning-sign' : undefined}
-            loading={acceptInProgress}
-            disabled={acceptInProgress || crIsUnderReview !== true || !original || suggestedRevisionWasAccepted || suggestedRevisionNeedsRebase}
-            onClick={applyRevision}>
-          Accept
-        </Button>
-      </FormGroup>
-      <FormGroup label="Supersedes&nbsp;revision" inline>
-        {suggestedRevisionIsNewEntry
-          ? <InputGroup type="text" disabled value="(new entry)" />
-          : <InputGroup
+      {suggestedRevisionIsNewEntry === true
+        ? <FormGroup label="New&nbsp;item&nbsp;ID" intent="primary">
+            <NumericInput
+              width={10}
+              rightElement={
+                _original === null
+                  ? <Button
+                      minimal
+                      intent={(newItemID !== undefined && newItemIDIsAvailable) ? "success" : "danger"}
+                      icon={(newItemID !== undefined && newItemIDIsAvailable) ? "tick" : "warning-sign"} />
+                  : undefined
+              }
+              onValueChange={(num) => setNewItemID(num || undefined)}
+              disabled={_original !== null}
+              value={_original?.termid || newItemID || 0} />
+          </FormGroup>
+        : <FormGroup label="Item&nbsp;ID" inline>
+            <InputGroup disabled value={original?.id} />
+          </FormGroup>
+      }
+      {suggestedRevisionIsNewEntry !== true
+        ? <FormGroup label="Supersedes&nbsp;revision" inline>
+            <InputGroup
               rightElement={
                 <Button
+                  minimal
+                  intent="primary"
                   onClick={() => {
                     ctx.selectRevision(revisionToReview.parents[0]);
                     lang.select(revisionToReview.object.language_code);
@@ -241,7 +275,29 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
               disabled
               type="text"
               value={revisionToReview.parents[0]} />
-          }
+          </FormGroup>
+        : null
+      }
+      <FormGroup
+          intent={suggestedRevisionNeedsRebase ? 'warning' : undefined}
+          helperText={acceptHelperText}
+          inline>
+        <Button
+            fill
+            intent={suggestedRevisionNeedsRebase ? "warning" : "primary"}
+            icon={suggestedRevisionWasAccepted ? 'tick-circle' : 'confirm'}
+            rightIcon={(suggestedRevisionWasAccepted === false && suggestedRevisionNeedsRebase === true) ? 'warning-sign' : undefined}
+            loading={acceptInProgress}
+            disabled={
+              acceptInProgress ||
+              crIsUnderReview !== true ||
+              (!suggestedRevisionIsNewEntry && !original && !_original) ||
+              suggestedRevisionWasAccepted ||
+              suggestedRevisionNeedsRebase ||
+              (suggestedRevisionIsNewEntry && !_original && newItemID === undefined)}
+            onClick={applyRevision}>
+          Accept revision
+        </Button>
       </FormGroup>
     </>
   );
