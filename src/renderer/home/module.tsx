@@ -13,7 +13,6 @@ import { ModuleConfig } from './module-config';
 import { Sidebar } from './module-sidebar';
 import { Query as ConceptQuery } from 'main/concept-manager'
 import styles from './styles.scss';
-import { ChangeRequest } from 'models/change-requests';
 
 
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
