@@ -75,7 +75,7 @@
     "nsis": {
       "runAfterFinish": true,
       "installerIcon": "build/icon.ico",
-      "artifactName": "electron-gha-${version}.${ext}"
+      "artifactName": "glossarist-desktop-${version}.${ext}"
     },
     "portable": {
       "artifactName": "glossarist-desktop.exe"
