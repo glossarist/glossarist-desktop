@@ -111,7 +111,7 @@ const MainView: React.FC<{}> = function () {
     entryWithSource = entry;
   } else if (proposedAuthSource !== undefined) {
     entryWithSource = {
-      id: active?.termid,
+      id: active.termid,
       language_code: lang.selected,
       entry_status: 'valid',
       terms: [{ designation: '', type: 'expression', partOfSpeech: undefined }],
