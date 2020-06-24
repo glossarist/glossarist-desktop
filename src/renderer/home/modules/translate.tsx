@@ -174,7 +174,7 @@ const MainView: React.FC<{}> = function () {
               changeRequestID={cr.selected}
               key={`${active.termid}-${lang.selected}`}
               entry={entryWithSource}
-              parentRevisionID={ctx.revisionID}
+              parentRevisionID={entry !== undefined ? entry._revisions.current : null}
               latestRevisionID={entry?._revisions.current || null}
               isLoading={ctx.isLoading} />
           : authSourceForm}
