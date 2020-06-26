@@ -1,6 +1,5 @@
 {
   "name": "glossarist",
-  "main": "./src/app.js",
   "productName": "Glossarist Desktop",
   "version": "1.4.0",
   "description": "Glossarist database viewer & editor for desktop",
@@ -10,14 +9,6 @@
     "email": "open.source@ribose.com",
     "url": "https://www.glossarist.org"
   },
-  "files": [
-    "node_modules/**/*",
-    {
-      "from": "src",
-      "to": "build",
-      "filter": "**/*"
-    }
-  ],
   "repository": "github:glossarist/glossarist-desktop",
   "homepage": "https://www.glossarist.org",
   "license": "MIT",
