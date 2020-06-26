@@ -1,6 +1,5 @@
 {
   "name": "glossarist",
-  "main": "./src/index.js",
   "productName": "Glossarist Desktop",
   "version": "1.4.0",
   "description": "Glossarist database viewer & editor for desktop",
@@ -10,6 +9,10 @@
     "email": "open.source@ribose.com",
     "url": "https://www.glossarist.org"
   },
+  "files": [
+    "./build/**/*",
+    "./src/main/index.js"
+  ],
   "repository": "github:glossarist/glossarist-desktop",
   "homepage": "https://www.glossarist.org",
   "license": "MIT",
@@ -17,6 +20,7 @@
     "postinstall": "electron-builder install-app-deps",
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
+    "clean": "rm -rf ./bundle ./dist",
     "dist": "cross-env DEBUG=electron-builder electron-builder",
     "dist:win": "electron-builder -w",
     "dist:mac": "electron-builder -m",
