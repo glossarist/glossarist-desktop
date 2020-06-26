@@ -1,5 +1,6 @@
 {
   "name": "glossarist",
+  "main": "./src/index.js",
   "productName": "Glossarist Desktop",
   "version": "1.4.0",
   "description": "Glossarist database viewer & editor for desktop",
