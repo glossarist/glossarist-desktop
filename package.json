@@ -1,5 +1,6 @@
 {
   "name": "glossarist",
+  "main": "./src/app.js",
   "productName": "Glossarist Desktop",
   "version": "1.4.0",
   "description": "Glossarist database viewer & editor for desktop",
@@ -10,8 +11,12 @@
     "url": "https://www.glossarist.org"
   },
   "files": [
-    "./build/**/*",
-    "./src/main/index.js"
+    "node_modules/**/*",
+    {
+      "from": "src",
+      "to": "build",
+      "filter": "**/*"
+    }
   ],
   "repository": "github:glossarist/glossarist-desktop",
   "homepage": "https://www.glossarist.org",
