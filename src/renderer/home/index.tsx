@@ -140,6 +140,8 @@ function ({ activeModuleID, activateModule }) {
   ('db-default-read', { object: null }, { objectID: 'branding' }).value.object;
 
   const topPanelRef = useHelp('panels/top-panel');
+  const syncButtonRef = useHelp('sync-button');
+  const settingsButtonRef = useHelp('settings-button');
 
   const openSettingsWindow = () => {
     callIPC('open-predefined-window', { id: 'settings' });
@@ -171,6 +173,7 @@ function ({ activeModuleID, activateModule }) {
           <H1 className={styles.appTitle}>{branding?.name || "Glossarist"}</H1>
           <Button
             icon="settings"
+            elementRef={settingsButtonRef}
             title="Open settings"
             onClick={openSettingsWindow}
             className={styles.settingsButton}
@@ -178,6 +181,7 @@ function ({ activeModuleID, activateModule }) {
           />
           <Button
             icon="refresh"
+            elementRef={syncButtonRef}
             title="Synchronize (push and fetch changes)"
             onClick={requestSync}
             intent="primary"
