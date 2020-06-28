@@ -1,5 +1,6 @@
 import update from 'immutability-helper';
 import { debounce } from 'throttle-debounce';
+import { remote } from 'electron';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Text, InputGroup, Button, Tag, ButtonGroup } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
@@ -15,7 +16,6 @@ import { ModuleConfig, ToolbarItem } from '../module-config';
 import { availableLanguages } from 'app';
 import sharedStyles from '../styles.scss';
 import styles from './browse.scss';
-import { remote } from 'electron';
 
 
 const MainView: React.FC<{}> = function () {
