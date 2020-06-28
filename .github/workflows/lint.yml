@@ -23,6 +23,5 @@ jobs:
 
       - name: Run linters
         run: |
-          yarn lint:css
           yarn lint:ts
           yarn format
