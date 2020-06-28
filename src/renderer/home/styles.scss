@@ -323,6 +323,14 @@ html, body, #app {
   }
 }
 
+:local .helpPanel {
+  .panelContents {
+    height: 80px;
+    padding: $pt-grid-size;
+    overflow-y: hidden;
+  }
+}
+
 :local .reviewNode {
   :global .bp3-icon {
     margin-right: $pt-grid-size;
