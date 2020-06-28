@@ -77,5 +77,6 @@ const Panel: React.FC<{}> = function () {
 
 export default {
   Contents: Panel,
-  title: "Basics",
+  title: "Concept summary",
+  helpResourceID: "concept-summary",
 } as PanelConfig;
