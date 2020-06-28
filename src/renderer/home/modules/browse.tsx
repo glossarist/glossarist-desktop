@@ -2,7 +2,7 @@ import update from 'immutability-helper';
 import { debounce } from 'throttle-debounce';
 import { remote } from 'electron';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Text, InputGroup, Button, Tag, ButtonGroup } from '@blueprintjs/core';
+import { Text, InputGroup, Button, Tag, ButtonGroup, Icon } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { MultiLanguageConcept, SupportedLanguages } from 'models/concepts';
@@ -234,6 +234,9 @@ export default {
     panels.basics,
     panels.relationships,
     panels.status,
+    { className: sharedStyles.flexiblePanelSeparator,
+      Contents: () => <span><Icon icon="chevron-down" />{" "}Lineage</span>,
+      collapsed: 'never' },
     panels.lineage,
     panels.revision,
   ],
