@@ -154,7 +154,7 @@ export default {
   title: "Create",
 
   leftSidebar: [
-    //panels.system,
+    panels.system,
     //panels.sourceRollTranslated,
     //panels.languages,
     panels.help,
