@@ -54,7 +54,12 @@ export function getRepresentingDesignation(entry: Concept<any, any>): string {
 
 
 export const RepresentingDesignation: React.FC<{ entry: Concept<any, any> }> = function ({ entry }) {
-  const repDesignation = entry.terms[0].designation;
+  const representingTerm: Designation =
+    entry.terms.filter(d => d.normativeStatus === 'preferred')[0] ||
+    entry.terms.filter(d => d.normativeStatus === 'admitted')[0] ||
+    entry.terms[0];
+
+  const repDesignation = representingTerm?.designation;
 
   return <>
     <MathJax.Text text={repDesignation} />
