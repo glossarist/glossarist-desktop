@@ -217,7 +217,7 @@ const LanguageMenu: ToolbarItem = function () {
 
 
 export default {
-  hotkey: 'b',
+  hotkey: 'a',
   title: "List",
 
   leftSidebar: [
