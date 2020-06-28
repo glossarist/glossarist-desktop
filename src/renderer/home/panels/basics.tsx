@@ -29,7 +29,6 @@ const Panel: React.FC<{}> = function () {
         ? <>
             <FormGroup
                 key="designation"
-                label="Designation"
                 labelInfo={preferredDesignationMarker}
                 className={styles.designation}>
               <div className={`${styles.designationText} ${rtlClass} ${designationValidityClass} ${loadingClass}`}>
