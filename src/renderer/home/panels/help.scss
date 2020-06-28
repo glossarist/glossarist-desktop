@@ -1,0 +1,14 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+:local .helpContainer {
+  font-size: $pt-font-size-small;
+
+  > p {
+    margin: 0;
+    padding: 0;
+  }
+
+  .readMore {
+    color: $pt-text-color-muted;
+  } 
+}
