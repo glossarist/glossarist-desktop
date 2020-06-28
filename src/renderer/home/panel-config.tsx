@@ -10,4 +10,5 @@ export interface PanelConfig {
   className?: string
   props?: object
   collapsed?: 'never' | 'by-default'
+  helpResourceID?: string
 }

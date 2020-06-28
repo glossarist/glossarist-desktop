@@ -260,7 +260,7 @@ export default {
   leftSidebar: [
     panels.system,
     panels.sourceRollTranslated,
-    panels.databases,
+    panels.help,
   ],
 
   MainView: ConceptMap,

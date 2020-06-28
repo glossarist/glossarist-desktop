@@ -211,7 +211,7 @@ export default {
     panels.system,
     panels.sourceRollTranslated,
     panels.languages,
-    panels.databases,
+    panels.help,
   ],
 
   MainView,

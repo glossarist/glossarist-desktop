@@ -90,4 +90,5 @@ export default {
   Contents: Panel,
   title: "Selected revision",
   TitleComponentSecondary: PanelTitleSecondary,
+  helpResourceID: 'selected-revision',
 } as PanelConfig;

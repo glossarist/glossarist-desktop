@@ -7,12 +7,13 @@ import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/conc
 import { app } from 'renderer';
 import {
   ConceptContext, SourceContext,
-  ObjectQueryContext, ChangeRequestContext,
+  ObjectQueryContext, ChangeRequestContext, DocsContext,
 } from './contexts';
 import { ModuleConfig } from './module-config';
 import { Sidebar } from './module-sidebar';
 import { Query as ConceptQuery } from 'main/concept-manager'
 import styles from './styles.scss';
+import { openHelpPage } from 'renderer/help';
 
 
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
@@ -21,6 +22,8 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
 
   const [selectedConceptRef, selectConceptRef] = useState<ConceptRef | null>(null);
   const [selectedCRID, selectCRID] = useState<string | null>(null);
+
+  const docs = useContext(DocsContext);
 
   // NOTE: CR item here is specific to single-registry concepts, with languages as subkeys.
   // TODO: Once MLGT is migrated to subregistries, CR item must specify registry (subregistry?), item type, and item ID.
@@ -66,6 +69,19 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       }
     }
   }, [selectedRevisionID]);
+
+  useEffect(() => {
+    function handleReadMore(e: KeyboardEvent) {
+      e.preventDefault();
+      if (docs.hoveredItem?.readMoreURL) {
+        openHelpPage(docs.hoveredItem?.readMoreURL);
+      } else {
+        console.error("Nothing to open");
+      }
+      return false;
+    }
+    Mousetrap.bind('f1', handleReadMore);
+  }, [docs.hoveredItem]);
 
 
   // Hotkey navigation up/down concept roll

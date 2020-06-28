@@ -7,6 +7,7 @@ import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
 import { ChangeRequest } from 'models/change-requests';
 import { WithRevisions } from 'models/revisions';
 import { ChangeRequestContext } from '../contexts';
+import { useHelp } from 'renderer/help';
 
 
 const Panel: React.FC<{}> = function () {
@@ -20,6 +21,8 @@ const Panel: React.FC<{}> = function () {
 const AddChangeRequest: React.FC<{ isCollapsed?: boolean }> = function ({ isCollapsed }) {
   const [commitInProgress, setCommitInProgress] = useState(false);
   const cr = useContext(ChangeRequestContext);
+
+  const helpRef = useHelp('new-draft-change-request-button');
 
   const committerInfo = useIPCValue<{}, { email: string, name: string }>
   ('db-default-get-current-committer-info', { email: '', name: '' }).value;
@@ -82,6 +85,7 @@ const AddChangeRequest: React.FC<{ isCollapsed?: boolean }> = function ({ isColl
   return <Button
     icon="add"
     title="Create new draft change request"
+    elementRef={helpRef}
     small minimal
     disabled={!committerInfo.email || commitInProgress || isCollapsed}
     loading={commitInProgress}
@@ -93,4 +97,5 @@ export default {
   Contents: Panel,
   title: "My draft change requests",
   TitleComponentSecondary: AddChangeRequest,
+  helpResourceID: 'my-draft-change-requests',
 } as PanelConfig;

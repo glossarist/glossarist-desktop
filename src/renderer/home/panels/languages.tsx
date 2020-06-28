@@ -62,4 +62,5 @@ export default {
   title: "Language",
   className: sharedStyles.languagesPanel,
   TitleComponentSecondary: TitleSecondary,
+  helpResourceID: 'languages-panel',
 } as PanelConfig;

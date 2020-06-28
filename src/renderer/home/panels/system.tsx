@@ -6,6 +6,7 @@ import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { refToString } from '../concepts';
 import { ConceptRef } from 'models/concepts';
+import { useHelp } from 'renderer/help';
 
 
 async function getFilesystemPath(ref: ConceptRef): Promise<string> {
@@ -17,11 +18,12 @@ async function getFilesystemPath(ref: ConceptRef): Promise<string> {
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   const ref = concept?.ref ? refToString(concept.ref) : '—';
+  const helpRef = useHelp('item-id');
 
   return (
     <div>
       <FormGroup label="ID" inline={true}>
-        <InputGroup disabled value={ref} />
+        <InputGroup readOnly value={ref} inputRef={helpRef as (el: HTMLInputElement | null) => void} />
       </FormGroup>
       <FormGroup label="File" inline={true}>
         <Button
@@ -46,4 +48,5 @@ export default {
   title: "Item",
   Contents: Panel,
   TitleComponentSecondary: PanelTitleSecondary,
+  helpResourceID: 'item',
 } as PanelConfig;

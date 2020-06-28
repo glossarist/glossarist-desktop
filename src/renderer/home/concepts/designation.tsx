@@ -8,6 +8,7 @@ import {
 
 import styles from './styles.scss';
 import MathJax from 'react-mathjax2';
+import { useHelp } from 'renderer/help';
 
 
 export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
@@ -60,10 +61,11 @@ export const RepresentingDesignation: React.FC<{ entry: Concept<any, any> }> = f
     entry.terms[0];
 
   const repDesignation = representingTerm?.designation;
+  const ref = useHelp('concepts/representing-designation');
 
-  return <>
+  return <div ref={ref as (el: HTMLDivElement) => void}>
     <MathJax.Text text={repDesignation} />
     {" "}
     {entry.domain ? ' <' + entry.domain + '>' : ''}
-  </>;
+  </div>;
 };

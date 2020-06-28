@@ -11,8 +11,12 @@ import { useIPCValue } from 'coulomb/ipc/renderer';
 
 import { callIPC } from 'coulomb/ipc/renderer';
 import { Panel } from 'coulomb-panel/panel';
+import { SingleDBStatusContext } from 'coulomb/db/renderer/single-db-status-context-provider';
+import { DBSyncScreen } from 'coulomb/db/isogit-yaml/renderer/status';
 
-import { ModuleContext } from './contexts';
+import { useHelp } from 'renderer/help';
+
+import { ModuleContext, DocsContext, HoveredItem } from './contexts';
 import { ModuleConfig } from './module-config';
 import styles from './styles.scss';
 import { Module } from './module';
@@ -27,8 +31,6 @@ import { default as view } from './modules/view';
 import { default as map } from './modules/map';
 import { default as translate } from './modules/translate';
 import { default as create } from './modules/create';
-import { SingleDBStatusContext } from 'coulomb/db/renderer/single-db-status-context-provider';
-import { DBSyncScreen } from 'coulomb/db/isogit-yaml/renderer/status';
 
 const MODULE_CONFIG: { [id: string]: ModuleConfig } = {
   review,
@@ -64,11 +66,7 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   const db = useContext(SingleDBStatusContext);
 
-  const branding = useIPCValue<{ objectID: string }, { object: { name: string, symbol?: string } | null }>
-  ('db-default-read', { object: null }, { objectID: 'branding' }).value.object;
-
-  const dataRepoPath = useIPCValue<{}, { localClonePath?: string }>
-  ('db-default-describe', {}, { objectID: 'branding' }).value.localClonePath;
+  const [hoveredItem, setHoveredItem] = useState<HoveredItem | null>(null);
 
   useEffect(() => {
     for (const moduleID of MODULES) {
@@ -84,12 +82,6 @@ const Window: React.FC<WindowComponentProps> = function () {
   useEffect(() => {
     setModuleOptions({});
   }, [activeModuleID]);
-
-  const module = MODULE_CONFIG[activeModuleID];
-
-  const openSettingsWindow = () => {
-    callIPC('open-predefined-window', { id: 'settings' });
-  };
 
   const [syncScreenRequested, requestSyncScreen] = useState(false);
 
@@ -107,6 +99,8 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   }, [JSON.stringify(db)]);
 
+  const module = MODULE_CONFIG[activeModuleID];
+
   if (db === null) {
     return <NonIdealState title="Preparing DB synchronization…" />;
   } else if (syncScreenRequested) {
@@ -115,47 +109,9 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   return (
     <div className={styles.homeWindowLayout}>
-      <Panel
-          isCollapsible
+    <DocsContext.Provider value={{ hoveredItem, setHoveredItem }}>
 
-          className={styles.topPanel}
-          titleBarClassName={styles.panelTitleBar}
-          contentsClassName={styles.panelContents}
-
-          iconCollapsed="caret-down"
-          iconExpanded="caret-up">
-
-          <img
-            className={styles.appSymbol}
-            src={branding?.symbol !== undefined && dataRepoPath 
-              ? `file://${dataRepoPath}/${branding.symbol}`
-              : `file://${__static}/glossarist-symbol.svg`} />
-
-          <div className={styles.headerAndSettings}>
-            <H1 className={styles.appTitle}>{branding?.name || "Glossarist"}</H1>
-            <Button
-              icon="settings"
-              title="Open settings"
-              onClick={openSettingsWindow}
-              className={styles.settingsButton}
-              minimal={true}
-            />
-          </div>
-
-        {MODULE_GROUPS.map(group =>
-          <ButtonGroup large className={styles.moduleSelector}>
-            {group.map(moduleID =>
-              <Button
-                  disabled={MODULE_CONFIG[moduleID].disabled === true}
-                  active={moduleID === activeModuleID}
-                  key={moduleID}
-                  onClick={() => activateModule(moduleID)}>
-                {MODULE_CONFIG[moduleID].title}
-              </Button>
-            )}
-          </ButtonGroup>
-        )}
-      </Panel>
+      <TopPanel activeModuleID={activeModuleID} activateModule={activateModule} />
 
       <ModuleContext.Provider value={{ opts: moduleOptions, setOpts: setModuleOptions }}>
         <Module
@@ -164,8 +120,107 @@ const Window: React.FC<WindowComponentProps> = function () {
           MainView={module.MainView}
           mainToolbar={module.mainToolbar} />
       </ModuleContext.Provider>
+    </DocsContext.Provider>
+
     </div>
   );
 };
+
+
+const TopPanel: React.FC<{
+  activeModuleID: keyof typeof MODULE_CONFIG
+  activateModule: (mod: keyof typeof MODULE_CONFIG) => void
+}> =
+function ({ activeModuleID, activateModule }) {
+
+  const dataRepoPath = useIPCValue<{}, { localClonePath?: string }>
+  ('db-default-describe', {}, { objectID: 'branding' }).value.localClonePath;
+
+  const branding = useIPCValue<{ objectID: string }, { object: { name: string, symbol?: string } | null }>
+  ('db-default-read', { object: null }, { objectID: 'branding' }).value.object;
+
+  const topPanelRef = useHelp('panels/top-panel');
+
+  const openSettingsWindow = () => {
+    callIPC('open-predefined-window', { id: 'settings' });
+  };
+
+  const requestSync = () => {
+    callIPC('db-default-git-trigger-sync');
+  };
+
+  return (
+    <Panel
+        isCollapsible
+
+        className={styles.topPanel}
+        titleBarClassName={styles.panelTitleBar}
+        contentsClassName={styles.panelContents}
+        ref={topPanelRef as (item: HTMLDivElement) => void}
+
+        iconCollapsed="caret-down"
+        iconExpanded="caret-up">
+
+        <img
+          className={styles.appSymbol}
+          src={branding?.symbol !== undefined && dataRepoPath
+            ? `file://${dataRepoPath}/${branding.symbol}`
+            : `file://${__static}/glossarist-symbol.svg`} />
+
+        <div className={styles.headerAndSettings}>
+          <H1 className={styles.appTitle}>{branding?.name || "Glossarist"}</H1>
+          <Button
+            icon="settings"
+            title="Open settings"
+            onClick={openSettingsWindow}
+            className={styles.settingsButton}
+            minimal
+          />
+          <Button
+            icon="refresh"
+            title="Synchronize (push and fetch changes)"
+            onClick={requestSync}
+            intent="primary"
+            className={styles.settingsButton}
+            minimal
+          />
+        </div>
+
+        {MODULE_GROUPS.map(group =>
+          <ButtonGroup large className={styles.moduleSelector}>
+            {group.map(moduleID =>
+              <ModuleButton
+                isSelected={moduleID === activeModuleID}
+                moduleID={moduleID}
+                key={moduleID}
+                onSelect={() => activateModule(moduleID)}
+              />
+            )}
+          </ButtonGroup>
+        )}
+      </Panel>
+  );
+};
+
+
+const ModuleButton: React.FC<{
+  isSelected: boolean
+  moduleID: keyof typeof MODULE_CONFIG
+  onSelect: () => void
+}> =
+function ({ isSelected, moduleID, onSelect }) {
+  const ref = useHelp(`modules/${moduleID}`);
+
+  return (
+    <Button
+        elementRef={ref}
+        disabled={MODULE_CONFIG[moduleID].disabled === true}
+        active={isSelected}
+        onClick={onSelect}>
+      {MODULE_CONFIG[moduleID].title}
+    </Button>
+  );
+};
+
 
 export default Window;

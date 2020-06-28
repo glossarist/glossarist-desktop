@@ -510,7 +510,7 @@ export default {
     crDetails,
     panels.changeRequestRevisions,
     changeRequests,
-    panels.databases,
+    panels.help,
   ],
 
   MainView: MainView,

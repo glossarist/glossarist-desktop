@@ -224,7 +224,7 @@ export default {
     panels.system,
     panels.catalog,
     panels.collections,
-    panels.databases,
+    panels.help,
   ],
 
   MainView,

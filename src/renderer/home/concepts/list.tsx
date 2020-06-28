@@ -3,14 +3,15 @@ import { remote } from 'electron';
 import React, { useRef, useContext, useState, useEffect } from 'react';
 import { IButtonProps, Button } from '@blueprintjs/core';
 import { FixedSizeList as List } from 'react-window';
+import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
 
+import { useHelp } from 'renderer/help';
 import { availableLanguages } from '../../../app';
 import { MultiLanguageConcept, ConceptRef } from 'models/concepts';
 import { ConceptContext, SourceContext } from '../contexts';
 import { ConceptItem } from './item';
 
 import styles from './styles.scss';
-import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
 
 
 interface ConceptListProps {
@@ -42,6 +43,8 @@ function ({
   const isRTL = lang === 'ara';
 
   const listContainer = useRef<HTMLDivElement>(null);
+  const helpRef = useHelp('registry-item-list');
+
   const [listHeight, setListHeight] = useState<number>(CONTAINER_PADDINGS);
 
   const conceptCtx = useContext(ConceptContext);
@@ -63,6 +66,8 @@ function ({
     });
 
     window.addEventListener('resize', updateListHeight);
+
+    helpRef(listContainer.current as HTMLElement);
 
     updateListHeight();
 
