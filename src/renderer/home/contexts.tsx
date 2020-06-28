@@ -16,6 +16,17 @@ export const ReviewContext =
   ({ reviewID: null, selectReviewID: () => {}});
 
 
+export interface HoveredItem {
+  title: string
+  excerpt: string
+  readMoreURL: string | null
+}
+
+export const DocsContext =
+  React.createContext<{ setHoveredItem: (item: HoveredItem | null) => void, hoveredItem: HoveredItem | null }>
+  ({ hoveredItem: null, setHoveredItem: () => {} });
+
+
 interface ChangeRequestContextSpec {
   selected: string | null
   select: (id: string | null) => void
