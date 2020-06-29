@@ -67,7 +67,7 @@ html, body, #app {
 
   .panelContents {
     height: 3.75rem;
-    padding: 0 1rem .35rem 1rem;
+    padding: 0 $pt-grid-size * 2 .35rem $pt-grid-size * 2 !important;
 
     display: flex;
     flex-flow: row nowrap;
