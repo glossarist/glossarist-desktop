@@ -184,9 +184,9 @@ function ({ activeModuleID, activateModule }) {
             elementRef={syncButtonRef}
             title="Synchronize (push and fetch changes)"
             onClick={requestSync}
-            intent="primary"
+            intent="success"
+            outlined
             className={styles.settingsButton}
-            minimal
           />
         </div>
 
