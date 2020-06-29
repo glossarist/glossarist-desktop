@@ -2,11 +2,11 @@ import React, { useContext } from 'react';
 import { shell } from 'electron';
 import { FormGroup, InputGroup, Button } from '@blueprintjs/core';
 import { callIPC } from 'coulomb/ipc/renderer';
+import { ConceptRef } from 'models/concepts';
+import { useHelp } from 'renderer/help';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { refToString } from '../concepts';
-import { ConceptRef } from 'models/concepts';
-import { useHelp } from 'renderer/help';
 
 
 async function getFilesystemPath(ref: ConceptRef): Promise<string> {
@@ -18,16 +18,18 @@ async function getFilesystemPath(ref: ConceptRef): Promise<string> {
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   const ref = concept?.ref ? refToString(concept.ref) : '—';
-  const helpRef = useHelp('item-id');
+  const itemIDHelpRef = useHelp('item-id');
+  const revealButtonHelpRef = useHelp('file-reveal-button');
 
   return (
     <div>
       <FormGroup label="ID" inline={true}>
-        <InputGroup readOnly value={ref} inputRef={helpRef as (el: HTMLInputElement | null) => void} />
+        <InputGroup readOnly value={ref} inputRef={itemIDHelpRef as (el: HTMLInputElement | null) => void} />
       </FormGroup>
       <FormGroup label="File" inline={true}>
         <Button
           minimal
+          elementRef={revealButtonHelpRef}
           disabled={concept?.ref === null}
           onClick={async () => concept?.ref !== null
             ? shell.showItemInFolder(await getFilesystemPath(concept?.ref))
