@@ -20,7 +20,7 @@ import { app } from 'renderer';
 import { useHelp } from 'renderer/help';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
-import { ConceptContext, SourceContext, ChangeRequestContext } from '../contexts';
+import { ConceptContext, SourceContext, ChangeRequestContext, UserRoleContext } from '../contexts';
 import { EntryDetails } from '../concepts';
 import sharedStyles from '../styles.scss';
 import styles from './review.scss';
@@ -398,6 +398,8 @@ const CRDetailsPanel: React.FC<{}> = function () {
 
   const [stageInProgress, setStageInProgress] = useState<boolean>(false);
 
+  const userIsManager = useContext(UserRoleContext).isManager === true;
+
   const revealButtonHelpRef = useHelp('file-reveal-button');
 
   async function getFilesystemPath(crID: string): Promise<string> {
@@ -465,24 +467,25 @@ const CRDetailsPanel: React.FC<{}> = function () {
           </FormGroup>
         : null}
 
-      <FormGroup label="CR&nbsp;stage" inline>
+      <FormGroup label="Stage" inline helperText={
+        <ButtonGroup vertical fill>
+          {cr.author.email === committerEmail && isDraft
+            ? <Button small disabled={stageInProgress || !crHasRevisions} intent="success" onClick={async () => await updateStage('Proposal')}>Propose</Button>
+            : null}
+          {isInReview && userIsManager
+            ? <>
+                <Button small disabled={stageInProgress} intent="success" onClick={async () => await updateStage('Resolved')}>Resolve</Button>
+                <Button small disabled={stageInProgress} intent="danger" onClick={async () => await updateStage('Rejected')}>Reject</Button>
+              </>
+            : null}
+          {cr.author.email === committerEmail && isInReview
+            ? <Button outlined small disabled={stageInProgress} intent="warning" onClick={async () => await updateStage('Withdrawn')}>Withdraw</Button>
+            : null}
+        </ButtonGroup>
+      }>
         <InputGroup
           readOnly
           type="text"
-          rightElement={<>
-            {cr.author.email === committerEmail && isDraft
-              ? <Button disabled={stageInProgress || !crHasRevisions} intent="success" onClick={async () => await updateStage('Proposal')}>Propose</Button>
-              : null}
-            {cr.author.email === committerEmail && isInReview
-              ? <Button disabled={stageInProgress} intent="warning" onClick={async () => await updateStage('Withdrawn')}>Withdraw</Button>
-              : null}
-            {cr.author.email !== committerEmail && isInReview
-              ? <ButtonGroup>
-                  <Button disabled={stageInProgress} intent="success" onClick={async () => await updateStage('Resolved')}>Resolve</Button>
-                  <Button disabled={stageInProgress} intent="danger" onClick={async () => await updateStage('Rejected')}>Reject</Button>
-                </ButtonGroup>
-              : null}
-          </>}
           value={cr.meta.registry.stage || '—'} />
       </FormGroup>
       <FormGroup label="File" inline={true}>
