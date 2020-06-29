@@ -21,6 +21,8 @@ type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
 export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, MainView, mainToolbar }) {
   const lang = useContext(LangConfigContext);
 
+  // Docs
+  const docs = useContext(DocsContext);
 
   // User role
   const committerUsername = useIPCValue<{}, { username: string }>
@@ -34,8 +36,6 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
 
   const [selectedConceptRef, selectConceptRef] = useState<ConceptRef | null>(null);
   const [selectedCRID, selectCRID] = useState<string | null>(null);
-
-  const docs = useContext(DocsContext);
 
   // NOTE: CR item here is specific to single-registry concepts, with languages as subkeys.
   // TODO: Once MLGT is migrated to subregistries, CR item must specify registry (subregistry?), item type, and item ID.
