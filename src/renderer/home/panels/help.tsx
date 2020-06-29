@@ -29,7 +29,7 @@ const Title: React.FC<{}> = function () {
   if (item !== null && item.title && item?.title.trim() !== '') {
     return <span style={{ whiteSpace: 'nowrap' }}>{item.title}</span>;
   } else {
-    return null;
+    return <>Help</>;
   }
 };
 
@@ -38,5 +38,5 @@ export default {
   Contents: Panel,
   title: "Help",
   className: sharedStyles.helpPanel,
-  TitleComponentSecondary: Title,
+  TitleComponent: Title,
 } as PanelConfig;
