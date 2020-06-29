@@ -503,7 +503,7 @@ const crDetails: PanelConfig = {
 
 
 export default {
-  hotkey: 'r',
+  hotkey: 'x',
   title: "Review",
 
   leftSidebar: [
