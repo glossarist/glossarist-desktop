@@ -107,10 +107,10 @@
     "nsis": {
       "runAfterFinish": true,
       "installerIcon": "build/icon.ico",
-      "artifactName": "glossarist-desktop-${version}.${ext}"
+      "artifactName": "install-glossarist-desktop-${version}.${ext}"
     },
     "portable": {
-      "artifactName": "glossarist-desktop.exe"
+      "artifactName": "glossarist-desktop-${version}-portable.exe"
     },
     "appx": {
       "backgroundColor": "#464646",
