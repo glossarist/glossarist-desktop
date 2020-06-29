@@ -312,6 +312,7 @@ const suggestedRevision: PanelConfig = {
 
 
 type ChangeRequestLifecyclePhase = 'drafts' | 'submitted' | 'resolved';
+type CRFilter = { lcPhase: ChangeRequestLifecyclePhase, onlyMine: boolean };
 interface ChangeRequestsPanelContext {
   filter: { lcPhase: ChangeRequestLifecyclePhase, onlyMine: boolean }
 }
@@ -319,9 +320,11 @@ const ChangeRequestsPanel: React.FC<{}> = function () {
   const settings: ChangeRequestsPanelContext = useContext(PanelContext).state;
   const committerEmail = useIPCValue<{}, { email: string }>
   ('db-default-get-current-committer-info', { email: '' }).value.email;
+  const userIsManager = useContext(UserRoleContext).isManager === true;
 
-  const phase = settings.filter?.lcPhase || 'drafts';
-  const onlyMine = settings.filter?.onlyMine !== false;
+  const filter = settings.filter || getDefaultCRFilter(userIsManager);
+  const phase = filter?.lcPhase || 'drafts';
+  const onlyMine = filter?.onlyMine !== false;
 
   return <ChangeRequestList
     submitted={phase !== 'drafts'}
@@ -331,9 +334,11 @@ const ChangeRequestsPanel: React.FC<{}> = function () {
 
 const ChangeRequestFilter: React.FC<{}> = function () {
   const panelCtx = useContext(PanelContext);
+  const userIsManager = useContext(UserRoleContext).isManager === true;
 
   function invokeFilterNenu() {
     const m = new remote.Menu();
+    const filter = panelCtx.state.filter || getDefaultCRFilter(userIsManager);
 
     function selectLCPhase(phase: ChangeRequestLifecyclePhase) {
       panelCtx.setState((state: ChangeRequestsPanelContext) =>
@@ -343,19 +348,19 @@ const ChangeRequestFilter: React.FC<{}> = function () {
     m.append(new remote.MenuItem({
       label: "Drafts",
       type: 'radio',
-      checked: (panelCtx.state.filter?.lcPhase || 'drafts') === 'drafts',
+      checked: (filter.lcPhase || 'drafts') === 'drafts',
       click: () => selectLCPhase('drafts'),
     }));
     m.append(new remote.MenuItem({
       label: "Submitted",
       type: 'radio',
-      checked: panelCtx.state.filter?.lcPhase === 'submitted',
+      checked: filter.lcPhase === 'submitted',
       click: () => selectLCPhase('submitted'),
     }));
     m.append(new remote.MenuItem({
       label: "Resolved",
       type: 'radio',
-      checked: panelCtx.state.filter?.lcPhase === 'resolved',
+      checked: filter.lcPhase === 'resolved',
       click: () => selectLCPhase('resolved'),
     }));
 
@@ -366,10 +371,10 @@ const ChangeRequestFilter: React.FC<{}> = function () {
     m.append(new remote.MenuItem({
       label: "My only",
       type: 'checkbox',
-      checked: panelCtx.state.filter?.onlyMine !== false,
+      checked: filter.onlyMine !== false,
       click: () =>
         panelCtx.setState((state: ChangeRequestsPanelContext) =>
-          ({ ...state, filter: { ...state.filter, onlyMine: panelCtx.state.filter?.onlyMine !== false ? false : true } })),
+          ({ ...state, filter: { ...state.filter, onlyMine: filter.onlyMine !== false ? false : true } })),
     }));
     m.popup({ window: remote.getCurrentWindow() });
   }
@@ -535,3 +540,12 @@ export default {
     panels.revision,
   ],
 } as ModuleConfig;
+
+
+function getDefaultCRFilter(userIsManager: boolean): CRFilter {
+  if (userIsManager) {
+    return { lcPhase: 'submitted', onlyMine: false };
+  } else {
+    return { lcPhase: 'drafts', onlyMine: true };
+  }
+}
