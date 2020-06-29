@@ -7,18 +7,30 @@ import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/conc
 import { app } from 'renderer';
 import {
   ConceptContext, SourceContext,
-  ObjectQueryContext, ChangeRequestContext, DocsContext,
+  ObjectQueryContext, ChangeRequestContext, DocsContext, UserRoleContext,
 } from './contexts';
 import { ModuleConfig } from './module-config';
 import { Sidebar } from './module-sidebar';
 import { Query as ConceptQuery } from 'main/concept-manager'
 import styles from './styles.scss';
 import { openHelpPage } from 'renderer/help';
+import { useIPCValue } from 'coulomb/ipc/renderer';
 
 
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
 export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, MainView, mainToolbar }) {
   const lang = useContext(LangConfigContext);
+
+
+  // User role
+  const committerUsername = useIPCValue<{}, { username: string }>
+  ('db-default-get-current-committer-info', { username: '' }).value.username;
+
+  const roles = useIPCValue<{ objectID: string }, { object: { [username: string]: { isManager?: true } } | null }>
+  ('db-default-read', { object: null }, { objectID: 'roles' }).value.object;
+
+  const roleInfo = roles ? roles[committerUsername] : null;
+  const isManager = roleInfo?.isManager || undefined;
 
   const [selectedConceptRef, selectConceptRef] = useState<ConceptRef | null>(null);
   const [selectedCRID, selectCRID] = useState<string | null>(null);
@@ -131,6 +143,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     : null;
 
   return (
+    <UserRoleContext.Provider value={{ isManager }}>
     <ChangeRequestContext.Provider
       value={{
         selected: selectedCRID,
@@ -218,5 +231,6 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     </ConceptContext.Provider>
     </MathJax.Context>
     </ChangeRequestContext.Provider>
+    </UserRoleContext.Provider>
   );
 };

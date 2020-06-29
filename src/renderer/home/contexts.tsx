@@ -16,6 +16,11 @@ export const ReviewContext =
   ({ reviewID: null, selectReviewID: () => {}});
 
 
+export const UserRoleContext =
+  React.createContext<{ isManager?: boolean }>
+  ({});
+
+
 export interface HoveredItem {
   title: string
   excerpt: string
