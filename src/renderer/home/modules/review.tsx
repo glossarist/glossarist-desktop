@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { remote, shell } from 'electron';
 import * as log from 'electron-log';
 import React, { useContext, useEffect, useState } from 'react';
 import VisualDiff from 'react-visual-diff';
@@ -7,11 +8,15 @@ import {
   NonIdealState, Icon, Callout, FormGroup,
   InputGroup, Button, ButtonGroup, NumericInput,
 } from '@blueprintjs/core';
+
 import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
+import { PanelContext } from 'coulomb-panel/panel';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+
 import { Concept, MultiLanguageConcept, SupportedLanguages, LifecycleStage, ConceptRef } from 'models/concepts';
+import { ChangeRequest } from 'models/change-requests';
 import { Revision, getNewRevisionID } from 'models/revisions';
 import { app } from 'renderer';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { ConceptContext, SourceContext, ChangeRequestContext } from '../contexts';
@@ -20,9 +25,6 @@ import sharedStyles from '../styles.scss';
 import styles from './review.scss';
 import { PanelConfig } from '../panel-config';
 import { ChangeRequestList } from '../change-requests/list';
-import { PanelContext } from 'coulomb-panel/panel';
-import { remote, shell } from 'electron';
-import { ChangeRequest } from 'models/change-requests';
 
 
 type ConceptRevision = Revision<Concept<any, any>>;
