@@ -17,6 +17,7 @@ import { Concept, MultiLanguageConcept, SupportedLanguages, LifecycleStage, Conc
 import { ChangeRequest } from 'models/change-requests';
 import { Revision, getNewRevisionID } from 'models/revisions';
 import { app } from 'renderer';
+import { useHelp } from 'renderer/help';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { ConceptContext, SourceContext, ChangeRequestContext } from '../contexts';
@@ -397,6 +398,8 @@ const CRDetailsPanel: React.FC<{}> = function () {
 
   const [stageInProgress, setStageInProgress] = useState<boolean>(false);
 
+  const revealButtonHelpRef = useHelp('file-reveal-button');
+
   async function getFilesystemPath(crID: string): Promise<string> {
     return (await callIPC<{ objectID: string }, { path: string }>
     ('model-changeRequests-get-filesystem-path', { objectID: crID })).path;
@@ -485,6 +488,7 @@ const CRDetailsPanel: React.FC<{}> = function () {
       <FormGroup label="File" inline={true}>
         <Button
           minimal
+          elementRef={revealButtonHelpRef}
           disabled={crID === null}
           onClick={async () => crID !== null
             ? shell.showItemInFolder(await getFilesystemPath(crID))
