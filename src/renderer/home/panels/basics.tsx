@@ -19,7 +19,7 @@ const Panel: React.FC<{}> = function () {
   const isValid = revision ? ['retired', 'superseded'].indexOf(revision.entry_status) < 0 : undefined;
   const designationValidityClass = isValid === false ? sharedStyles.invalidDesignation : '';
   const loadingClass = concept.isLoading ? Classes.SKELETON : undefined;
-  const preferredDesignationMarker = localized?.terms[0].normativeStatus === 'preferred'
+  const preferredDesignationMarker = localized?.terms[0].normative_status === 'preferred'
     ? <span className={loadingClass}>preferred</span>
     : undefined;
 
