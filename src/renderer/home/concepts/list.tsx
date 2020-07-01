@@ -43,7 +43,7 @@ function ({
   const isRTL = lang === 'ara';
 
   const listContainer = useRef<HTMLDivElement>(null);
-  const helpRef = useHelp('registry-item-list');
+  const helpRef = useHelp('widgets/registry-item-list');
 
   const [listHeight, setListHeight] = useState<number>(CONTAINER_PADDINGS);
 
