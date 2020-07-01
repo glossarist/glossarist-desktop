@@ -110,6 +110,8 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
   const [newItemID, setNewItemID] = useState<number | undefined>(undefined);
   const [newItemIDIsAvailable, setNewItemIDIsAvailable] = useState<boolean | undefined>(undefined);
 
+  const userIsManager = useContext(UserRoleContext).isManager === true;
+
   const crID = crCtx.selected;
   const crObjectID = crCtx.selectedItem;
 
@@ -292,6 +294,7 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
             rightIcon={(suggestedRevisionWasAccepted === false && suggestedRevisionNeedsRebase === true) ? 'warning-sign' : undefined}
             loading={acceptInProgress}
             disabled={
+              !userIsManager ||
               acceptInProgress ||
               crIsUnderReview !== true ||
               (!suggestedRevisionIsNewEntry && !original && !_original) ||
