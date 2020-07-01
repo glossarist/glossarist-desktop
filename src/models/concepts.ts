@@ -149,7 +149,7 @@ export type OptionalLanguages = Omit<SupportedLanguages, 'eng'>;
 
 export type Designation = {
   designation: string
-  normativeStatus?: NormativeStatus
+  normative_status?: NormativeStatus
 } & TypedDesignation;
 
 export const NORMATIVE_STATUS_CHOICES = [

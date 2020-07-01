@@ -126,7 +126,7 @@ WithRevisions<Concept<number, any>> | null {
     };
 
     if (legacy.classification) {
-      designation.normativeStatus = legacy.classification;
+      designation.normative_status = legacy.classification;
     }
 
     terms = [designation];

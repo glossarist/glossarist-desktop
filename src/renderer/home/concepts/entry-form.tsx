@@ -41,7 +41,7 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
 
   function handleDesignationNormativeStatusEdit(idx: number, ns: NormativeStatus) {
     if (!props.onDesignationEdit) { return; }
-    props.onDesignationEdit(idx, { ...props.entry.terms[idx], normativeStatus: ns } as Designation);
+    props.onDesignationEdit(idx, { ...props.entry.terms[idx], normative_status: ns } as Designation);
   }
 
   function handleDesignationEdit(idx: number, d: string) {
@@ -93,7 +93,7 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
       {[...NORMATIVE_STATUS_CHOICES.entries()].map(([nsIdx, ns]) => 
         <Button small minimal
             key={nsIdx}
-            active={ns === d.normativeStatus}
+            active={ns === d.normative_status}
             onClick={() => handleDesignationNormativeStatusEdit(idx, ns)}>
           {ns}
         </Button>
@@ -129,7 +129,7 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                 ? <ButtonGroup title="Select normative status">
                     {normativeStatusChoices(idx, d)}
                   </ButtonGroup>
-                : <>{d.normativeStatus || '(unspecified)'}</>}
+                : <>{d.normative_status || '(unspecified)'}</>}
               {" "}
               {props.onExampleDeletion
                 ? <Button small

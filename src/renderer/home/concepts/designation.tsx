@@ -24,7 +24,7 @@ export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
     }
   }
 
-  const normativeStatusClass = styles[`normativeStatus-${d.normativeStatus || 'undefined'}`];
+  const normativeStatusClass = styles[`normativeStatus-${d.normative_status || 'undefined'}`];
 
   return <span className={`${styles.designation} ${normativeStatusClass}`}>
     <MathJax.Text text={d.designation} />
@@ -39,8 +39,8 @@ export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
       {d.type === 'expression' && d.geographicalArea
         ? <span className={styles.usage} title="Geographical area of usage">{d.geographicalArea}</span>
         : null}
-      {d.normativeStatus !== 'admitted' && d.normativeStatus !== undefined
-        ? <strong className={`${styles.normativeStatus} ${normativeStatusClass}`} title="Normative status">{d.normativeStatus}</strong>
+      {d.normative_status !== 'admitted' && d.normative_status !== undefined
+        ? <strong className={`${styles.normativeStatus} ${normativeStatusClass}`} title="Normative status">{d.normative_status}</strong>
         : null}
     </span>
   </span>
@@ -56,8 +56,8 @@ export function getRepresentingDesignation(entry: Concept<any, any>): string {
 
 export const RepresentingDesignation: React.FC<{ entry: Concept<any, any> }> = function ({ entry }) {
   const representingTerm: Designation =
-    entry.terms.filter(d => d.normativeStatus === 'preferred')[0] ||
-    entry.terms.filter(d => d.normativeStatus === 'admitted')[0] ||
+    entry.terms.filter(d => d.normative_status === 'preferred')[0] ||
+    entry.terms.filter(d => d.normative_status === 'admitted')[0] ||
     entry.terms[0];
 
   const repDesignation = representingTerm?.designation;
