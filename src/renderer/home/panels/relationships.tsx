@@ -9,6 +9,7 @@ import {
   ConceptContext,
   ConceptRelationshipsContextProvider,
   ConceptRelationshipsContext,
+  UserRoleContext,
 } from '../contexts';
 
 import { LazyConceptItem } from '../concepts';
@@ -142,6 +143,7 @@ const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isC
   const panel = useContext(PanelContext);
   const panelState = panel.state as { addingLink?: boolean };
   const addingLink = panelState.addingLink || false;
+  const userIsManager = useContext(UserRoleContext).isManager === true;
 
   useEffect(() => {
     toggleAddingLink(false);
@@ -151,17 +153,22 @@ const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isC
     panel.setState({ addingLink: state });
   }
 
-  return (
-    <Button
-        small minimal
-        icon="add"
-        disabled={!concept.active}
-        active={addingLink}
-        onClick={(evt: React.MouseEvent<HTMLElement>) => {
-          evt.stopPropagation();
-          toggleAddingLink(!addingLink);
-        }} />
-  );
+  if (userIsManager) {
+    return (
+      <Button
+          small minimal
+          icon="add"
+          disabled={!concept.active}
+          active={addingLink}
+          onClick={(evt: React.MouseEvent<HTMLElement>) => {
+            evt.stopPropagation();
+            toggleAddingLink(!addingLink);
+          }} />
+    );
+  } else {
+    return null;
+  }
+
 };
 
 
