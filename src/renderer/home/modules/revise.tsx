@@ -54,7 +54,7 @@ const MainView: React.FC<{}> = function () {
 };
 
 export default {
-  hotkey: 'e',
+  hotkey: 'r',
   title: "Edit",
 
   leftSidebar: [

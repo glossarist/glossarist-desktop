@@ -254,7 +254,7 @@ const CONCEPT_MAP_ELEMENT_STYLES = [
 
 
 export default {
-  hotkey: 'm',
+  hotkey: 'g',
   title: "Graph",
 
   leftSidebar: [

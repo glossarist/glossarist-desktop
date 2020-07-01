@@ -46,8 +46,8 @@ const MainView: React.FC<{}> = function () {
 
 
 export default {
-  hotkey: 'v',
-  title: "Item",
+  hotkey: 'd',
+  title: "Card",
 
   leftSidebar: [
     panels.system,
