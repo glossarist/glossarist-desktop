@@ -61,7 +61,7 @@ export const RepresentingDesignation: React.FC<{ entry: Concept<any, any> }> = f
     entry.terms[0];
 
   const repDesignation = representingTerm?.designation;
-  const ref = useHelp('concepts/representing-designation');
+  const ref = useHelp('widgets/representing-designation');
 
   return <div ref={ref as (el: HTMLDivElement) => void}>
     <MathJax.Text text={repDesignation} />

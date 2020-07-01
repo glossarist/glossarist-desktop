@@ -22,7 +22,7 @@ const AddChangeRequest: React.FC<{ isCollapsed?: boolean }> = function ({ isColl
   const [commitInProgress, setCommitInProgress] = useState(false);
   const cr = useContext(ChangeRequestContext);
 
-  const helpRef = useHelp('new-draft-change-request-button');
+  const helpRef = useHelp('widgets/new-draft-change-request-button');
 
   const committerInfo = useIPCValue<{}, { email: string, name: string }>
   ('db-default-get-current-committer-info', { email: '', name: '' }).value;

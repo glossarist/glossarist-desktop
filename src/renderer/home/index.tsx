@@ -140,8 +140,8 @@ function ({ activeModuleID, activateModule }) {
   ('db-default-read', { object: null }, { objectID: 'branding' }).value.object;
 
   const topPanelRef = useHelp('panels/top-panel');
-  const syncButtonRef = useHelp('sync-button');
-  const settingsButtonRef = useHelp('settings-button');
+  const syncButtonRef = useHelp('widgets/sync-button');
+  const settingsButtonRef = useHelp('widgets/settings-button');
 
   const openSettingsWindow = () => {
     callIPC('open-predefined-window', { id: 'settings' });

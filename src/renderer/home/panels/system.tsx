@@ -18,8 +18,8 @@ async function getFilesystemPath(ref: ConceptRef): Promise<string> {
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
   const ref = concept?.ref ? refToString(concept.ref) : '—';
-  const itemIDHelpRef = useHelp('item-id');
-  const revealButtonHelpRef = useHelp('file-reveal-button');
+  const itemIDHelpRef = useHelp('widgets/item-id');
+  const revealButtonHelpRef = useHelp('widgets/file-reveal-button');
 
   return (
     <div>
