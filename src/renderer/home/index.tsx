@@ -147,8 +147,9 @@ function ({ activeModuleID, activateModule }) {
     callIPC('open-predefined-window', { id: 'settings' });
   };
 
-  const requestSync = () => {
-    callIPC('db-default-git-trigger-sync');
+  const requestSync = async () => {
+    await callIPC('db-default-git-request-push');
+    await callIPC('db-default-git-trigger-sync');
   };
 
   return (
