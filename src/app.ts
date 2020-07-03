@@ -6,26 +6,28 @@ export const defaultLanguage = 'eng';
 
 export const availableLanguages = {
   'eng': 'English',
-  'fra': 'French',
   'ara': 'Arabic',
-  'chi': 'Chinese',
-  'ces': 'Czech',
+  'zho': 'Chinese',
   'dan': 'Danish',
+  'nld': 'Dutch',
   'fin': 'Finnish',
-  'ita': 'Italian',
-  'ger': 'German',
+  'fra': 'French',
+  'deu': 'German',
   'jpn': 'Japanese',
   'kor': 'Korean',
   'msa': 'Malay',
+  'pol': 'Polish',
+  'rus': 'Russian',
+  'spa': 'Spanish',
+  'swe': 'Swedish',
+
+  'ces': 'Czech',
+  'ita': 'Italian',
   'nno': 'Norwegian Nynorsk',
   'nob': 'Norwegian Bokmål',
-  'pol': 'Polish',
   'por': 'Portuguese',
-  'rus': 'Russian',
   'slv': 'Slovenian',
-  'spa': 'Spanish',
   'srp': 'Serbian',
-  'swe': 'Swedish',
 };
 
 
