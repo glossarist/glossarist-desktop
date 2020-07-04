@@ -137,6 +137,9 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   function handleDefChange(val: string) {
     updateEntry(e => ( e ? { ...e, definition: val } : e));
   }
+  function handleDomainChange(val: string) {
+    updateEntry(e => ( e ? { ...e, domain: val } : e));
+  }
   function handleUsageInfoChange(val: string) {
     updateEntry(e => ( e ? { ...e, usageInfo: val } : e));
   }
@@ -187,6 +190,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
       onExampleEdit={canEdit ? handleItemEdit('examples') : undefined}
       onNoteDeletion={canEdit ? handleItemDeletion('notes') : undefined}
       onNoteEdit={canEdit ? handleItemEdit('notes') : undefined}
+      onDomainChange={canEdit ? handleDomainChange : undefined}
     />
   );
 
