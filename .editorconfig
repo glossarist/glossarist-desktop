@@ -1,0 +1,15 @@
+# Editor configuration, see http://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+ij_visual_guides = 120
+ij_any_while_on_new_line = true
+ij_any_else_on_new_line = true
+ij_any_finally_on_new_line = true
+ij_any_catch_on_new_line = true
