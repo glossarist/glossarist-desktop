@@ -27,6 +27,7 @@ interface EntryFormProps {
   onNoteDeletion?: (idx: number) => void
   onExampleEdit?: (idx: number, newVal: string) => void
   onExampleDeletion?: (idx: number) => void
+  onDomainChange?: (newVal: string) => void
 }
 export const EntryForm: React.FC<EntryFormProps> = function (props) {
 
@@ -90,7 +91,7 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
 
   function normativeStatusChoices(idx: number, d: Designation) {
     return <>
-      {[...NORMATIVE_STATUS_CHOICES.entries()].map(([nsIdx, ns]) => 
+      {[...NORMATIVE_STATUS_CHOICES.entries()].map(([nsIdx, ns]) =>
         <Button small minimal
             key={nsIdx}
             active={ns === d.normative_status}
@@ -253,8 +254,7 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
             labelFor="domainLegacy">
           <InputGroup fill
             defaultValue={props.entry.domain || ''}
-            readOnly
-            disabled
+            disabled={!props.onDomainChange}
             id="domainLegacy" />
         </FormGroup>
       </div>
