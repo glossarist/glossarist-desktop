@@ -248,7 +248,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
                   props.isLoading ||
                   !entry ||
                   !hasUncommittedChanges}>
-                {creating ? "Add to change request" : "Update change request"}
+                {creating ? "Add to CR" : "Update CR"}
             </Button>
           </Tooltip>
         </ButtonGroup>
