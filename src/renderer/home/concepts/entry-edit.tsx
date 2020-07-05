@@ -224,9 +224,11 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
         <ButtonGroup>
           <Button
               onClick={revertChanges}
+              intent="warning"
               title="Deletes changes to this entry from draft change request"
+              icon="cross"
               disabled={creating}>
-            Revert
+            Remove from CR
           </Button>
           <Tooltip
               openOnTargetFocus={false}
