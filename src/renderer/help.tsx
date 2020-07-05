@@ -3,15 +3,7 @@ import axios from 'axios';
 import { DocsContext, HoveredItem } from './home/contexts';
 
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
-let GENERAL_HELP_ROOT: string;
-
-if (!isDevelopment) {
-  GENERAL_HELP_ROOT = 'https://www.glossarist.org';
-} else {
-  GENERAL_HELP_ROOT = 'http://localhost:4000';
-}
-
+const GENERAL_HELP_ROOT = 'https://www.glossarist.org';
 const IN_APP_HELP_ROOT = `${GENERAL_HELP_ROOT}/_in_app_help`;
 
 
