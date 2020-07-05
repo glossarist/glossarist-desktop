@@ -135,7 +135,7 @@
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
     "axios": "^0.19.2",
-    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.5.2-gitpkg",
+    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.5.3-gitpkg",
     "coulomb-panel": "https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.5-gitpkg",
     "cytoscape": "3",
     "electron-log": "^4.2.2",
