@@ -1,7 +1,7 @@
 import { RendererConfig } from 'coulomb/config/renderer';
 import { renderApp } from 'coulomb/app/renderer';
 import { conf as appConf, availableLanguages, defaultLanguage } from '../app';
-import { callIPC } from 'coulomb/ipc/renderer';
+//import { callIPC } from 'coulomb/ipc/renderer';
 
 
 export const conf: RendererConfig<typeof appConf> = {

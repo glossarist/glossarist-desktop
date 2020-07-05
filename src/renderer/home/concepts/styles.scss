@@ -71,10 +71,11 @@
 
   display: flex;
   flex-flow: column nowrap;
-  overflow-y: auto;
+  overflow-y: hidden;
 
   .entryForm {
     flex: 1;
+    overflow-y: auto;
   }
 }
 
