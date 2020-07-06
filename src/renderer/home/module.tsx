@@ -134,7 +134,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
 
   const concept = selectedConceptRef
     ? (_concepts.objects[selectedConceptRef] || null)
-    : null; 
+    : null;
   const localizedConcept = concept
     ? (concept[lang.selected as keyof typeof availableLanguages] || null)
     : undefined;
