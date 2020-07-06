@@ -142,92 +142,93 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     ? (localizedConcept._revisions.tree[selectedRevisionID]?.object || null)
     : null;
 
+  // NOTE: Nested context providers below are left not indented on purpose. Too many levels.
   return (
+
     <UserRoleContext.Provider value={{ isManager }}>
-    <ChangeRequestContext.Provider
-      value={{
-        selected: selectedCRID,
-        select: selectCRID,
-        selectedItem: selectedCRItem,
-        selectItem: selectCRItem,
-      }}>
-    <MathJax.Context
-        options={{
-          asciimath2jax: {
-            useMathMLspacing: true,
-            delimiters: [["$$","$$"]],
-            preview: "none",
-          },
-        }}
-        script={`file://${__static}/math/MathJax.js?config=AM_HTMLorMML`}>
 
-    <ConceptContext.Provider
-        value={{
-          active: concept,
-          isLoading: _concepts.isUpdating,
-          activeLocalized: localizedConcept,
+    <ChangeRequestContext.Provider value={{
+      selected: selectedCRID,
+      select: selectCRID,
+      selectedItem: selectedCRItem,
+      selectItem: selectCRItem,
+    }}>
 
-          ref: selectedConceptRef,
-          select: selectConceptRef,
+    <MathJax.Context script={`file://${__static}/math/MathJax.js?config=AM_HTMLorMML`} options={{
+      asciimath2jax: {
+        useMathMLspacing: true,
+        delimiters: [["$$","$$"]],
+        preview: "none",
+      },
+    }}>
 
-          highlightedRefs: highlightedConceptRefs,
-          highlightRef: (ref: ConceptRef) =>
-            updateHighlightedConceptRefs((refs) => {
-              const idx = refs.indexOf(ref);
-              if (idx < 0) {
-                return [ ...refs, ref ];
-              }
-              return refs;
-            }),
-          unhighlightRef: (ref: ConceptRef) =>
-            updateHighlightedConceptRefs((refs) => {
-              const idx = refs.indexOf(ref);
-              if (idx >= 0) {
-                update(refs, { $splice: [[ idx, 1 ]] });
-              }
-              return refs;
-            }),
-          highlightOne: (ref: ConceptRef) =>
-            updateHighlightedConceptRefs([ ref ]),
+    <ConceptContext.Provider value={{
+      active: concept,
+      isLoading: _concepts.isUpdating,
+      activeLocalized: localizedConcept,
 
-          revisionID: selectedRevisionID,
-          revision,
-          selectRevision: selectRevisionID,
-        }}>
-      <SourceContext.Provider
-          value={{
-            isLoading: _concepts.isUpdating,
+      ref: selectedConceptRef,
+      select: selectConceptRef,
 
-            active: query.inSource || DEFAULT_SOURCE,
-            collections: collections.objects,
-            select: (source: ObjectSource) => setQuery(q => update(q, { inSource: { $set: source } })),
+      highlightedRefs: highlightedConceptRefs,
+      highlightRef: (ref: ConceptRef) =>
+        updateHighlightedConceptRefs((refs) => {
+          const idx = refs.indexOf(ref);
+          if (idx < 0) {
+            return [ ...refs, ref ];
+          }
+          return refs;
+        }),
+      unhighlightRef: (ref: ConceptRef) =>
+        updateHighlightedConceptRefs((refs) => {
+          const idx = refs.indexOf(ref);
+          if (idx >= 0) {
+            update(refs, { $splice: [[ idx, 1 ]] });
+          }
+          return refs;
+        }),
+      highlightOne: (ref: ConceptRef) =>
+        updateHighlightedConceptRefs([ ref ]),
 
-            refs: concepts.ids,
-            index: _concepts.objects,
-            objects: concepts.objects,
-          }}>
-        <ObjectQueryContext.Provider value={{ query, setQuery }}>
+      revisionID: selectedRevisionID,
+      revision,
+      selectRevision: selectRevisionID,
+    }}>
 
-          <div className={styles.moduleView}>
-            {leftSidebar.length > 0
-              ? <Sidebar key="left" position="left" panelSet={leftSidebar} />
-              : null}
+    <SourceContext.Provider value={{
+      isLoading: _concepts.isUpdating,
 
-            <div key="main" className={styles.moduleMainView}>
-              <MainView />
+      active: query.inSource || DEFAULT_SOURCE,
+      collections: collections.objects,
+      select: (source: ObjectSource) => setQuery(q => update(q, { inSource: { $set: source } })),
 
-              <div className={styles.moduleToolbar}>
-                {[...mainToolbar.entries()].map(([idx, El]) => <El key={idx} />)}
-              </div>
-            </div>
+      refs: concepts.ids,
+      index: _concepts.objects,
+      objects: concepts.objects,
+    }}>
 
-            {rightSidebar.length > 0
-              ? <Sidebar key="right" position="right" panelSet={rightSidebar} />
-              : null}
-          </div>
+    <ObjectQueryContext.Provider value={{ query, setQuery }}>
 
-        </ObjectQueryContext.Provider>
-      </SourceContext.Provider>
+    <div className={styles.moduleView}>
+      {leftSidebar.length > 0
+        ? <Sidebar key="left" position="left" panelSet={leftSidebar} />
+        : null}
+
+      <div key="main" className={styles.moduleMainView}>
+        <MainView />
+
+        <div className={styles.moduleToolbar}>
+          {[...mainToolbar.entries()].map(([idx, El]) => <El key={idx} />)}
+        </div>
+      </div>
+
+      {rightSidebar.length > 0
+        ? <Sidebar key="right" position="right" panelSet={rightSidebar} />
+        : null}
+    </div>
+
+    </ObjectQueryContext.Provider>
+    </SourceContext.Provider>
     </ConceptContext.Provider>
     </MathJax.Context>
     </ChangeRequestContext.Provider>
