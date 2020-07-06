@@ -1,7 +1,7 @@
 import { RendererConfig } from 'coulomb/config/renderer';
 import { renderApp } from 'coulomb/app/renderer';
+import { callIPC } from 'coulomb/ipc/renderer';
 import { conf as appConf, availableLanguages, defaultLanguage } from '../app';
-//import { callIPC } from 'coulomb/ipc/renderer';
 
 
 export const conf: RendererConfig<typeof appConf> = {
@@ -20,11 +20,23 @@ export const conf: RendererConfig<typeof appConf> = {
   contextProviders: [{
     cls: () => import('coulomb/localizer/renderer/context-provider'),
     getProps: async () => {
-      // const registerMeta = callIPC
-      // ('db-default-read', { objectID: 'branding' }).value.object;
+      const registerMeta = (await callIPC<{ objectID: 'register' }, { object: { subregisters: { [id: string]: any } } | null }>
+      ('db-default-read', { objectID: 'register' })).object;
+
+      let langs: { [lang: string]: string };
+      if (registerMeta) {
+        const langSubregisters = Object.keys(registerMeta.subregisters).
+        filter(k => availableLanguages[k as keyof typeof availableLanguages] !== undefined) as (keyof typeof availableLanguages)[];
+
+        langs = langSubregisters.
+        map(langID => ({ [langID]: availableLanguages[langID] })).
+        reduce((prev, curr) => ({ ...prev, ...curr }));
+      } else {
+        langs = availableLanguages;
+      }
 
       return {
-        available: availableLanguages,
+        available: langs,
         selected: defaultLanguage,
         default: defaultLanguage,
         // NOTE: Default language is treated as authoritative language.
