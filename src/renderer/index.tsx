@@ -33,7 +33,7 @@ export const conf: RendererConfig<typeof appConf> = {
     },
   }, {
     cls: () => import('coulomb/db/renderer/single-db-status-context-provider'),
-    getProps: () => ({ dbName: 'default' }),
+    getProps: async () => ({ dbName: 'default' }),
   }],
 };
 
