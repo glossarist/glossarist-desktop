@@ -143,6 +143,8 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     : null;
 
   // NOTE: Nested context providers below are left not indented on purpose. Too many levels.
+  // TODO: Configure context providers outside of this JSX.
+
   return (
 
     <UserRoleContext.Provider value={{ isManager }}>
