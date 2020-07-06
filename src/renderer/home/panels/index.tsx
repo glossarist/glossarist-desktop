@@ -14,3 +14,4 @@ export { default as revision } from './revision';
 export { default as changeRequestRevisions } from './change-request-revisions';
 export { default as draftChangeRequests } from './draft-change-requests';
 export { default as help } from './help';
+export { default as changeRequests } from './change-requests';

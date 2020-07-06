@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { remote, shell } from 'electron';
+import { shell } from 'electron';
 import * as log from 'electron-log';
 import React, { useContext, useEffect, useState } from 'react';
 import VisualDiff from 'react-visual-diff';
@@ -10,10 +10,12 @@ import {
 } from '@blueprintjs/core';
 
 import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
-import { PanelContext } from 'coulomb-panel/panel';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
-import { Concept, MultiLanguageConcept, SupportedLanguages, LifecycleStage, ConceptRef } from 'models/concepts';
+import {
+  Concept, MultiLanguageConcept,
+  SupportedLanguages, LifecycleStage, ConceptRef,
+} from 'models/concepts';
 import { ChangeRequest } from 'models/change-requests';
 import { Revision, getNewRevisionID } from 'models/revisions';
 import { app } from 'renderer';
@@ -25,7 +27,6 @@ import { EntryDetails } from '../concepts';
 import sharedStyles from '../styles.scss';
 import styles from './review.scss';
 import { PanelConfig } from '../panel-config';
-import { ChangeRequestList } from '../change-requests/list';
 
 
 type ConceptRevision = Revision<Concept<any, any>>;
@@ -314,88 +315,6 @@ const suggestedRevision: PanelConfig = {
 };
 
 
-type ChangeRequestLifecyclePhase = 'drafts' | 'submitted' | 'resolved';
-type CRFilter = { lcPhase: ChangeRequestLifecyclePhase, onlyMine: boolean };
-interface ChangeRequestsPanelContext {
-  filter: { lcPhase: ChangeRequestLifecyclePhase, onlyMine: boolean }
-}
-const ChangeRequestsPanel: React.FC<{}> = function () {
-  const settings: ChangeRequestsPanelContext = useContext(PanelContext).state;
-  const committerEmail = useIPCValue<{}, { email: string }>
-  ('db-default-get-current-committer-info', { email: '' }).value.email;
-  const userIsManager = useContext(UserRoleContext).isManager === true;
-
-  const filter = settings.filter || getDefaultCRFilter(userIsManager);
-  const phase = filter?.lcPhase || 'drafts';
-  const onlyMine = filter?.onlyMine !== false;
-
-  return <ChangeRequestList
-    submitted={phase !== 'drafts'}
-    resolved={phase === 'resolved'}
-    createdBy={onlyMine ? committerEmail : undefined} />;
-};
-
-const ChangeRequestFilter: React.FC<{}> = function () {
-  const panelCtx = useContext(PanelContext);
-  const userIsManager = useContext(UserRoleContext).isManager === true;
-
-  function invokeFilterNenu() {
-    const m = new remote.Menu();
-    const filter = panelCtx.state.filter || getDefaultCRFilter(userIsManager);
-
-    function selectLCPhase(phase: ChangeRequestLifecyclePhase) {
-      panelCtx.setState((state: ChangeRequestsPanelContext) =>
-        ({ ...state, filter: { ...(state.filter || {}), lcPhase: phase }}));
-    }
-
-    m.append(new remote.MenuItem({
-      label: "Drafts",
-      type: 'radio',
-      checked: (filter.lcPhase || 'drafts') === 'drafts',
-      click: () => selectLCPhase('drafts'),
-    }));
-    m.append(new remote.MenuItem({
-      label: "Submitted",
-      type: 'radio',
-      checked: filter.lcPhase === 'submitted',
-      click: () => selectLCPhase('submitted'),
-    }));
-    m.append(new remote.MenuItem({
-      label: "Resolved",
-      type: 'radio',
-      checked: filter.lcPhase === 'resolved',
-      click: () => selectLCPhase('resolved'),
-    }));
-
-    m.append(new remote.MenuItem({
-      type: 'separator',
-    }));
-
-    m.append(new remote.MenuItem({
-      label: "My only",
-      type: 'checkbox',
-      checked: filter.onlyMine !== false,
-      click: () =>
-        panelCtx.setState((state: ChangeRequestsPanelContext) =>
-          ({ ...state, filter: { ...state.filter, onlyMine: filter.onlyMine !== false ? false : true } })),
-    }));
-    m.popup({ window: remote.getCurrentWindow() });
-  }
-
-  return <Button
-    minimal
-    icon="filter"
-    onClick={(evt: React.MouseEvent) => { evt.stopPropagation(); invokeFilterNenu(); }}
-    title="Filter change requests" />
-}
-
-const changeRequests: PanelConfig = {
-  Contents: ChangeRequestsPanel,
-  title: "Change requests",
-  TitleComponentSecondary: ChangeRequestFilter,
-};
-
-
 const CRDetailsPanel: React.FC<{}> = function () {
   const committerEmail = useIPCValue<{}, { email: string }>
   ('db-default-get-current-committer-info', { email: '' }).value.email;
@@ -526,7 +445,7 @@ export default {
   leftSidebar: [
     crDetails,
     panels.changeRequestRevisions,
-    changeRequests,
+    panels.changeRequests,
     panels.help,
   ],
 
@@ -543,12 +462,3 @@ export default {
     panels.revision,
   ],
 } as ModuleConfig;
-
-
-function getDefaultCRFilter(userIsManager: boolean): CRFilter {
-  if (userIsManager) {
-    return { lcPhase: 'submitted', onlyMine: false };
-  } else {
-    return { lcPhase: 'drafts', onlyMine: true };
-  }
-}
