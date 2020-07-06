@@ -54,7 +54,9 @@ export function useHelp(itemID: string): (item: HTMLElement) => void {
     async function handleMouseOver(evt: MouseEvent) {
       evt.stopPropagation();
       if (JSON.stringify(itemHelp) !== JSON.stringify(ctx.hoveredItem)) {
-        ctx.setHoveredItem(itemHelp);
+        setImmediate(() => {
+          ctx.setHoveredItem(itemHelp);
+        });
       }
     }
 
