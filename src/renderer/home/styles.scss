@@ -44,6 +44,10 @@ html, body, #app {
     text-transform: uppercase;
     letter-spacing: -.025em;
     line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: $pt-grid-size / 2;
   }
 
   .appSymbol {
@@ -56,13 +60,15 @@ html, body, #app {
     flex: 1;
     display: flex;
     align-items: baseline;
-    flex-direction: row;
+    flex: row nowrap;
     justify-content: flex-start;
+    overflow: hidden;
+    margin-right: $pt-grid-size;
     margin-top: .25em;
   }
 
   .settingsButton {
-    margin-left: 0.3rem;
+    margin-left: $pt-grid-size;
   }
 
   .panelContents {

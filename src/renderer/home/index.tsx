@@ -136,7 +136,10 @@ function ({ activeModuleID, activateModule }) {
   const dataRepoPath = useIPCValue<{}, { localClonePath?: string }>
   ('db-default-describe', {}, { objectID: 'branding' }).value.localClonePath;
 
-  const branding = useIPCValue<{ objectID: string }, { object: { name: string, symbol?: string } | null }>
+  const register = useIPCValue<{ objectID: 'register' }, { object: { name: string, description: string } | null }>
+  ('db-default-read', { object: null }, { objectID: 'register' }).value.object;
+
+  const branding = useIPCValue<{ objectID: 'branding' }, { object: { name: string, symbol?: string } | null }>
   ('db-default-read', { object: null }, { objectID: 'branding' }).value.object;
 
   const topPanelRef = useHelp('panels/top-panel');
@@ -171,7 +174,20 @@ function ({ activeModuleID, activateModule }) {
             : `file://${__static}/glossarist-symbol.svg`} />
 
         <div className={styles.headerAndSettings}>
-          <H1 className={styles.appTitle}>{branding?.name || "Glossarist"}</H1>
+          <H1
+              className={styles.appTitle}
+              title={`${register?.name}\n${register?.description}`}>
+            {branding?.name || register?.name || "Glossarist"}</H1>
+          <Button
+            icon="refresh"
+            elementRef={syncButtonRef}
+            title="Synchronize (push and fetch changes)"
+            onClick={requestSync}
+            intent="success"
+            large
+            outlined
+            className={styles.settingsButton}
+          />
           <Button
             icon="settings"
             elementRef={settingsButtonRef}
@@ -179,15 +195,6 @@ function ({ activeModuleID, activateModule }) {
             onClick={openSettingsWindow}
             className={styles.settingsButton}
             minimal
-          />
-          <Button
-            icon="refresh"
-            elementRef={syncButtonRef}
-            title="Synchronize (push and fetch changes)"
-            onClick={requestSync}
-            intent="success"
-            outlined
-            className={styles.settingsButton}
           />
         </div>
 
