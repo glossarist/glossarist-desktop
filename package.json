@@ -167,7 +167,7 @@
     "@types/react-window": "^1.8.1",
     "@types/throttle-debounce": "^2.1.0",
     "cross-env": "^7.0.0",
-    "electron": "^8.0.1",
+    "electron": "^8.2.4",
     "electron-builder": "^22.7.0",
     "electron-builder-notarize": "^1.1.2",
     "electron-react-devtools": "^0.5.3",
