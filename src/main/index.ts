@@ -35,7 +35,6 @@ export const conf: MainConfig<typeof appConf> = {
       backend: BackendCls,
       options: {
         workDir: path.join(appDataPath, 'glossarist-database'),
-        upstreamRepoURL: 'https://github.com/ISO-TC211/geolexica-database',
         corsProxyURL: 'https://cors.isomorphic-git.org',
         fsWrapperClass: FSWrapper,
       },
