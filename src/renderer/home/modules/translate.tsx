@@ -45,6 +45,7 @@ const MainView: React.FC<{}> = function () {
   const [proposedAuthSource, setProposedAuthSource] =
     useState<undefined | AuthoritativeSource>
     (entry?.authoritative_source);
+
   const [authSourceDraft, updateAuthSourceDraft] =
     useState<{ [K in keyof AuthoritativeSource]: string }>
     (initializeAuthSourceDraft(entry?.authoritative_source));
