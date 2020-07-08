@@ -16,6 +16,7 @@ import { availableLanguages } from 'app';
 import * as panels from '../panels';
 import { ConceptContext, ModuleContext, ChangeRequestContext } from '../contexts';
 import { EntryEdit, EntryDetails } from '../concepts';
+import { convertDraftToAuthSource, AuthoritativeSourceDraft } from '../concepts/auth-source';
 import { ToolbarItem, ModuleConfig } from '../module-config';
 import sharedStyles from '../styles.scss'
 import styles from './translate.scss';
@@ -47,7 +48,7 @@ const MainView: React.FC<{}> = function () {
     (entry?.authoritative_source);
 
   const [authSourceDraft, updateAuthSourceDraft] =
-    useState<{ [K in keyof AuthoritativeSource]: string }>
+    useState<AuthoritativeSourceDraft>
     (initializeAuthSourceDraft(entry?.authoritative_source));
 
   useEffect(() => {
@@ -92,22 +93,13 @@ const MainView: React.FC<{}> = function () {
     };
   }
   function handleAcceptAuthSourceDraft() {
-    let link: URL;
-    try {
-      link = new URL(authSourceDraft.link);
-    } catch (e) {
-      toaster.show({
-        icon: "error",
-        intent: "danger",
-        message: "You seem to have specified an incorrect URL as authoritative source link.",
-      });
-      return;
+    const [authSource, errors] = convertDraftToAuthSource(authSourceDraft);
+
+    for (const message of errors) {
+      toaster.show({ icon: "error", intent: "danger", message });
     }
-    setProposedAuthSource({
-      ref: authSourceDraft.ref,
-      clause: authSourceDraft.clause,
-      link: link,
-    });
+    if (errors.length > 0) { return; }
+    setProposedAuthSource(authSource);
   }
 
   let entryWithSource: Concept<any, any> | undefined
@@ -141,22 +133,24 @@ const MainView: React.FC<{}> = function () {
               has status {authVersion.entry_status}. If you are sure, please </>
           : <>Please </>}
         specify the authoritative source you will use for translating this concept to {lang.available[lang.selected]}.
+        <br />
+        Either a link or a standard reference is required.
       </p>
-      <FormGroup label="Standard reference" labelInfo="(required)">
+      <FormGroup label="Standard reference">
         <InputGroup large fill required
           type="text"
           placeholder="ISO 1234:2345"
           value={authSourceDraft.ref}
           onChange={handleAuthSourceStringPropertyChange('ref')} />
       </FormGroup>
-      <FormGroup label="Clause" labelInfo="(required)">
+      <FormGroup label="Clause">
         <InputGroup large fill required
           type="text"
           placeholder="3.4"
           value={authSourceDraft.clause}
           onChange={handleAuthSourceStringPropertyChange('clause')} />
       </FormGroup>
-      <FormGroup label="Link" labelInfo="(must be a valid URL)">
+      <FormGroup label="Link" labelInfo="(if provided, must be a valid URL)">
         <InputGroup large fill required
           placeholder="http://example.com/"
           type="text"
