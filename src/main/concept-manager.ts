@@ -18,7 +18,7 @@ export interface Query {
   // TODO: Make querying more flexible via a tree of predicates.
 
   onlyIDs?: number[]
-  inSource?: ObjectSource 
+  inSource?: ObjectSource
   matchingText?: string
   localization?: {
     lang: keyof SupportedLanguages
