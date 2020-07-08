@@ -59,7 +59,7 @@ WithRevisions<Concept<number, L>> | null {
       parents: [],
       timeCreated: e.date_accepted || new Date(),
       author: {
-        name: "Glossarist bot",
+        name: "Data migration procedure",
         email: "glossarist@ribose.com",
       }
     };
