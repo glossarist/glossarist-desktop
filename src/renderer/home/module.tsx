@@ -65,10 +65,11 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
 
   useEffect(() => {
     if (localizedConcept !== undefined && localizedConcept !== null) {
+      const revs = localizedConcept._revisions;
       if (selectedRevisionID === null) {
-        selectRevisionID(localizedConcept._revisions.current || null);
-      } else if (localizedConcept._revisions.tree[selectedRevisionID] === undefined) {
-        selectRevisionID(localizedConcept._revisions.current || null);
+        selectRevisionID(revs?.current || null);
+      } else if (revs?.tree[selectedRevisionID] === undefined) {
+        selectRevisionID(revs?.current || null);
       }
       //selectReviewID(null);
     }
@@ -76,8 +77,9 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
 
   useEffect(() => {
     if (localizedConcept !== undefined && localizedConcept !== null) {
+      const revs = localizedConcept._revisions;
       if (selectedRevisionID === null) {
-        selectRevisionID(localizedConcept._revisions.current);
+        selectRevisionID(revs?.current);
       }
     }
   }, [selectedRevisionID]);
@@ -139,7 +141,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     ? (concept[lang.selected as keyof typeof availableLanguages] || null)
     : undefined;
   const revision = localizedConcept && selectedRevisionID
-    ? (localizedConcept._revisions.tree[selectedRevisionID]?.object || null)
+    ? (localizedConcept._revisions?.tree[selectedRevisionID]?.object || null)
     : null;
 
   // NOTE: Nested context providers below are left not indented on purpose. Too many levels.

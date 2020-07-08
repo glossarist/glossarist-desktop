@@ -1,6 +1,6 @@
 import moment from 'moment';
 import React, { useContext } from 'react';
-import { Text, ITreeNode, Tree } from '@blueprintjs/core';
+import { Text, ITreeNode, Tree, NonIdealState } from '@blueprintjs/core';
 import { Concept } from 'models/concepts';
 import { Revision } from 'models/revisions';
 import { ConceptContext } from '../contexts';
@@ -24,11 +24,15 @@ const Panel: React.FC<{}> = function () {
   }
 
   var revisionNodes: ITreeNode[] = [];
-  var rev: string | null = entry._revisions.current;
+  var rev: string | null = entry._revisions?.current;
+
+  if (!entry._revisions || !rev) {
+    return <NonIdealState description="This item is not under revision management." />;
+  }
 
   while (rev !== null) {
     const revData: Revision<Concept<any, any>> | undefined =
-      entry._revisions.tree[rev];
+      entry._revisions?.tree[rev] || undefined;
 
     if (revData === undefined) {
       console.error("Missing revData", entry._revisions);
