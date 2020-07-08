@@ -80,12 +80,13 @@ WithRevisions<Concept<number, L>> | null {
 function migrateDomain(e: WithRevisions<Concept<number, any>>):
 WithRevisions<Concept<number, any>> | null {
   const domainRegex = /\<([^)]+)\>/;
-  var domain = undefined;
+  var domain: string | undefined;
   for (const [idx, { designation }] of e.terms.entries()) {
     const matches = domainRegex.exec(designation);
     if (matches !== null && matches[0].indexOf('<') === -1) {
       domain = matches[1];
       e.terms[idx].designation = designation.replace(matches[0], '').trim();
+      break;
     }
   }
 
