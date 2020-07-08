@@ -42,13 +42,6 @@ const MainView: React.FC<{}> = function () {
 
   const comparing = mod.opts.compareAuthoritative && authVersion;
 
-  // Force switch to non-authoritative language
-  useEffect(() => {
-    if (lang.selected === lang.default) {
-      lang.select(Object.keys(lang.available).filter(id => id !== lang.default)[0]);
-    }
-  }, [lang.selected]);
-
   const [proposedAuthSource, setProposedAuthSource] =
     useState<undefined | AuthoritativeSource>
     (entry?.authoritative_source);
@@ -64,6 +57,16 @@ const MainView: React.FC<{}> = function () {
 
   if (active === null) {
     return <NonIdealState title="No concept is selected" />;
+  } else if (lang.selected === lang.default) {
+    // TODO: Force switch to preferred translation language?
+    return <NonIdealState
+      icon="translate"
+      title="Please choose another language"
+      description={<>
+        For translation purposes, your active language in Glossarist
+        <br />
+        must be other than {lang.available[lang.default]}.
+      </>} />;
   } else if (cr.selected === null) {
     return <NonIdealState
       icon="edit"
