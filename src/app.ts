@@ -80,7 +80,7 @@ export const conf: AppConfig = {
     default: {
       openerParams: {
         title: 'Glossarist Desktop',
-        dimensions: { width: 1200, height: 700, minWidth: 800, minHeight: 500 },
+        dimensions: { width: 1200, height: 700, minWidth: 1200, minHeight: 500 },
       },
     },
     batchCommit: {
