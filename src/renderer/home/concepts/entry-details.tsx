@@ -23,6 +23,10 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
     synonyms = [];
   }
 
+  function openAuthSource(link: string) {
+    require('electron').shell.openExternal(link);
+  }
+
   return (
     <div className={`${styles.entryDetails} ${entry.language_code === 'ara' ? Classes.RTL : ''} ${className || ''}`}>
       {entry.domain ? <span className={styles.legacyDomain}>&lt;{entry.domain}&gt;</span> : null}
@@ -57,6 +61,21 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
             </div>
           )}
       </div>
+
+      <footer>
+        <dl>
+          <dt>Entry status</dt>
+          <dd>{entry.entry_status || 'unknown'}</dd>
+          <dt>Authoritative source</dt>
+          <dd>
+            {`${entry.authoritative_source.link || ''}`.trim() !== ''
+              ? <a onClick={() => openAuthSource(`${entry.authoritative_source.link}`)}>
+                  {entry.authoritative_source.ref || entry.authoritative_source.link} {entry.authoritative_source.clause}
+                </a>
+              : <>{entry.authoritative_source.ref} {entry.authoritative_source.clause}</>}
+          </dd>
+        </dl>
+      </footer>
     </div>
   );
 };
