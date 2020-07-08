@@ -20,8 +20,16 @@ export const conf: RendererConfig<typeof appConf> = {
   contextProviders: [{
     cls: () => import('coulomb/localizer/renderer/context-provider'),
     getProps: async () => {
-      const registerMeta = (await callIPC<{ objectID: 'register' }, { object: { subregisters: { [id: string]: any } } | null }>
-      ('db-default-read', { objectID: 'register' })).object;
+      type RegisterMeta = { subregisters: { [id: string]: any } };
+
+      let registerMeta: RegisterMeta | null;
+
+      try {
+        registerMeta = (await callIPC<{ objectID: 'register' }, { object: RegisterMeta | null }>
+        ('db-default-read', { objectID: 'register' })).object;
+      } catch (e) {
+        registerMeta = null;
+      }
 
       let langs: { [lang: string]: string };
       if (registerMeta) {
