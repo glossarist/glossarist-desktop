@@ -56,7 +56,7 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
 
         {[...entry.notes.entries()].map(([idx, item]) =>
             <div className={`${styles.note} ${loadingClass}`} key={`note-${idx}`}>
-              <span className={styles.label}>NOTE:</span>
+              <span className={styles.label}>Note {idx + 1} to entry:</span>
               <MathJax.Text text={item} />
             </div>
           )}
