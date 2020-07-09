@@ -91,7 +91,7 @@ const Window: React.FC<WindowComponentProps> = function () {
       db.status.needsPassword ||
       db.status.isPushing ||
       db.status.isPulling ||
-      (db.status.lastSynchronized === null && db.status.hasLocalChanges === false));
+      db.status.lastSynchronized === null);
 
     if (showInitializationScreen) {
       requestSyncScreen(true);
