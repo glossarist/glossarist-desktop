@@ -206,10 +206,11 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                     {d.partOfSpeech === 'noun'
                       ? <>
                           <HTMLSelect key="gender"
-                            title="Grammatical gender"
-                            value={d.gender}
-                            onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
-                              handleNounGender(idx, evt.currentTarget.value as Noun["gender"] || '')}>
+                              title="Grammatical gender"
+                              value={d.gender}
+                              onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                                handleNounGender(idx, evt.currentTarget.value as Noun["gender"] || '')
+                              }>
                             <option value="">gender</option>
                             <option value="masculine" title="Masculine">m.</option>
                             <option value="feminine" title="Feminine">f.</option>
@@ -217,10 +218,11 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                             <option value="neuter" title="Neuter/neutral gender">nt.</option>
                           </HTMLSelect>
                           <HTMLSelect key="number"
-                            title="Grammatical number"
-                            value={d.grammaticalNumber}
-                            onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
-                              handleNounNumber(idx, evt.currentTarget.value as Noun["grammaticalNumber"] || '')}>
+                              title="Grammatical number"
+                              value={d.grammaticalNumber}
+                              onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                                handleNounNumber(idx, evt.currentTarget.value as Noun["grammaticalNumber"] || '')
+                              }>
                             <option value="">number</option>
                             <option value="singular">sing.</option>
                             <option value="plural">pl.</option>
