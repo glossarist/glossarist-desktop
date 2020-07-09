@@ -35,7 +35,6 @@ export const conf: MainConfig<typeof appConf> = {
       backend: BackendCls,
       options: {
         workDir: path.join(appDataPath, 'glossarist-database'),
-        corsProxyURL: 'https://cors.isomorphic-git.org',
         fsWrapperClass: FSWrapper,
       },
     },
