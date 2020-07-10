@@ -4,6 +4,7 @@ import {
   Button, FormGroup, ButtonGroup,
   InputGroup, ControlGroup,
   HTMLSelect,
+  Classes,
 } from '@blueprintjs/core';
 
 import {
@@ -14,6 +15,7 @@ import {
 
 import { AutoSizedTextArea } from '../widgets';
 import styles from './styles.scss';
+import { isRTL } from 'app';
 
 
 interface EntryFormProps {
@@ -30,6 +32,8 @@ interface EntryFormProps {
   onDomainChange?: (newVal: string) => void
 }
 export const EntryForm: React.FC<EntryFormProps> = function (props) {
+
+  const rtl = isRTL(props.entry.language_code);
 
   function openHelpPage(link: string) {
     require('electron').shell.openExternal(link);
@@ -144,7 +148,9 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
             </>}
             intent={d.designation.trim() === '' ? 'danger' : undefined}>
 
-          <InputGroup fill className={styles.designation}
+          <InputGroup fill
+            className={`${styles.designation} ${rtl ? Classes.RTL : ''}`}
+            dir={rtl ? 'rtl' : 'ltr'}
             value={d.designation}
             id={`designation-${idx}`}
             disabled={!props.onDesignationEdit}
@@ -282,6 +288,8 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
           </>}
           labelInfo="(required)">
         <AutoSizedTextArea fill
+          dir={rtl ? 'rtl' : 'ltr'}
+          className={rtl ? Classes.RTL : undefined}
           value={props.entry.definition || ''}
           id="definition"
           disabled={!props.onDefinitionChange}
@@ -307,6 +315,8 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
               : undefined}
             intent={item.trim() === '' ? 'danger' : undefined}>
           <AutoSizedTextArea fill
+            dir={rtl ? 'rtl' : 'ltr'}
+            className={rtl ? Classes.RTL : undefined}
             value={item}
             id={`example-${idx}`}
             growVertically
@@ -334,6 +344,8 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
               : undefined}
             intent={item.trim() === '' ? 'danger' : undefined}>
           <AutoSizedTextArea fill
+            dir={rtl ? 'rtl' : 'ltr'}
+            className={rtl ? Classes.RTL : undefined}
             value={item}
             growVertically
             id={`note-${idx}`}
