@@ -256,15 +256,6 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                 ? props.onUsageInfoChange((evt.target as HTMLInputElement).value)
                 : void 0} />
         </FormGroup>
-        <FormGroup
-            label="Domain"
-            helperText="Legacy."
-            labelFor="domainLegacy">
-          <InputGroup fill
-            defaultValue={props.entry.domain || ''}
-            disabled={!props.onDomainChange}
-            id="domainLegacy" />
-        </FormGroup>
       </div>
 
       <FormGroup
