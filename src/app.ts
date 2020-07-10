@@ -4,6 +4,11 @@ import { AppConfig } from 'coulomb/config/app';
 export const defaultLanguage = 'eng';
 
 
+export function isRTL(lang: keyof typeof availableLanguages) {
+  return lang === 'ara';
+}
+
+
 export const availableLanguages = {
   'eng': 'English',
   'ara': 'Arabic',
