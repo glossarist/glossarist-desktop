@@ -28,7 +28,7 @@ export const availableLanguages = {
   'por': 'Portuguese',
   'slv': 'Slovenian',
   'srp': 'Serbian',
-};
+} as const;
 
 
 export type CatalogPresetName = 'all' | 'current-proposal';
