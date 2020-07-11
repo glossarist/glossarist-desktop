@@ -53,11 +53,9 @@ export function useHelp(itemID: string): (item: HTMLElement) => void {
   useEffect(() => {
     async function handleMouseOver(evt: MouseEvent) {
       evt.stopPropagation();
-      if (JSON.stringify(itemHelp) !== JSON.stringify(ctx.hoveredItem)) {
-        setImmediate(() => {
-          ctx.setHoveredItem(itemHelp);
-        });
-      }
+      setImmediate(() => {
+        ctx.setHoveredItem(itemHelp);
+      });
     }
 
     ref?.addEventListener('mouseover', handleMouseOver);
