@@ -15,6 +15,7 @@ declare module "react-visual-diff" {
   export = VisualDiff
 }
 
+
 declare module "react-mathjax2" {
   const MathJax: {
     Context: React.FC<any>
