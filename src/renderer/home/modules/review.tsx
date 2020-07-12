@@ -21,15 +21,34 @@ import { Revision, getNewRevisionID } from 'models/revisions';
 import { app } from 'renderer';
 import { useHelp } from 'renderer/help';
 import * as panels from '../panels';
-import { ModuleConfig } from '../module-config';
-import { ConceptContext, SourceContext, ChangeRequestContext, UserRoleContext } from '../contexts';
+import { ModuleConfig, ToolbarItem } from '../module-config';
+import { ConceptContext, SourceContext, ChangeRequestContext, UserRoleContext, ModuleContext } from '../contexts';
 import { EntryDetails } from '../concepts';
 import sharedStyles from '../styles.scss';
 import styles from './review.scss';
 import { PanelConfig } from '../panel-config';
+import { AnnotatedChange } from '../inline-diff';
 
 
 type ConceptRevision = Revision<Concept<any, any>>;
+
+
+const InlineDiff: React.FC<{
+  proposedRevision: Concept<any, any> | null
+  proposedRevisionTimestamp: Date | null
+  comparedRevision: Concept<any, any> | null
+  comparedRevisionID: string | null
+}> = React.memo(({ proposedRevision, comparedRevision }) => {
+  const proposedEntry = proposedRevision ? <EntryDetails entry={proposedRevision} /> : <></>;
+  return <VisualDiff
+    left={comparedRevision ? <EntryDetails entry={comparedRevision} /> : proposedEntry}
+    right={proposedEntry}
+    renderChange={AnnotatedChange} />;
+}, (prevProps, nextProps) =>
+  prevProps.proposedRevisionTimestamp === nextProps.proposedRevisionTimestamp &&
+  prevProps.comparedRevisionID === nextProps.comparedRevisionID
+);
+
 
 const MainView: React.FC<{}> = function () {
   const source = useContext(SourceContext);
@@ -38,13 +57,13 @@ const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const crID = crCtx.selected;
   const crObjectID = crCtx.selectedItem;
-
+  const mod = useContext(ModuleContext);
 
   const reviewMaterial = useIPCValue
   <{ changeRequestID: string | null, objectType: string, objectID: string | null }, { toReview?: ConceptRevision }>
   ('model-changeRequests-read-revision', {}, { changeRequestID: crID, objectType: 'concepts', objectID: crObjectID }).value;
 
-  const revisionToReview = reviewMaterial.toReview ? reviewMaterial.toReview.object : null;
+  const revisionToReview = reviewMaterial.toReview || null;
   const revisionToCompare = ctx.revision;
 
   useEffect(() => {
@@ -71,6 +90,7 @@ const MainView: React.FC<{}> = function () {
         </Callout>
       </> : undefined}
     />;
+
   } else if (revisionToReview === null) {
     return <NonIdealState
       title="Nothing to show"
@@ -80,21 +100,18 @@ const MainView: React.FC<{}> = function () {
       </>} />;
   }
 
-  let material: JSX.Element;
-
-  const toReview = <EntryDetails entry={revisionToReview} />;
-
-  if (revisionToCompare) {
-    const toCompare = <EntryDetails entry={revisionToCompare} />;
-    material = <VisualDiff left={toCompare} right={toReview} />
-  } else {
-    material = toReview;
-  }
+  const compare: false | 'inline-diff' = mod.opts.compare !== undefined ? mod.opts.compare : 'inline-diff';
 
   return (
     <div className={sharedStyles.backdrop}>
       <div className={styles.reviewForm}>
-        {material}
+        {compare === 'inline-diff'
+          ? <InlineDiff
+              proposedRevision={revisionToReview.object}
+              proposedRevisionTimestamp={revisionToReview.timeCreated}
+              comparedRevision={revisionToCompare}
+              comparedRevisionID={ctx.revisionID} />
+          : <EntryDetails entry={revisionToReview.object} />}
       </div>
     </div>
   );
@@ -438,6 +455,35 @@ const crDetails: PanelConfig = {
 };
 
 
+const CompareSwitch: ToolbarItem = function () {
+  const modCtx = useContext(ModuleContext);
+
+  const compare: false | 'inline-diff' | 'side-by-side' =
+    modCtx.opts.compare !== undefined ? modCtx.opts.compare : 'inline-diff';
+
+  return (
+    <ButtonGroup>
+      <Button
+        icon="document"
+        title="No comparison"
+        active={compare === false}
+        onClick={() => { modCtx.setOpts({ ...modCtx.opts, compare: false }); }} />
+      <Button
+        icon="highlight"
+        title="Inline comparison"
+        active={compare === 'inline-diff'}
+        onClick={() => { modCtx.setOpts({ ...modCtx.opts, compare: 'inline-diff' }); }} />
+      <Button
+        icon="comparison"
+        disabled
+        title="Side-by-side comparison"
+        active={compare === 'side-by-side'}
+        onClick={() => { modCtx.setOpts({ ...modCtx.opts, compare: 'side-by-side' }); }} />
+    </ButtonGroup>
+  );
+};
+
+
 export default {
   hotkey: 'x',
   title: "Review",
@@ -450,7 +496,7 @@ export default {
   ],
 
   MainView: MainView,
-  mainToolbar: [],
+  mainToolbar: [CompareSwitch],
 
   rightSidebar: [
     suggestedRevision,
