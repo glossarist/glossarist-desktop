@@ -45,11 +45,9 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
         <FullDesignation d={primaryDesignation} />
       </H2>
 
-      {synonyms.length > 0
-        ? <div className={styles.synonyms}>
-            {[...synonyms.entries()].map(([idx, s]) => <FullDesignation key={idx} d={s} />)}
-          </div>
-        : null}
+      <div className={styles.synonyms}>
+        {[...synonyms.entries()].map(([idx, s]) => <FullDesignation key={idx} d={s} />)}
+      </div>
 
       <div className={`${Classes.RUNNING_TEXT}`}>
         <div className={`${styles.definition} ${loadingClass}`}>

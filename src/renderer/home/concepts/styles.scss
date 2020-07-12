@@ -130,9 +130,11 @@
     }
   }
   .synonyms {
-    margin-bottom: 1rem;
+    &:not(:empty) {
+      margin-bottom: 1rem;
+    }
 
-    &:before {
+    &:not(:empty):before {
       content: "Syn.";
       font-style: italic;
     }
