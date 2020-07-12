@@ -40,7 +40,12 @@ export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
         ? <span dir="ltr" className={styles.usage} title="Geographical area of usage">{d.geographicalArea}</span>
         : null}
       {d.normative_status !== 'admitted' && (d.normative_status?.trim() || '') !== ''
-        ? <strong dir="ltr" className={`${styles.normativeStatus} ${styles.label} ${normativeStatusClass}`} title="Normative status">{d.normative_status}</strong>
+        ? <strong
+              dir="ltr"
+              className={`${styles.normativeStatus} ${styles.label} ${normativeStatusClass}`}
+              title="Normative status">
+            {d.normative_status}
+          </strong>
         : null}
     </span>
   </span>
