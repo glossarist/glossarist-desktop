@@ -465,18 +465,18 @@ const CompareSwitch: ToolbarItem = function () {
     <ButtonGroup>
       <Button
         icon="document"
-        title="No comparison"
+        title="Item as proposed without comparison"
         active={compare === false}
         onClick={() => { modCtx.setOpts({ ...modCtx.opts, compare: false }); }} />
       <Button
         icon="highlight"
-        title="Inline comparison"
+        title="Item as proposed, differences with comparison target highlighted"
         active={compare === 'inline-diff'}
         onClick={() => { modCtx.setOpts({ ...modCtx.opts, compare: 'inline-diff' }); }} />
       <Button
         icon="comparison"
         disabled
-        title="Side-by-side comparison"
+        title="Side-by-side comparison between item as proposed and comparison target"
         active={compare === 'side-by-side'}
         onClick={() => { modCtx.setOpts({ ...modCtx.opts, compare: 'side-by-side' }); }} />
     </ButtonGroup>
