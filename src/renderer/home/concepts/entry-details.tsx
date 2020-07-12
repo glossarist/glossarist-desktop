@@ -3,7 +3,6 @@ import MathJax from 'react-mathjax2';
 import { Classes, H2 } from '@blueprintjs/core';
 import { Concept, Designation } from 'models/concepts';
 import { isRTL } from 'app';
-import { useHelp } from 'renderer/help';
 import styles from './styles.scss';
 import { FullDesignation } from './designation';
 
@@ -31,8 +30,6 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
     require('electron').shell.openExternal(link);
   }
 
-  const primaryDesignationHelpRef = useHelp('widgets/representing-designation');
-
   return (
     <div
         dir={rtl ? 'rtl' : 'ltr'}
@@ -40,8 +37,7 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
       {entry.domain ? <span className={styles.legacyDomain}>&lt;{entry.domain}&gt;</span> : null}
 
       <H2
-          className={`${styles.primaryDesignation} ${loadingClass}`}
-          elementRef={(el) => primaryDesignationHelpRef(el as HTMLElement)}>
+          className={`${styles.primaryDesignation} ${loadingClass}`}>
         <FullDesignation d={primaryDesignation} />
       </H2>
 
