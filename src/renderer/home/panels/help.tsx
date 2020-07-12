@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { DocsContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import sharedStyles from '../styles.scss';
