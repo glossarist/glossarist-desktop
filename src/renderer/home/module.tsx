@@ -187,7 +187,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
         updateHighlightedConceptRefs((refs) => {
           const idx = refs.indexOf(ref);
           if (idx >= 0) {
-            update(refs, { $splice: [[ idx, 1 ]] });
+            return update(refs, { $splice: [[ idx, 1 ]] });
           }
           return refs;
         }),
