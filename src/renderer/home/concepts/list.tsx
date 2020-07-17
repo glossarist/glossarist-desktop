@@ -132,12 +132,16 @@ function ({
 
     const m = new remote.Menu();
     m.append(new remote.MenuItem({
-      label: refsActedUpon.length > 1 ? `Add ${refsActedUpon.length} concepts to collection` : "Add to collection",
+      label: refsActedUpon.length > 1
+        ? `Add ${refsActedUpon.length} concepts to collection`
+        : "Add to collection",
       enabled: refsActedUpon.length > 0,
       submenu: cm,
     }));
     m.append(new remote.MenuItem({
-      label: refsActedUpon.length > 1 ? `Remove ${refsActedUpon.length} concepts from current collection` : "Remove from current collection",
+      label: refsActedUpon.length > 1
+        ? `Remove ${refsActedUpon.length} concepts from current collection`
+        : "Remove from current collection",
       enabled:
         refsActedUpon.length > 0 &&
         committerEmail !== '' &&

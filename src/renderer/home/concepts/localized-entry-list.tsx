@@ -105,7 +105,9 @@ function ({
           alignText="left"
           className={`
             ${styles.lazyConceptListItem}
-            ${conceptCtx.ref === e.id ? styles.lazyConceptListItemSelected : ''}
+            ${conceptCtx.ref === e.id && lang.selected === e.language_code
+              ? styles.lazyConceptListItemSelected
+              : ''}
           `}
           active={isHighlighted}
           {...buttonProps}
