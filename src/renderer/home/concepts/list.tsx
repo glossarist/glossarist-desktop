@@ -169,7 +169,9 @@ function ({
           onContextMenu={() => invokeRowContextMenu(c.termid)}
           className={`
             ${styles.lazyConceptListItem}
-            ${conceptCtx.ref === c.termid ? styles.lazyConceptListItemSelected : ''}
+            ${conceptCtx.ref === c.termid
+              ? styles.lazyConceptListItemSelected
+              : ''}
           `}
           active={isHighlighted}
           {...buttonProps}
