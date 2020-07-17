@@ -1,7 +1,7 @@
 import { debounce } from 'throttle-debounce';
 import { remote } from 'electron';
 import React, { useRef, useContext, useState, useEffect } from 'react';
-import { IButtonProps, Button } from '@blueprintjs/core';
+import { IButtonProps, Button, Checkbox } from '@blueprintjs/core';
 import { FixedSizeList as List } from 'react-window';
 import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
 
@@ -90,18 +90,12 @@ function ({
     }
   }
 
-  function handleClick(termid: number, evt: React.MouseEvent) {
-    conceptCtx.select(termid);
-
-    if (evt.altKey) {
+  function handleHighlightClick(termid: number) {
       if (conceptCtx.highlightedRefs.indexOf(termid) < 0) {
         conceptCtx.highlightRef(termid);
       } else {
         conceptCtx.unhighlightRef(termid);
       }
-    } else {
-      conceptCtx.highlightOne(termid);
-    }
   }
 
   async function addToCollection(collectionID: string, refs: ConceptRef[]) {
@@ -173,9 +167,23 @@ function ({
               ? styles.lazyConceptListItemSelected
               : ''}
           `}
-          active={isHighlighted}
           {...buttonProps}
-          onClick={(evt: React.MouseEvent) => handleClick(c.termid, evt)}>
+          onClick={(evt: React.MouseEvent) => {
+            if ((evt.target as Element).nodeName === 'INPUT') {
+              evt.stopPropagation();
+            } else {
+              setImmediate(() => conceptCtx.select(c.termid))
+            }
+          }}>
+
+        <Checkbox
+          checked={isHighlighted}
+          style={{ margin: '0' }}
+          onChangeCapture={(evt) => {
+            evt.stopPropagation();
+            handleHighlightClick(c.termid);
+            return false;
+          }} />
 
         {itemMarker
           ? <span className={styles.itemMarker}>{itemMarker(c)}</span>
