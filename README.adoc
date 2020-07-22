@@ -24,7 +24,7 @@ that will ask you for information and put together a commit message for you.
 
 To follow the convention:
 
-* Only use ``git commit`` or ``npx git-cz`` when making commits
+* Only use ``git commit`` when making commits
 * Don’t use built-in IDE commit prompts, since they may bypass prepare-commit-msg hook
 
 === Pushing
