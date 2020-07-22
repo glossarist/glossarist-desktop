@@ -1,9 +1,13 @@
 = Glossarist desktop -- cross-platform standardized terminology editor
 
-This application supports:
+image::https://img.shields.io/badge/commitizen-friendly-brightgreen.svg[alt="Commitizen friendly",link="http://commitizen.github.io/cz-cli/"]
 
-. Editing [ISO/TC 211 Geolexica database](https://github.com/ISO-TC211/geolexica-database) data
-. Editing [OSGeo Geolexica database](https://github.com/geolexica/osgeo-glossary) data
-. (PoC) Editing [IEC Electropedia data](https://github.com/glossarist/iev-data) data
+This application allows to collaboratively edit concept systems in Glossarist format.
+
+Currently those are:
+
+. Editing https://github.com/ISO-TC211/geolexica-database[ISO/TC 211 Geolexica database] data
+. Editing https://github.com/geolexica/osgeo-glossary[OSGeo Geolexica database] data
+. (PoC) Editing https://github.com/glossarist/iev-data[IEC Electropedia data] data
 
 See more at https://glossarist.org/desktop/.
