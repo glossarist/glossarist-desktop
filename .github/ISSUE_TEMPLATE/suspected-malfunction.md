@@ -1,6 +1,6 @@
 ---
-name: Suspected malfunction
-about: Help us improve by reporting if the app doesn’t behave as expected.
+name: Report a problem or unexpected behavior
+about: Help us improve by reporting if the app malfunctions, or doesn’t work as expected.
 title: "[BUG]"
 labels: ''
 assignees: strogonoff
