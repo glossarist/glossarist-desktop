@@ -135,7 +135,7 @@ const TopPanel: React.FC<{
 function ({ activeModuleID, activateModule }) {
 
   const dataRepoPath = useIPCValue<{}, { localClonePath?: string }>
-  ('db-default-describe', {}, { objectID: 'branding' }).value.localClonePath;
+  ('db-default-describe', {}, {}).value.localClonePath;
 
   const register = useIPCValue<{ objectID: 'register' }, { object: { name: string, description: string } | null }>
   ('db-default-read', { object: null }, { objectID: 'register' }).value.object;
