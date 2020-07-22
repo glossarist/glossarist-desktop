@@ -68,6 +68,6 @@ jobs:
       - name: Trigger glossarist.org
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.GH_GLOSSARIST_CI_TOKEN }}
           repository: glossarist/glossarist.org
           event-type: ${{ steps.event_type.outputs.value }}
