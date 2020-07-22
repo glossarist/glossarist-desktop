@@ -57,3 +57,17 @@ jobs:
           # macOS notarization API key
           API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           API_KEY_ISSUER_ID: ${{ secrets.APPLE_API_KEY_ISSUER_ID }}
+  update-site:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build event type
+        id: event_type
+        run: |
+          echo "##[set-output name=value;]deploy_${GITHUB_REF##*/}"
+      - name: Trigger glossarist.org
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          repository: glossarist/glossarist.org
+          event-type: ${{ steps.event_type.outputs.value }}
