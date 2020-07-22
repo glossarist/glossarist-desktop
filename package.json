@@ -51,6 +51,16 @@
   "build": {
     "productName": "Glossarist",
     "appId": "org.glossarist.desktop",
+    "extraResources": [
+      {
+        "from": "./src/static",
+        "to": "src/static"
+      },
+      {
+        "from": "./node_modules/coulomb/db/isogit-yaml/main/isogit/worker.js",
+        "to": "isogit-worker.js"
+      }
+    ],
     "afterPack": "./scripts/after-pack.js",
     "afterSign": "electron-builder-notarize",
     "mac": {
@@ -135,7 +145,7 @@
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
     "axios": "^0.19.2",
-    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.6.0-gitpkg",
+    "coulomb": "https://github.com/coulombjs/coulomb#coulomb-v0.7.1-gitpkg",
     "coulomb-panel": "https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.5-gitpkg",
     "cytoscape": "3",
     "electron-log": "^4.2.2",
