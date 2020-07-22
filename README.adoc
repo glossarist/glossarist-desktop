@@ -11,3 +11,7 @@ Currently those are:
 . (PoC) Editing https://github.com/glossarist/iev-data[IEC Electropedia data] data
 
 See more at https://glossarist.org/desktop/.
+
+== Contributing
+
+PRs are welcome.
