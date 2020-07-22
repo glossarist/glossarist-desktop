@@ -27,6 +27,19 @@ To follow the convention:
 * Only use ``git commit`` when making commits
 * Don’t use built-in IDE commit prompts, since they may bypass prepare-commit-msg hook
 
+=== Pulling
+
+- It is recommended to use “rebase” behavior of pull (make sure to use fresh Git)
+  by having this in your global .gitconfig:
+
+  ```
+  [pull]
+          rebase = true
+  ```
+
+- When pulling, Commitizen commit prompt may appear even if there is no merge commit to be made.
+  You can dismiss it with Ctrl+C.
+
 === Pushing
 
 There is a pre-push Git hook that compiles the app.
