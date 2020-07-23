@@ -31,16 +31,21 @@ export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
 
     <span className={styles.designationMarkers}>
       {d.type === 'expression' && d.partOfSpeech
-        ? <span className={styles.grammar}>{partOfSpeechLabel(d)}</span>
+        ? <span dir="ltr" className={styles.grammar}>{partOfSpeechLabel(d)}</span>
         : null}
       {d.type === 'expression' && d.isAbbreviation
-        ? <span className={styles.grammar} title="Acronym or abbreviation">abbr.</span>
+        ? <span dir="ltr" className={styles.grammar} title="Acronym or abbreviation">abbr.</span>
         : null}
       {d.type === 'expression' && d.geographicalArea
-        ? <span className={styles.usage} title="Geographical area of usage">{d.geographicalArea}</span>
+        ? <span dir="ltr" className={styles.usage} title="Geographical area of usage">{d.geographicalArea}</span>
         : null}
-      {d.normative_status !== 'admitted' && d.normative_status !== undefined
-        ? <strong className={`${styles.normativeStatus} ${normativeStatusClass}`} title="Normative status">{d.normative_status}</strong>
+      {d.normative_status !== 'admitted' && (d.normative_status?.trim() || '') !== ''
+        ? <strong
+              dir="ltr"
+              className={`${styles.normativeStatus} ${styles.label} ${normativeStatusClass}`}
+              title="Normative status">
+            {d.normative_status}
+          </strong>
         : null}
     </span>
   </span>

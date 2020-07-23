@@ -82,21 +82,10 @@ function ({
     conceptCtx.select(termid);
     crCtx.selectItem(`${termid}-${langID}`);
     lang.select(langID);
-
-    if (evt.altKey) {
-      if (conceptCtx.highlightedRefs.indexOf(termid) < 0) {
-        conceptCtx.highlightRef(termid);
-      } else {
-        conceptCtx.unhighlightRef(termid);
-      }
-    } else {
-      conceptCtx.highlightOne(termid);
-    }
   }
 
   const Row = ({ index, style }: { index: number, style: object }) => {
     const e = entries[index];
-    const isHighlighted = conceptCtx.highlightedRefs.indexOf(e.id) >= 0;
 
     return (
       <Button
@@ -105,9 +94,10 @@ function ({
           alignText="left"
           className={`
             ${styles.lazyConceptListItem}
-            ${conceptCtx.ref === e.id ? styles.lazyConceptListItemSelected : ''}
+            ${conceptCtx.ref === e.id && lang.selected === e.language_code
+              ? styles.lazyConceptListItemSelected
+              : ''}
           `}
-          active={isHighlighted}
           {...buttonProps}
           onClick={(evt: React.MouseEvent) => handleClick(e.id, e.language_code, evt)}>
 

@@ -18,7 +18,7 @@ export interface Query {
   // TODO: Make querying more flexible via a tree of predicates.
 
   onlyIDs?: number[]
-  inSource?: ObjectSource 
+  inSource?: ObjectSource
   matchingText?: string
   localization?: {
     lang: keyof SupportedLanguages
@@ -41,33 +41,47 @@ extends Manager<MultiLanguageConcept<any>, number, Query> {
     //  Object.values(objects).map(async (c) => await this.migrate(c))
     //)).reduce((objs, obj) => ({ ...objs, [obj.termid]: obj }), {});
 
-    log.debug("ConceptManager: Migration start");
-
-    const objs = await this.readAll();
-
-    log.debug("ConceptManager: Read source data");
-
-    const migratedObjects = Object.values(objs).
-    map(migrateConcept);
-
-    const migratedObjectIDs: number[] = migratedObjects.
-    filter(([_, didMigrate]) => {
-      return didMigrate;
-    }).
-    map(([object, _]) => {
-      return object.termid;
-    });
-
-    for (const [obj, didMigrate] of migratedObjects) {
-      if (didMigrate) {
-        await this.rawUpdate(obj.termid, obj);
-      }
+    const committer = await this.db.getCurrentCommitterInformation();
+    type Roles = { [username: string]: { isRegistryManager: boolean } };
+    let roles: Roles;
+    try {
+      roles = (await this.db.read('roles')) as Roles;
+    } catch (e) {
+      roles = {};
     }
 
-    log.debug("ConceptManager: Migration: IDs affected by migration", migratedObjectIDs);
+    const committerRole = roles[committer.username];
+    if (committerRole?.isRegistryManager === true) {
+      log.info("ConceptManager: Migration start");
 
-    if (migratedObjectIDs.length > 0) {
-      await this.db.commitAll("Bulk migration", false);
+      const objs = await this.readAll();
+
+      log.debug("ConceptManager: Read source data");
+
+      const migratedObjects = Object.values(objs).
+      map(migrateConcept);
+
+      const migratedObjectIDs: number[] = migratedObjects.
+      filter(([_, didMigrate]) => {
+        return didMigrate;
+      }).
+      map(([object, _]) => {
+        return object.termid;
+      });
+
+      for (const [obj, didMigrate] of migratedObjects) {
+        if (didMigrate) {
+          await this.rawUpdate(obj.termid, obj);
+        }
+      }
+
+      log.debug("ConceptManager: Migration: IDs affected by migration", migratedObjectIDs);
+
+      if (migratedObjectIDs.length > 0) {
+        await this.db.commitAll("Bulk migration", false);
+      }
+    } else {
+      log.debug("ConceptManager: Skipping migration: User is not registry manager");
     }
   }
 

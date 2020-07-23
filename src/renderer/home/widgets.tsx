@@ -14,7 +14,7 @@ const DEFAULT_COMMITTER_PIC = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.or
 interface CommitterPicProps {
   email: string
   style?: React.CSSProperties
-  className?: string 
+  className?: string
   size?: number
 }
 export const CommitterPic: React.FC<CommitterPicProps> = function ({ email, style, className, size }) {

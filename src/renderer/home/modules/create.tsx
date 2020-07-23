@@ -5,21 +5,17 @@ import { AuthoritativeSource, Concept } from 'models/concepts';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { EntryEdit } from '../concepts';
+import {
+  initializeAuthSourceDraft,
+  convertDraftToAuthSource,
+  AuthoritativeSourceDraft,
+} from '../concepts/auth-source';
 import { ConceptContext, ChangeRequestContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 import styles from './translate.scss';
 
 
 const toaster = Toaster.create({ position: Position.TOP });
-
-
-function initializeAuthSourceDraft(authSource?: AuthoritativeSource) {
-return {
-    ref: '',
-    clause: '',
-    link: 'https://example.com/',
-};
-}
 
 
 const MainView: React.FC<{}> = function () {
@@ -31,7 +27,7 @@ const MainView: React.FC<{}> = function () {
     useState<undefined | AuthoritativeSource>
     (undefined);
   const [authSourceDraft, updateAuthSourceDraft] =
-    useState<{ [K in keyof AuthoritativeSource]: string }>
+    useState<AuthoritativeSourceDraft>
     (initializeAuthSourceDraft());
 
   useEffect(() => {
@@ -53,23 +49,15 @@ const MainView: React.FC<{}> = function () {
         [field]: (evt.target as HTMLInputElement).value }));
     };
   }
+
   function handleAcceptAuthSourceDraft() {
-    let link: URL;
-    try {
-      link = new URL(authSourceDraft.link);
-    } catch (e) {
-      toaster.show({
-        icon: "error",
-        intent: "danger",
-        message: "You seem to have specified an incorrect URL as authoritative source link.",
-      });
-      return;
+    const [authSource, errors] = convertDraftToAuthSource(authSourceDraft);
+
+    for (const message of errors) {
+      toaster.show({ icon: "error", intent: "danger", message });
     }
-    setProposedAuthSource({
-      ref: authSourceDraft.ref,
-      clause: authSourceDraft.clause,
-      link: link,
-    });
+    if (errors.length > 0) { return; }
+    setProposedAuthSource(authSource);
   }
 
   let entryWithSource: Concept<any, any> | undefined
@@ -104,22 +92,24 @@ const MainView: React.FC<{}> = function () {
         key={`-1-${lang.default}`}>
       <p>
         Please specify the authoritative source you will use for this concept’s authoritative language entry.
+        <br />
+        Either a link or a standard reference is required.
       </p>
-      <FormGroup label="Standard reference" labelInfo="(required)">
+      <FormGroup label="Standard reference">
         <InputGroup large fill required
           type="text"
           placeholder="ISO 1234:2345"
           value={authSourceDraft.ref}
           onChange={handleAuthSourceStringPropertyChange('ref')} />
       </FormGroup>
-      <FormGroup label="Clause" labelInfo="(required)">
+      <FormGroup label="Clause">
         <InputGroup large fill required
           type="text"
           placeholder="3.4"
           value={authSourceDraft.clause}
           onChange={handleAuthSourceStringPropertyChange('clause')} />
       </FormGroup>
-      <FormGroup label="Link" labelInfo="(must be a valid URL)">
+      <FormGroup label="Link" labelInfo="(if provided, must be a valid URL)">
         <InputGroup large fill required
           placeholder="http://example.com/"
           type="text"

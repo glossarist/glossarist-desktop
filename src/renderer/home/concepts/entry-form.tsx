@@ -4,6 +4,7 @@ import {
   Button, FormGroup, ButtonGroup,
   InputGroup, ControlGroup,
   HTMLSelect,
+  Classes,
 } from '@blueprintjs/core';
 
 import {
@@ -14,6 +15,7 @@ import {
 
 import { AutoSizedTextArea } from '../widgets';
 import styles from './styles.scss';
+import { isRTL } from 'app';
 
 
 interface EntryFormProps {
@@ -30,6 +32,8 @@ interface EntryFormProps {
   onDomainChange?: (newVal: string) => void
 }
 export const EntryForm: React.FC<EntryFormProps> = function (props) {
+
+  const rtl = isRTL(props.entry.language_code);
 
   function openHelpPage(link: string) {
     require('electron').shell.openExternal(link);
@@ -144,7 +148,9 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
             </>}
             intent={d.designation.trim() === '' ? 'danger' : undefined}>
 
-          <InputGroup fill className={styles.designation}
+          <InputGroup fill
+            className={`${styles.designation} ${rtl ? Classes.RTL : ''}`}
+            dir={rtl ? 'rtl' : 'ltr'}
             value={d.designation}
             id={`designation-${idx}`}
             disabled={!props.onDesignationEdit}
@@ -206,10 +212,11 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                     {d.partOfSpeech === 'noun'
                       ? <>
                           <HTMLSelect key="gender"
-                            title="Grammatical gender"
-                            value={d.gender}
-                            onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
-                              handleNounGender(idx, evt.currentTarget.value as Noun["gender"] || '')}>
+                              title="Grammatical gender"
+                              value={d.gender}
+                              onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                                handleNounGender(idx, evt.currentTarget.value as Noun["gender"] || '')
+                              }>
                             <option value="">gender</option>
                             <option value="masculine" title="Masculine">m.</option>
                             <option value="feminine" title="Feminine">f.</option>
@@ -217,10 +224,11 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                             <option value="neuter" title="Neuter/neutral gender">nt.</option>
                           </HTMLSelect>
                           <HTMLSelect key="number"
-                            title="Grammatical number"
-                            value={d.grammaticalNumber}
-                            onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
-                              handleNounNumber(idx, evt.currentTarget.value as Noun["grammaticalNumber"] || '')}>
+                              title="Grammatical number"
+                              value={d.grammaticalNumber}
+                              onChange={(evt: React.FormEvent<HTMLSelectElement>) =>
+                                handleNounNumber(idx, evt.currentTarget.value as Noun["grammaticalNumber"] || '')
+                              }>
                             <option value="">number</option>
                             <option value="singular">sing.</option>
                             <option value="plural">pl.</option>
@@ -248,15 +256,6 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
                 ? props.onUsageInfoChange((evt.target as HTMLInputElement).value)
                 : void 0} />
         </FormGroup>
-        <FormGroup
-            label="Domain"
-            helperText="Legacy."
-            labelFor="domainLegacy">
-          <InputGroup fill
-            defaultValue={props.entry.domain || ''}
-            disabled={!props.onDomainChange}
-            id="domainLegacy" />
-        </FormGroup>
       </div>
 
       <FormGroup
@@ -280,6 +279,8 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
           </>}
           labelInfo="(required)">
         <AutoSizedTextArea fill
+          dir={rtl ? 'rtl' : 'ltr'}
+          className={rtl ? Classes.RTL : undefined}
           value={props.entry.definition || ''}
           id="definition"
           disabled={!props.onDefinitionChange}
@@ -305,6 +306,8 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
               : undefined}
             intent={item.trim() === '' ? 'danger' : undefined}>
           <AutoSizedTextArea fill
+            dir={rtl ? 'rtl' : 'ltr'}
+            className={rtl ? Classes.RTL : undefined}
             value={item}
             id={`example-${idx}`}
             growVertically
@@ -332,6 +335,8 @@ export const EntryForm: React.FC<EntryFormProps> = function (props) {
               : undefined}
             intent={item.trim() === '' ? 'danger' : undefined}>
           <AutoSizedTextArea fill
+            dir={rtl ? 'rtl' : 'ltr'}
+            className={rtl ? Classes.RTL : undefined}
             value={item}
             growVertically
             id={`note-${idx}`}

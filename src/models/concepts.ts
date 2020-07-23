@@ -77,7 +77,7 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   // These apply to the definition.
 
   authoritative_source: AuthoritativeSource
-  // Can be set 
+  // Can be set
 
   //lineage_source: LineageSource
 
@@ -101,9 +101,10 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
 }
 
 export type AuthoritativeSource = {
-  ref: StandardRef
-  clause: StandardClause
-  link: URL
+  // All are optional, but either ref & clause or link must be present
+  ref?: StandardRef
+  clause?: StandardClause
+  link?: URL
 }
 
 

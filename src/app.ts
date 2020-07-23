@@ -4,6 +4,11 @@ import { AppConfig } from 'coulomb/config/app';
 export const defaultLanguage = 'eng';
 
 
+export function isRTL(lang: keyof typeof availableLanguages) {
+  return lang === 'ara';
+}
+
+
 export const availableLanguages = {
   'eng': 'English',
   'ara': 'Arabic',
@@ -28,7 +33,7 @@ export const availableLanguages = {
   'por': 'Portuguese',
   'slv': 'Slovenian',
   'srp': 'Serbian',
-};
+} as const;
 
 
 export type CatalogPresetName = 'all' | 'current-proposal';
@@ -69,10 +74,6 @@ export const conf: AppConfig = {
     }
   },
 
-  help: {
-    rootURL: 'https://geolexica.org/desktop/help/',
-  },
-
   windows: {
     splash: {
       openerParams: {
@@ -84,7 +85,7 @@ export const conf: AppConfig = {
     default: {
       openerParams: {
         title: 'Glossarist Desktop',
-        dimensions: { width: 1200, height: 700, minWidth: 800, minHeight: 500 },
+        dimensions: { width: 1200, height: 700, minWidth: 1200, minHeight: 500 },
       },
     },
     batchCommit: {

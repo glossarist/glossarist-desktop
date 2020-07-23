@@ -80,6 +80,17 @@
 }
 
 
+:local .label {
+  opacity: .5;
+  padding: .25rem;
+  border: 1px dashed silver;
+  margin: .5rem -.25rem;
+  text-align: left;
+  border-radius: .25em;
+  text-shadow: rgba(0, 0, 0, 0.2) .1em .1em .2em;
+}
+
+
 :local .entryDetails {
   padding: 2rem;
   padding-top: 3rem;
@@ -90,6 +101,7 @@
     font-weight: normal;
     font-family: Georgia, serif;
     margin-bottom: 1rem;
+
     > * {
       display: inline;
     }
@@ -113,13 +125,16 @@
     .designationMarkers {
       > * {
         margin-left: .5rem;
+        margin-right: .5rem;
       }
     }
   }
   .synonyms {
-    margin-bottom: 1rem;
+    &:not(:empty) {
+      margin-bottom: 1rem;
+    }
 
-    &:before {
+    &:not(:empty):before {
       content: "Syn.";
       font-style: italic;
     }
@@ -158,10 +173,6 @@
   }
   .example, .note {
     margin-bottom: 1rem;
-
-    .label {
-      margin-right: 1rem;
-    }
   }
   .example {
     font-style: italic;
