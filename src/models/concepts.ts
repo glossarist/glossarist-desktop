@@ -52,7 +52,7 @@ export interface Concept<Ref extends ConceptRef, Lang extends keyof SupportedLan
   language_code: Lang
   entry_status: ConceptStatus
 
-  lifecycle_stage?: LifecycleStage,
+  lifecycle_stage?: LifecycleStage
 
   terms: Designation[]
 
