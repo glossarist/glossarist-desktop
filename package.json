@@ -52,6 +52,7 @@
     "productName": "Glossarist",
     "appId": "org.glossarist.desktop",
     "asarUnpack": [
+      "node_modules/keytar/build/Release/*",
       "dist/main/0.bundle.worker.js",
       "dist/main/0.bundle.worker.js.map"
     ],
