@@ -2768,9 +2768,9 @@ cosmiconfig@^6.0.0:
   version "0.0.5"
   resolved "https://github.com/riboseinc/coulomb-panel#84f133d319803b205eb73d96d275b3bb6b95eed6"
 
-"coulomb@https://github.com/coulombjs/coulomb#coulomb-v0.9.0-gitpkg":
-  version "0.9.0"
-  resolved "https://github.com/coulombjs/coulomb#67a18e2d150040f977b4f98df62fee6656de68b4"
+"coulomb@https://github.com/coulombjs/coulomb#coulomb-v0.9.1-gitpkg":
+  version "0.9.1"
+  resolved "https://github.com/coulombjs/coulomb#aa1a7b85e9e8d19b4dd0bb1d4682e943600683a0"
   dependencies:
     async-lock "^1.2.2"
     fs-extra "^8.1.0"
