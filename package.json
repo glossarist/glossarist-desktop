@@ -131,9 +131,6 @@
         "provider": "github",
         "releaseType": "release"
       }
-    ],
-    "files": [
-      "node_modules/keytar/build/Release/*.node"
     ]
   },
   "stylelint": {
