@@ -53,8 +53,10 @@
     "appId": "org.glossarist.desktop",
     "asarUnpack": [
       "node_modules/keytar/build/Release/*",
-      "dist/main/0.bundle.worker.js",
-      "dist/main/0.bundle.worker.js.map"
+      "node_modules/source-map/**/*",
+      "node_modules/source-map-support/**/*",
+      "node_modules/buffer-from/**/*",
+      "dist/main/*.worker.js*"
     ],
     "afterPack": "./scripts/after-pack.js",
     "afterSign": "electron-builder-notarize",
