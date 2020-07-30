@@ -52,7 +52,7 @@
     "productName": "Glossarist",
     "appId": "org.glossarist.desktop",
     "asarUnpack": [
-      "node_modules/keytar/build/Release/*",
+      "node_modules/keytar/**/*",
       "node_modules/source-map/**/*",
       "node_modules/source-map-support/**/*",
       "node_modules/buffer-from/**/*",
