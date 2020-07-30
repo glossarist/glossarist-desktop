@@ -62,9 +62,7 @@
     "afterSign": "electron-builder-notarize",
     "mac": {
       "target": [
-        "dmg",
-        "mas",
-        "zip"
+        "dmg"
       ],
       "category": "public.app-category.productivity",
       "darkModeSupport": false,
