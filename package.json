@@ -114,6 +114,7 @@
     },
     "nsis": {
       "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true,
       "installerIcon": "build/icon.ico",
       "artifactName": "install-glossarist-desktop-${version}.${ext}"
     },
