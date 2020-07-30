@@ -9,6 +9,7 @@ module.exports = function (config) {
     loader: 'awesome-node-loader',
     options: {
       name: '[name].[ext]',
+      useDirname: false,
     },
   });
 
