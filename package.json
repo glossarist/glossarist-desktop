@@ -67,7 +67,7 @@
         "zip"
       ],
       "category": "public.app-category.productivity",
-      "darkModeSupport": true,
+      "darkModeSupport": false,
       "icon": "build/icon.icns",
       "gatekeeperAssess": false,
       "hardenedRuntime": true,
