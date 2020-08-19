@@ -13,7 +13,7 @@ const Panel: React.FC<{}> = function () {
 
   const entry = ctx.activeLocalized;
   const selectedRevisionID = ctx.revisionID;
-  const revision = entry && selectedRevisionID ? entry._revisions.tree[selectedRevisionID] : null;
+  const revision = entry && selectedRevisionID ? entry._revisions?.tree[selectedRevisionID] : null;
   const changeRequestID = revision?.changeRequestID;
 
   const cr = app.useOne<ChangeRequest, string>('changeRequests', changeRequestID || null).object;
