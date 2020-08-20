@@ -45,3 +45,23 @@ To follow the convention:
 
 There is a pre-push Git hook that compiles the app.
 This helps us catch compilation errors before code reaches CI.
+
+=== Releasing
+
+CI builds the application automatically,
+and publishes a release if it doesn’t yet exist for the version specified in package.json
+and Git version tag exists and is formatted appropriately.
+
+After you have made and tested your changes:
+
+. Edit package.json to increment version as appropriate, let’s say we are publishing `1.2.3`.
+
+. Tag and push the repository.
++
+Version tags are formatted as semantic version with “v” prepended, such as `v1.2.3`.
++
+[source]
+--
+$ git tag -s v1.2.3
+$ git push --follow-tags
+--
