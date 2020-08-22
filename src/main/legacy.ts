@@ -132,7 +132,7 @@ WithRevisions<Concept<number, any>> | null {
 
     terms = [designation];
 
-    delete legacy.term;
+    delete (legacy as any).term;
     delete legacy.classification;
 
   } else {
