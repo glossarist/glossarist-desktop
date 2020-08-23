@@ -27,11 +27,6 @@ const MainView: React.FC<{}> = function () {
 
   if (active === null) {
     return <NonIdealState title="No concept is selected" />;
-  } else if (cr.selected === null) {
-    return <NonIdealState
-      icon="edit"
-      title="Change request, please!"
-      description="To make changes, select or create a draft CR." />;
   } else if (auth === undefined) {
     return <NonIdealState
       icon="error"
@@ -44,7 +39,7 @@ const MainView: React.FC<{}> = function () {
   return (
     <div className={sharedStyles.backdrop}>
       <EntryEdit
-        changeRequestID={cr.selected}
+        changeRequestID={cr.selected || undefined}
         key={auth.id}
         entry={auth._revisions.tree[auth._revisions.current].object}
         parentRevisionID={ctx.revisionID}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import {
   ButtonGroup, Button,
@@ -22,10 +22,11 @@ import { EntryForm } from './entry-form';
 import styles from './styles.scss';
 import sharedStyles from '../styles.scss';
 import { ChangeRequest } from 'models/change-requests';
+import { ChangeRequestContext } from '../contexts';
 
 
 interface EntryEditProps {
-  changeRequestID: string
+  changeRequestID?: string
   entry: Concept<any, any>
   isLoading: boolean
   parentRevisionID: string | null
@@ -34,7 +35,8 @@ interface EntryEditProps {
   className?: string
 }
 export const EntryEdit: React.FC<EntryEditProps> = function (props) {
-  const cr = app.useOne<ChangeRequest, string>('changeRequests', props.changeRequestID).object;
+  const cr = app.useOne<ChangeRequest, string>('changeRequests', props.changeRequestID || null).object;
+  const crCtx = useContext(ChangeRequestContext);
 
   const revisionInCR: null | Revision<Concept<any, any>> = (cr?.revisions.concepts || {})[`${props.entry.id}-${props.entry.language_code}`] || null;
 
@@ -61,12 +63,20 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   }, [revisionInCR, props.parentRevisionID]);
 
   const revertChanges = async () => {
-    await callIPC<{ changeRequestID: string, objectType: string, objectID: string }, { success: true }>
-    ('model-changeRequests-delete-revision', {
-      changeRequestID: props.changeRequestID,
-      objectType: 'concepts',
-      objectID: `${entry.id}-${entry.language_code}`,
-    });
+    if (props.changeRequestID !== undefined) {
+
+      setCommitInProgress(true);
+
+      await callIPC<{ changeRequestID: string, objectType: string, objectID: string }, { success: true }>
+      ('model-changeRequests-delete-revision', {
+        changeRequestID: props.changeRequestID,
+        objectType: 'concepts',
+        objectID: `${entry.id}-${entry.language_code}`,
+      });
+
+      setCommitInProgress(false);
+
+    }
   };
 
   const commitChanges = async () => {
@@ -74,9 +84,9 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
       setCommitInProgress(true);
 
       try {
-        await callIPC
-        <{ changeRequestID: string, objectType: string, objectID: string,
-           data: Concept<any, any>, parentRevisionID: string | null }, { newRevisionID: string }>
+        const result = await callIPC
+        <{ changeRequestID?: string, objectType: string, objectID: string,
+           data: Concept<any, any>, parentRevisionID: string | null }, { success: true, crID: string }>
         ('model-changeRequests-save-revision', {
           changeRequestID: props.changeRequestID,
           data: sanitized,
@@ -84,6 +94,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
           objectID: `${entry.id}-${entry.language_code}`,
           parentRevisionID: props.parentRevisionID,
         });
+        crCtx.select(result.crID);
         setCommitInProgress(false);
         setImmediate(() => props.onUpdateCR ? props.onUpdateCR() : void 0);
       } catch (e) {
@@ -211,6 +222,17 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
     saveIconSecondary = undefined;
   }
 
+  let addChangeLabel: string;
+  if (creating) {
+    if (!cr) {
+      addChangeLabel = "Start new CR";
+    } else {
+      addChangeLabel = "Add to CR";
+    }
+  } else {
+    addChangeLabel = "Update CR";
+  }
+
   return (
     <div className={`${styles.conceptEntryForm} ${props.className || ''}`}>
 
@@ -225,8 +247,9 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
           <Button
               onClick={revertChanges}
               intent="warning"
-              title="Deletes changes to this entry from draft change request"
+              title="Deletes changes to this entry from draft change request. If CR becomes empty, it is automatically deleted."
               icon="cross"
+              active={commitInProgress}
               disabled={creating}>
             Remove from CR
           </Button>
@@ -248,7 +271,7 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
                   props.isLoading ||
                   !entry ||
                   !hasUncommittedChanges}>
-                {creating ? "Add to CR" : "Update CR"}
+              {addChangeLabel}
             </Button>
           </Tooltip>
         </ButtonGroup>

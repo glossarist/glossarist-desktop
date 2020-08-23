@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import * as log from 'electron-log';
 import { default as Manager } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
 import { listen } from '@riboseinc/coulomb/ipc/main';
@@ -123,6 +124,51 @@ extends Manager<WithRevisions<ChangeRequest>, string, ChangeRequestManagerQuery>
     return result;
   }
 
+  private async initializeChangeRequest(): Promise<WithRevisions<ChangeRequest>> {
+    const committerInfo = await this.db.getCurrentCommitterInformation();
+    const newCRID = crypto.randomBytes(3).toString('hex');
+    const revisionID = crypto.randomBytes(3).toString('hex');
+
+    const creationTS = new Date();
+
+    const crStub: ChangeRequest ={
+      id: newCRID,
+      author: committerInfo,
+      timeCreated: creationTS,
+      revisions: {},
+      meta: {
+        registry: {
+          stage: 'Draft',
+        },
+        submitter: {
+          primaryPerson: {
+            name: committerInfo.name,
+            email: committerInfo.email,
+            affiliation: '',
+          },
+        },
+      },
+    };
+
+    const crWithRevisions = {
+      ...crStub,
+      _revisions: {
+        current: revisionID,
+        tree: {
+          [revisionID]: {
+            object: crStub,
+            parents: [],
+            timeCreated: creationTS,
+          },
+        },
+      },
+    };
+
+    await this.create(crWithRevisions, true);
+
+    return crWithRevisions;
+  }
+
   setUpIPC(modelName: string) {
     super.setUpIPC(modelName);
     const prefix = `model-${modelName}`;
@@ -130,11 +176,25 @@ extends Manager<WithRevisions<ChangeRequest>, string, ChangeRequestManagerQuery>
     listen<{ changeRequestID: string, objectType: string, objectID: string }, { success: true }>
     (`${prefix}-delete-revision`, async ({ changeRequestID, objectType, objectID }) => {
       var cr = await this.read(changeRequestID);
+
+      if (cr.timeSubmitted !== undefined) {
+        log.error("CR manager: Trying to delete a revision from an already submitted CR.");
+        throw new Error("Tried to delete a revision from an already submitted CR");
+      }
+
       delete cr.revisions[objectType][objectID];
+
       if (Object.keys(cr.revisions[objectType] || {}).length < 1) {
         delete cr.revisions[objectType];
       }
-      await this.update(changeRequestID, cr, `Remove ${objectType}/${objectID} from CR ${changeRequestID}`);
+
+      if (Object.keys(cr.revisions).length > 0) {
+        await this.update(changeRequestID, cr, `Remove ${objectType}/${objectID} from CR ${changeRequestID}`);
+      } else {
+        // Delete CR draft if it has no more revisions
+        await this.delete(changeRequestID, true);
+      }
+
       return { success: true };
     });
 
@@ -160,9 +220,19 @@ extends Manager<WithRevisions<ChangeRequest>, string, ChangeRequestManagerQuery>
       return { success: true };
     });
 
-    listen<{ changeRequestID: string, objectType: string, objectID: string, data: object, parentRevisionID: string | null }, { success: true }>
+    listen<{ changeRequestID?: string, objectType: string, objectID: string, data: object, parentRevisionID: string | null }, { success: true, crID: string }>
     (`${prefix}-save-revision`, async ({ changeRequestID, objectType, objectID, data, parentRevisionID }) => {
-      var cr = await this.read(changeRequestID);
+      var cr: WithRevisions<ChangeRequest>;
+      let effectiveChangeRequestID: string;
+
+      if (changeRequestID) {
+        cr = await this.read(changeRequestID);
+        effectiveChangeRequestID = changeRequestID;
+      } else {
+        cr = await this.initializeChangeRequest();
+        effectiveChangeRequestID = cr.id;
+      }
+
       cr.revisions[objectType] = {
         ...cr.revisions[objectType],
         [objectID]: {
@@ -171,8 +241,13 @@ extends Manager<WithRevisions<ChangeRequest>, string, ChangeRequestManagerQuery>
           timeCreated: new Date(),
         },
       };
-      await this.update(changeRequestID, cr, `Save ${objectType}/${objectID} in CR ${changeRequestID}`);
-      return { success: true };
+
+      await this.update(
+        effectiveChangeRequestID,
+        cr,
+        `Save ${objectType}/${objectID} in CR ${effectiveChangeRequestID}`);
+
+      return { success: true, crID: effectiveChangeRequestID };
     });
 
     listen<{ changeRequestID: string | null }, { [objectType: string]: { [objectID: string]: Revision<any> } }>
