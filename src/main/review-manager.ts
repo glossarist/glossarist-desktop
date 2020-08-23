@@ -12,7 +12,7 @@ interface ReviewManagerQuery {
   completed?: boolean
   objectType?: string
   objectIDs?: string[]
-  onlyIDs?: string[] 
+  onlyIDs?: string[]
 }
 class ReviewManager
 <R extends object>

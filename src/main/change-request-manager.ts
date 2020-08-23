@@ -12,7 +12,7 @@ interface ChangeRequestManagerQuery {
   submitted?: boolean
   resolved?: boolean
   creatorEmail?: string
-  onlyIDs?: string[] 
+  onlyIDs?: string[]
 }
 class ChangeRequestManager
 <R extends object>

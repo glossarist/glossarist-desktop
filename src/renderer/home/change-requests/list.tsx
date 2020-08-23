@@ -10,7 +10,7 @@ import { CommitterPic } from '../widgets';
 
 interface ChangeRequestListProps {
   submitted: boolean
-  resolved?: boolean 
+  resolved?: boolean
   createdBy?: string
 }
 export const ChangeRequestList: React.FC<ChangeRequestListProps> =
