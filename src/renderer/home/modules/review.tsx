@@ -9,8 +9,8 @@ import {
   InputGroup, Button, ButtonGroup, NumericInput,
 } from '@blueprintjs/core';
 
-import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { useIPCValue, callIPC } from '@riboseinc/coulomb/ipc/renderer';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import {
   Concept, MultiLanguageConcept,

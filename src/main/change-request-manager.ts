@@ -1,10 +1,10 @@
 import * as log from 'electron-log';
-import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
+import { default as Manager } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
+import { listen } from '@riboseinc/coulomb/ipc/main';
 
 import { SupportedLanguages, Concept, LifecycleStage } from '../models/concepts';
 import { Revision, WithRevisions } from 'models/revisions';
 import { app, conf } from '.';
-import { listen } from 'coulomb/ipc/main';
 import { ChangeRequest, LIFECYCLE_STAGES_IN_REVIEW, LIFECYCLE_STAGES_ARCHIVED } from 'models/change-requests';
 
 

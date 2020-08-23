@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { shell } from 'electron';
 import { FormGroup, InputGroup, Button } from '@blueprintjs/core';
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 import { ConceptRef } from 'models/concepts';
 import { useHelp } from 'renderer/help';
 import { ConceptContext } from '../contexts';

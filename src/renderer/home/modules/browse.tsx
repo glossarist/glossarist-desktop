@@ -3,7 +3,7 @@ import { debounce } from 'throttle-debounce';
 import { remote } from 'electron';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Text, InputGroup, Button, Tag, ButtonGroup, Icon } from '@blueprintjs/core';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { MultiLanguageConcept, SupportedLanguages } from 'models/concepts';
 import {

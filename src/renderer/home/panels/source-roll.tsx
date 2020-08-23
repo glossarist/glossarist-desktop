@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { availableLanguages } from 'app';
 import { MultiLanguageConcept } from 'models/concepts';

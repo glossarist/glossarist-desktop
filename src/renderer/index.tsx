@@ -1,6 +1,6 @@
-import { RendererConfig } from 'coulomb/config/renderer';
-import { renderApp } from 'coulomb/app/renderer';
-import { callIPC } from 'coulomb/ipc/renderer';
+import { RendererConfig } from '@riboseinc/coulomb/config/renderer';
+import { renderApp } from '@riboseinc/coulomb/app/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 import { conf as appConf, availableLanguages, defaultLanguage } from '../app';
 
 
@@ -10,15 +10,15 @@ export const conf: RendererConfig<typeof appConf> = {
   windowComponents: {
     default: () => import('./home'),
     batchCommit: () => import('./batch-commit'),
-    settings: () => import('coulomb/settings/renderer'),
+    settings: () => import('@riboseinc/coulomb/settings/renderer'),
   },
 
   databaseStatusComponents: {
-    default: () => import('coulomb/db/isogit-yaml/renderer/status'),
+    default: () => import('@riboseinc/coulomb/db/isogit-yaml/renderer/status'),
   },
 
   contextProviders: [{
-    cls: () => import('coulomb/localizer/renderer/context-provider'),
+    cls: () => import('@riboseinc/coulomb/localizer/renderer/context-provider'),
     getProps: async () => {
       type RegisterMeta = { subregisters: { [id: string]: any } };
 
@@ -52,7 +52,7 @@ export const conf: RendererConfig<typeof appConf> = {
       };
     },
   }, {
-    cls: () => import('coulomb/db/renderer/single-db-status-context-provider'),
+    cls: () => import('@riboseinc/coulomb/db/renderer/single-db-status-context-provider'),
     getProps: async () => ({ dbName: 'default' }),
   }],
 };

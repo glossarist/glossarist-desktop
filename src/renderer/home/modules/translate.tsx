@@ -9,7 +9,7 @@ import {
   Callout, FormGroup, Toaster, Position, Icon,
  } from '@blueprintjs/core';
 
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { AuthoritativeSource, Concept } from 'models/concepts';
 import { availableLanguages } from 'app';

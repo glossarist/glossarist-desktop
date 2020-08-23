@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 
 import {
   MultiLanguageConcept, ConceptRef, Concept, ConceptRelation,
@@ -7,7 +8,6 @@ import {
 
 import { WithRevisions } from 'models/revisions';
 import { ObjectSource } from '../../app';
-import { useIPCValue } from 'coulomb/ipc/renderer';
 import { Query } from 'main/concept-manager';
 
 

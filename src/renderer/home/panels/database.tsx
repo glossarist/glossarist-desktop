@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { conf as appConf } from 'app';
 import { conf as rendererConf } from 'renderer';
-import { DatabaseList } from 'coulomb/db/renderer/status';
+import { DatabaseList } from '@riboseinc/coulomb/db/renderer/status';
 import { PanelConfig } from '../panel-config';
 
 

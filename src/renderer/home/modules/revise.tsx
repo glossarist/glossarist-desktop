@@ -1,6 +1,7 @@
 import React, { useEffect, useContext } from 'react';
 import { NonIdealState, Icon } from '@blueprintjs/core';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
+
 import { availableLanguages } from 'app';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';

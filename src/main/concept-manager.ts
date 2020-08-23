@@ -1,5 +1,5 @@
 import * as log from 'electron-log';
-import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
+import { default as Manager } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
 
 import {
   MultiLanguageConcept, ConceptCollection, ConceptRef, IncomingConceptRelation,
@@ -10,7 +10,7 @@ import { Revision, WithRevisions, getNewRevisionID } from 'models/revisions'
 
 import { ObjectSource, defaultLanguage } from '../app';
 import { app } from '.';
-import { listen } from 'coulomb/ipc/main';
+import { listen } from '@riboseinc/coulomb/ipc/main';
 import { migrateConcept } from './legacy';
 
 

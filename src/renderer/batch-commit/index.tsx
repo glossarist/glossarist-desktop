@@ -2,14 +2,14 @@ import { ipcRenderer } from 'electron';
 import React, { useState, useEffect } from 'react';
 
 import { H2, NonIdealState, Checkbox, Button, Callout, TextArea, Toaster, Position, Popover } from '@blueprintjs/core';
-import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
+import { callIPC, useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 
 import { conf as appConf } from '../../app';
 import { app } from '..';
 
 import styles from './styles.scss';
-import { Index } from 'coulomb/db/query';
-import { Model } from 'coulomb/db/models';
+import { Index } from '@riboseinc/coulomb/db/query';
+import { Model } from '@riboseinc/coulomb/db/models';
 
 
 export const WindowToaster = Toaster.create({
@@ -59,7 +59,7 @@ const modifiedFileListing: { [M in ModelNames]: React.FC<ModifiedFileOverviewPro
 };
 
 
-const models: (keyof Models)[] = [
+const models: ModelNames[] = [
   'concepts',
   'collections',
 ];
@@ -122,7 +122,7 @@ const Window: React.FC<{}> = function () {
 
   /* Event handlers */
 
-  function onSelect(modelName: keyof Models, id: AnyIDType) {
+  function onSelect(modelName: ModelNames, id: AnyIDType) {
     var selected = selectedItems[modelName];
     const selectedIdx = selected.indexOf(id);
     if (selectedIdx >= 0) {
@@ -142,7 +142,7 @@ const Window: React.FC<{}> = function () {
 
     try {
       await Promise.all([...Object.entries(selectedItems).map(
-        async ([modelName, objectIDs]: [keyof Models, AnyIDType[]]) =>
+        async ([modelName, objectIDs]: [ModelNames, AnyIDType[]]) =>
           await callIPC<{ objectIDs: AnyIDType[] }, { success: true }>
           (`model-${modelName}-discard-all-uncommitted`, { objectIDs })
       )]);

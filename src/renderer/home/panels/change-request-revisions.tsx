@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import { useIPCValue } from 'coulomb/ipc/renderer';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 
 import { Revision } from 'models/revisions';
 import { Concept } from 'models/concepts';

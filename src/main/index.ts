@@ -1,12 +1,12 @@
 import * as path from 'path';
 import { app as electronApp } from 'electron';
 
-import { MainConfig } from 'coulomb/config/main';
-import { initMain } from 'coulomb/app/main';
+import { MainConfig } from '@riboseinc/coulomb/config/main';
+import { initMain } from '@riboseinc/coulomb/app/main';
 
-import { default as BackendCls } from 'coulomb/db/isogit-yaml/main/base';
-import { default as FSWrapper } from 'coulomb/db/isogit-yaml/main/yaml/file';
-import { ManagerOptions } from 'coulomb/db/isogit-yaml/main/manager';
+import { default as BackendCls } from '@riboseinc/coulomb/db/isogit-yaml/main/base';
+import { default as FSWrapper } from '@riboseinc/coulomb/db/isogit-yaml/main/yaml/file';
+import { ManagerOptions } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
 
 
 import { MultiLanguageConcept, ConceptCollection } from '../models/concepts';

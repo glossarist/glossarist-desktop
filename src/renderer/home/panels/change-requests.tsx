@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import {
   Button,
 } from '@blueprintjs/core';
-import { useIPCValue } from 'coulomb/ipc/renderer';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 import { PanelContext } from 'coulomb-panel/panel';
 
 import { UserRoleContext } from '../contexts';

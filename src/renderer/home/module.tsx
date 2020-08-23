@@ -1,7 +1,9 @@
 import update from 'immutability-helper';
 import React, { useState, useContext, useMemo, useEffect } from 'react';
 import MathJax from 'react-mathjax2';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
+
 import { ObjectSource, availableLanguages } from 'app';
 import { MultiLanguageConcept, ConceptRef, ConceptCollection } from 'models/concepts';
 import { app } from 'renderer';
@@ -14,7 +16,6 @@ import { Sidebar } from './module-sidebar';
 import { Query as ConceptQuery } from 'main/concept-manager'
 import styles from './styles.scss';
 import { openHelpPage } from 'renderer/help';
-import { useIPCValue } from 'coulomb/ipc/renderer';
 
 
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;

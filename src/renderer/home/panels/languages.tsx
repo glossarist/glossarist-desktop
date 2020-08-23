@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import { Tree, ITreeNode, Icon } from '@blueprintjs/core';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { availableLanguages } from 'app';
 import { ConceptContext } from '../contexts';
 import { PanelConfig } from '../panel-config';

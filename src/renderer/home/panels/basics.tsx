@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { Classes, FormGroup, Text } from '@blueprintjs/core';
 import { PanelConfig } from '../panel-config';
 import { ConceptContext } from '../contexts';

@@ -7,7 +7,7 @@ import { ConceptRef, Concept } from 'models/concepts';
 import { ConceptContext, ChangeRequestContext } from '../contexts';
 
 import styles from './styles.scss';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { LocalizedEntry } from './item';
 
 

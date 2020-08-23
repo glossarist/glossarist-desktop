@@ -4,7 +4,7 @@ import { Button, Tag } from '@blueprintjs/core';
 import CytoscapeComponent from 'react-cytoscapejs';
 import { Core as Cy, NodeSingular as CyNode, ElementDefinition } from 'cytoscape';
 
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { ConceptRef, MultiLanguageConcept } from 'models/concepts';
 import { availableLanguages } from 'app';

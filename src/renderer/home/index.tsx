@@ -6,13 +6,13 @@ import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 
 import { H1, Button, ButtonGroup, NonIdealState } from '@blueprintjs/core';
 
-import { WindowComponentProps } from 'coulomb/config/renderer';
-import { useIPCValue } from 'coulomb/ipc/renderer';
+import { WindowComponentProps } from '@riboseinc/coulomb/config/renderer';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 import { Panel } from 'coulomb-panel/panel';
-import { SingleDBStatusContext } from 'coulomb/db/renderer/single-db-status-context-provider';
-import { DBSyncScreen } from 'coulomb/db/isogit-yaml/renderer/status';
+import { SingleDBStatusContext } from '@riboseinc/coulomb/db/renderer/single-db-status-context-provider';
+import { DBSyncScreen } from '@riboseinc/coulomb/db/isogit-yaml/renderer/status';
 
 import { useHelp } from 'renderer/help';
 

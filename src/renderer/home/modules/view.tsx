@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import { NonIdealState, Icon } from '@blueprintjs/core';
 
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { EntryDetails } from '../concepts';
 import { ModuleConfig } from '../module-config';

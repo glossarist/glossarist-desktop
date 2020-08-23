@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { NonIdealState, Toaster, Position, Callout, FormGroup, InputGroup, Button } from '@blueprintjs/core';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { AuthoritativeSource, Concept } from 'models/concepts';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';

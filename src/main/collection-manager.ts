@@ -1,5 +1,5 @@
-import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
-import { listen } from 'coulomb/ipc/main';
+import { default as Manager } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
+import { listen } from '@riboseinc/coulomb/ipc/main';
 
 import { app } from '.';
 import { ConceptCollection, ConceptRef, MultiLanguageConcept } from '../models/concepts';

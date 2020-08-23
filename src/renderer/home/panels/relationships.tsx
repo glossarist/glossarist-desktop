@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { InputGroup, Button, ITreeNode, Tree } from '@blueprintjs/core';
-import { callIPC } from 'coulomb/ipc/renderer';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { ConceptRef, MultiLanguageConcept, ConceptRelation } from 'models/concepts';
 import { PanelContext } from 'coulomb-panel/panel';
 

@@ -7,7 +7,7 @@ import {
   IconName,
 } from '@blueprintjs/core';
 
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 
 import {
   Concept,

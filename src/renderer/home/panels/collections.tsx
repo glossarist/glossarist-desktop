@@ -6,7 +6,7 @@ import { app } from 'renderer';
 import { SourceContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { PanelContext } from 'coulomb-panel/panel';
-import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
+import { callIPC, useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 import { remote } from 'electron';
 import { CommitterPic } from '../widgets';
 

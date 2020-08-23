@@ -3,7 +3,7 @@ import { remote } from 'electron';
 import React, { useRef, useContext, useState, useEffect } from 'react';
 import { IButtonProps, Button, Checkbox } from '@blueprintjs/core';
 import { FixedSizeList as List } from 'react-window';
-import { callIPC, useIPCValue } from 'coulomb/ipc/renderer';
+import { callIPC, useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 
 import { useHelp } from 'renderer/help';
 import { availableLanguages } from '../../../app';

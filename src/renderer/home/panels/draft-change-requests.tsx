@@ -3,9 +3,9 @@ import React, { useState, useContext } from 'react';
 import { ChangeRequestList } from "../change-requests/list";
 import { PanelConfig } from "../panel-config";
 import { Button } from '@blueprintjs/core';
-import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
 import { ChangeRequest } from 'models/change-requests';
 import { WithRevisions } from 'models/revisions';
+import { useIPCValue, callIPC } from '@riboseinc/coulomb/ipc/renderer';
 import { ChangeRequestContext } from '../contexts';
 import { useHelp } from 'renderer/help';
 
