@@ -162,7 +162,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
     <MathJax.Context script={`file://${__static}/math/MathJax.js?config=AM_HTMLorMML`} options={{
       asciimath2jax: {
         useMathMLspacing: true,
-        delimiters: [["$$","$$"]],
+        delimiters: [["`","`"]],
         preview: "none",
       },
     }}>
