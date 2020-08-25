@@ -102,17 +102,29 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   const module = MODULE_CONFIG[activeModuleID];
 
+  const handleRequestSync = async () => {
+    requestSyncScreen(true);
+    await callIPC('db-default-git-request-push');
+    await callIPC('db-default-git-trigger-sync');
+  };
+
   if (db === null) {
     return <NonIdealState title="Preparing DB synchronization…" />;
   } else if (syncScreenRequested) {
-    return <DBSyncScreen onDismiss={() => requestSyncScreen(false)} dbName="default" db={db} />;
+    return <DBSyncScreen
+      onDismiss={() => requestSyncScreen(false)}
+      dbName="default"
+      db={db} />;
   }
 
   return (
     <div className={styles.homeWindowLayout}>
     <DocsContext.Provider value={{ hoveredItem, setHoveredItem }}>
 
-      <TopPanel activeModuleID={activeModuleID} activateModule={activateModule} />
+      <TopPanel
+        activeModuleID={activeModuleID}
+        activateModule={activateModule}
+        onRequestSync={handleRequestSync} />
 
       <ModuleContext.Provider value={{ opts: moduleOptions, setOpts: setModuleOptions }}>
         <Module
@@ -131,8 +143,9 @@ const Window: React.FC<WindowComponentProps> = function () {
 const TopPanel: React.FC<{
   activeModuleID: keyof typeof MODULE_CONFIG
   activateModule: (mod: keyof typeof MODULE_CONFIG) => void
+  onRequestSync: () => void
 }> =
-function ({ activeModuleID, activateModule }) {
+function ({ activeModuleID, activateModule, onRequestSync }) {
 
   const dataRepoPath = useIPCValue<{}, { localClonePath?: string }>
   ('db-default-describe', {}, {}).value.localClonePath;
@@ -147,13 +160,16 @@ function ({ activeModuleID, activateModule }) {
   const syncButtonRef = useHelp('widgets/sync-button');
   const settingsButtonRef = useHelp('widgets/settings-button');
 
+  const [canRequestSync, setCanRequestSync] = useState(true);
+
+  const handleRequestSync = async () => {
+    setCanRequestSync(false);
+    onRequestSync();
+    setTimeout((() => setCanRequestSync(true)), 2000);
+  }
+
   const openSettingsWindow = () => {
     callIPC('open-predefined-window', { id: 'settings' });
-  };
-
-  const requestSync = async () => {
-    await callIPC('db-default-git-request-push');
-    await callIPC('db-default-git-trigger-sync');
   };
 
   return (
@@ -183,7 +199,8 @@ function ({ activeModuleID, activateModule }) {
             icon="refresh"
             elementRef={syncButtonRef}
             title="Synchronize (push and fetch changes)"
-            onClick={requestSync}
+            onClick={handleRequestSync}
+            disabled={!canRequestSync}
             intent="success"
             large
             outlined
