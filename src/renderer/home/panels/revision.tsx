@@ -18,12 +18,7 @@ const Panel: React.FC<{}> = function () {
 
   const cr = app.useOne<ChangeRequest, string>('changeRequests', changeRequestID || null).object;
 
-  if (!entry || !selectedRevisionID) {
-    return null;
-  }
-
-  if (!revision) {
-    console.error("Revision missing—probably on-the-fly migration")
+  if (!entry || !selectedRevisionID || !revision) {
     return null;
   }
 
