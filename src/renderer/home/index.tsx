@@ -216,8 +216,8 @@ function ({ activeModuleID, activateModule, onRequestSync }) {
           />
         </div>
 
-        {MODULE_GROUPS.map(group =>
-          <ButtonGroup large className={styles.moduleSelector}>
+        {MODULE_GROUPS.map((group, idx) =>
+          <ButtonGroup key={idx} large className={styles.moduleSelector}>
             {group.map(moduleID =>
               <ModuleButton
                 isSelected={moduleID === activeModuleID}
