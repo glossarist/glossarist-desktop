@@ -119,22 +119,24 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   return (
     <div className={styles.homeWindowLayout}>
-    <DocsContext.Provider value={{ hoveredItem, setHoveredItem }}>
+      <DocsContext.Provider value={{ hoveredItem, setHoveredItem }}>
 
-      <TopPanel
-        activeModuleID={activeModuleID}
-        activateModule={activateModule}
-        onRequestSync={handleRequestSync} />
+        <TopPanel
+          activeModuleID={activeModuleID}
+          activateModule={activateModule}
+          onRequestSync={handleRequestSync} />
 
-      <ModuleContext.Provider value={{ opts: moduleOptions, setOpts: setModuleOptions }}>
-        <Module
-          leftSidebar={module.leftSidebar}
-          rightSidebar={module.rightSidebar}
-          MainView={module.MainView}
-          mainToolbar={module.mainToolbar} />
-      </ModuleContext.Provider>
-    </DocsContext.Provider>
+        <ModuleContext.Provider value={{ opts: moduleOptions, setOpts: setModuleOptions }}>
 
+          <Module
+            leftSidebar={module.leftSidebar}
+            rightSidebar={module.rightSidebar}
+            MainView={module.MainView}
+            mainToolbar={module.mainToolbar} />
+
+        </ModuleContext.Provider>
+
+      </DocsContext.Provider>
     </div>
   );
 };
