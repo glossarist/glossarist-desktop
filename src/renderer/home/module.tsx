@@ -18,6 +18,13 @@ import styles from './styles.scss';
 import { openHelpPage } from 'renderer/help';
 
 
+const NODE_MODULES_PATH = process.env.NODE_ENV === 'production'
+  ? `${__static}/../../app.asar.unpacked/node_modules`
+  : `${__static}/../../node_modules`;
+
+const MATHJAX_PATH = `${NODE_MODULES_PATH}/mathjax/MathJax.js?config=AM_HTMLorMML`;
+
+
 type ModuleProps = Omit<Omit<ModuleConfig, 'title'>, 'hotkey'>;
 export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSidebar, MainView, mainToolbar }) {
   const lang = useContext(LangConfigContext);
@@ -159,7 +166,7 @@ export const Module: React.FC<ModuleProps> = function ({ leftSidebar, rightSideb
       selectItem: selectCRItem,
     }}>
 
-    <MathJax.Context script={`file://${__static}/math/MathJax.js?config=AM_HTMLorMML`} options={{
+    <MathJax.Context script={`file://${MATHJAX_PATH}`} options={{
       asciimath2jax: {
         useMathMLspacing: true,
         delimiters: [["`","`"]],
