@@ -1,6 +1,8 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
 :local .panelBase {
+  overflow-x: auto;
+
   :global .bp3-rtl {
     .bp3-input {
       direction: rtl;
