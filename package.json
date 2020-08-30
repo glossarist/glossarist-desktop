@@ -142,7 +142,7 @@
     "@blueprintjs/datetime": "^3.18.2",
     "@blueprintjs/icons": "^3.18.1",
     "@blueprintjs/select": "^3.13.3",
-    "@riboseinc/coulomb": "^0.9.3",
+    "@riboseinc/coulomb": "^0.9.4",
     "@types/node-fetch": "^2.5.4",
     "async-lock": "^1.2.2",
     "axios": "^0.19.2",
