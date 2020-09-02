@@ -9,7 +9,7 @@ function annotateChange(
   wrappingEl: HTMLSpanElement,
   childIsBoxy: boolean | undefined):
 RoughAnnotation[] {
-  let highlightConfig: RoughAnnotationConfig = {
+  const highlightConfig: RoughAnnotationConfig = {
     type: 'highlight',
     animate: false,
     color: Colors.GOLD5,
