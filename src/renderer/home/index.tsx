@@ -64,8 +64,6 @@ const Window: React.FC<WindowComponentProps> = function () {
   const [activeModuleID, activateModule] = useState(MODULES[0]);
   const [moduleOptions, setModuleOptions] = useState<any>({});
 
-  const db = useContext(SingleDBStatusContext);
-
   const [hoveredItem, setHoveredItem] = useState<HoveredItem | null>(null);
 
   useEffect(() => {
@@ -82,6 +80,11 @@ const Window: React.FC<WindowComponentProps> = function () {
   useEffect(() => {
     setModuleOptions({});
   }, [activeModuleID]);
+
+
+  // START DB SYNC SCREEN
+
+  const db = useContext(SingleDBStatusContext);
 
   const [syncScreenRequested, requestSyncScreen] = useState(false);
 
@@ -100,8 +103,6 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   }, [JSON.stringify(db)]);
 
-  const module = MODULE_CONFIG[activeModuleID];
-
   const handleRequestSync = async () => {
     requestSyncScreen(true);
     await callIPC('db-default-git-request-push');
@@ -116,6 +117,10 @@ const Window: React.FC<WindowComponentProps> = function () {
       dbName="default"
       db={db} />;
   }
+
+  // END SYNC SCREEN
+
+  const module = MODULE_CONFIG[activeModuleID];
 
   return (
     <div className={styles.homeWindowLayout}>
