@@ -60,7 +60,7 @@ html, body, #app {
     flex: 1;
     display: flex;
     align-items: baseline;
-    flex: row nowrap;
+    flex-flow: row nowrap;
     justify-content: flex-start;
     overflow: hidden;
     margin-right: $pt-grid-size;
@@ -161,7 +161,6 @@ html, body, #app {
       overflow: hidden;
       display: flex;
       flex-flow: column nowrap;
-      padding-bottom: 2rem;
       margin: -$panelPadding;
       padding: $panelPadding;
     }
@@ -363,7 +362,6 @@ html, body, #app {
   background: transparent;
   min-height: unset !important;
   box-shadow: none !important;
-  text-transform: uppercase;
   text-align: center;
   font-size: $pt-font-size-small;
   text-transform: uppercase;
