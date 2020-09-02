@@ -25,8 +25,9 @@ jobs:
         with:
           node-version: 12
 
-      - name: Install dependencies
-        run: yarn install
+      - name: Install project dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn
 
       - name: Run tests
         run: yarn compile
