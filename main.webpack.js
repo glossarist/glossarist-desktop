@@ -7,7 +7,7 @@ module.exports = function (config) {
 
   config.module.rules = config.module.rules.filter(r => {
     return (r.use !== 'node-loader');
-  })
+  });
 
   config.module.rules.unshift({
     test: /\.node$/,
