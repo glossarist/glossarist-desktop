@@ -67,6 +67,7 @@ jobs:
           # macOS notarization API key
           API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           API_KEY_ISSUER_ID: ${{ secrets.APPLE_API_KEY_ISSUER_ID }}
+
   update-site:
     runs-on: ubuntu-latest
     needs: release
