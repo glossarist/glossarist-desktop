@@ -1,7 +1,7 @@
 {
   "name": "glossarist",
   "productName": "Glossarist",
-  "version": "1.6.23",
+  "version": "1.6.24",
   "description": "Glossarist database viewer & editor for desktop",
   "bugs": "https://github.com/glossarist/isotc211-desktop/issues",
   "author": {
@@ -20,6 +20,7 @@
     "dist": "cross-env DEBUG=electron-builder electron-builder",
     "dist:win": "electron-builder -w",
     "dist:mac": "electron-builder -m",
+    "dist:linux": "electron-builder -l",
     "pack": "electron-builder --dir",
     "release": "electron-builder --publish always",
     "cdist": "yarn compile && electron-builder -mlw",
@@ -81,9 +82,6 @@
       "entitlementsInherit": "./build/entitlements.mas.inherit.plist",
       "hardenedRuntime": false
     },
-    "linux": {
-      "category": "Utility"
-    },
     "dmg": {
       "contents": [
         {
@@ -125,6 +123,21 @@
     "appx": {
       "backgroundColor": "#464646",
       "publisherDisplayName": "Glossarist",
+      "artifactName": "glossarist-desktop-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "AppImage",
+        "snap"
+      ],
+      "category": "Utility",
+      "icon": "build/icon.icns"
+    },
+    "appImage": {
+      "artifactName": "glossarist-desktop-${version}.${ext}"
+    },
+    "snap": {
       "artifactName": "glossarist-desktop-${version}.${ext}"
     },
     "publish": [
