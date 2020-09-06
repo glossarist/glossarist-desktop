@@ -1,7 +1,7 @@
 {
   "name": "glossarist",
   "productName": "Glossarist",
-  "version": "1.6.25",
+  "version": "1.6.26",
   "description": "Glossarist database viewer & editor for desktop",
   "bugs": "https://github.com/glossarist/isotc211-desktop/issues",
   "author": {
@@ -136,7 +136,8 @@
       "artifactName": "glossarist-desktop-${version}.${ext}"
     },
     "snap": {
-      "artifactName": "glossarist-desktop-${version}.${ext}"
+      "artifactName": "glossarist-desktop-${version}.${ext}",
+      "publish": ["github"]
     },
     "publish": [
       {
