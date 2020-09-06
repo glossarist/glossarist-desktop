@@ -129,7 +129,7 @@
       "target": [
         "snap"
       ],
-      "category": "Utility",
+      "category": "Productivity",
       "icon": "build/icon.icns"
     },
     "appImage": {
