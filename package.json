@@ -127,8 +127,6 @@
     },
     "linux": {
       "target": [
-        "deb",
-        "AppImage",
         "snap"
       ],
       "category": "Utility",
