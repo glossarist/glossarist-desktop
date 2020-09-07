@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { NonIdealState, Toaster, Position, Callout, FormGroup, InputGroup, Button } from '@blueprintjs/core';
+import { Toaster, Position, Callout, FormGroup, InputGroup, Button } from '@blueprintjs/core';
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { AuthoritativeSource, Concept } from 'models/concepts';
 import * as panels from '../panels';
@@ -77,13 +77,6 @@ const MainView: React.FC<{}> = function () {
     entryWithSource = undefined;
   }
 
-  if (cr.selected === null) {
-    return <NonIdealState
-      icon="edit"
-      title="Change request, please!"
-      description="To make changes, select or create a draft CR." />;
-  }
-
   const authSourceForm = (
     <Callout
         className={styles.authSourceCallout}
@@ -127,7 +120,7 @@ const MainView: React.FC<{}> = function () {
       <div>
         {entryWithSource
           ? <EntryEdit
-              changeRequestID={cr.selected}
+              changeRequestID={cr.selected || undefined}
               key={`-1-${lang.default}`}
               entry={entryWithSource}
               parentRevisionID={null}
