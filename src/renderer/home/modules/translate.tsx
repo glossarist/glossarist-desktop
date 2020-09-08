@@ -69,11 +69,6 @@ const MainView: React.FC<{}> = function () {
         <br />
         must be other than {lang.available[lang.default]}.
       </>} />;
-  } else if (cr.selected === null) {
-    return <NonIdealState
-      icon="edit"
-      title="Change request, please!"
-      description="To make changes, select or create a draft CR first." />;
   }
 
   function initializeAuthSourceDraft(authSource?: AuthoritativeSource) {
@@ -169,7 +164,7 @@ const MainView: React.FC<{}> = function () {
       <div>
         {entryWithSource !== undefined
           ? <EntryEdit
-              changeRequestID={cr.selected}
+              changeRequestID={cr.selected || undefined}
               key={`${active.termid}-${lang.selected}`}
               entry={entryWithSource}
               parentRevisionID={entry !== undefined ? entry._revisions.current : null}
