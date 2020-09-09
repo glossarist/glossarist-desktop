@@ -15,13 +15,12 @@ import {
   NORMATIVE_STATUS_CHOICES,
 } from 'models/concepts';
 
-import { Revision } from 'models/revisions';
 import { app } from 'renderer';
 
 import { EntryForm } from './entry-form';
 import styles from './styles.scss';
 import sharedStyles from '../styles.scss';
-import { ChangeRequest } from 'models/change-requests';
+import { ChangeRequest, RevisionInCR } from 'models/change-requests';
 import { ChangeRequestContext } from '../contexts';
 
 
@@ -38,7 +37,9 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
   const cr = app.useOne<ChangeRequest, string>('changeRequests', props.changeRequestID || null).object;
   const crCtx = useContext(ChangeRequestContext);
 
-  const revisionInCR: null | Revision<Concept<any, any>> = (cr?.revisions.concepts || {})[`${props.entry.id}-${props.entry.language_code}`] || null;
+  const revisionInCR: null | RevisionInCR<Concept<any, any>> =
+    (cr?.revisions.concepts || {})[`${props.entry.id}-${props.entry.language_code}`] ||
+    null;
 
   const creating = revisionInCR === null;
 
@@ -75,7 +76,6 @@ export const EntryEdit: React.FC<EntryEditProps> = function (props) {
       });
 
       setCommitInProgress(false);
-
     }
   };
 

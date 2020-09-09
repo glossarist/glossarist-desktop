@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { Toaster, Position, Callout, FormGroup, InputGroup, Button } from '@blueprintjs/core';
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
-import { AuthoritativeSource, Concept } from 'models/concepts';
+import { AuthoritativeSource, Concept, ConceptRef } from 'models/concepts';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { EntryEdit } from '../concepts';
@@ -33,15 +33,14 @@ const MainView: React.FC<{}> = function () {
     useState<AuthoritativeSourceDraft>
     (initializeAuthSourceDraft());
 
-  useEffect(() => {
-    ctx.select(-1);
-  }, [ctx.ref]);
+  const newRevisionID: ConceptRef = 0 - Object.values(cr?.revisions.concepts || []).map(revision => revision.parents.length < 1).length - 1;
 
   useEffect(() => {
     if (cr !== null && cr?.meta.registry.stage !== 'Draft') {
       crCtx.select(null);
     }
-  }, [cr]);
+    ctx.select(newRevisionID);
+  }, [cr, ctx.ref]);
 
   // Force switch to authoritative language
   useEffect(() => {
@@ -73,7 +72,7 @@ const MainView: React.FC<{}> = function () {
   if (proposedAuthSource) {
 
     entryWithSource = {
-      id: -1,
+      id: newRevisionID,
       language_code: lang.default,
       entry_status: 'valid',
       terms: [{ designation: '', type: 'expression', partOfSpeech: undefined }],
@@ -91,7 +90,7 @@ const MainView: React.FC<{}> = function () {
         className={styles.authSourceCallout}
         intent="primary"
         title="Authoritative source"
-        key={`-1-${lang.default}`}>
+        key={`${newRevisionID}-${lang.default}`}>
       <p>
         Please specify the authoritative source you will use for this concept’s authoritative language entry.
         <br />
@@ -130,7 +129,7 @@ const MainView: React.FC<{}> = function () {
         {entryWithSource
           ? <EntryEdit
               changeRequestID={crCtx.selected || undefined}
-              key={`-1-${lang.default}`}
+              key={`${newRevisionID}-${lang.default}`}
               entry={entryWithSource}
               parentRevisionID={null}
               latestRevisionID={null}

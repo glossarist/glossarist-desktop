@@ -16,8 +16,8 @@ import {
   Concept, MultiLanguageConcept,
   SupportedLanguages, LifecycleStage, ConceptRef,
 } from 'models/concepts';
-import { ChangeRequest } from 'models/change-requests';
-import { Revision, getNewRevisionID } from 'models/revisions';
+import { ChangeRequest, RevisionInCR } from 'models/change-requests';
+import { getNewRevisionID } from 'models/revisions';
 import { app } from 'renderer';
 import { useHelp } from 'renderer/help';
 import * as panels from '../panels';
@@ -30,7 +30,7 @@ import { PanelConfig } from '../panel-config';
 import { AnnotatedChange } from '../inline-diff';
 
 
-type ConceptRevision = Revision<Concept<any, any>>;
+type ConceptRevision = RevisionInCR<Concept<any, any>>;
 
 
 const InlineDiff: React.FC<{
@@ -157,38 +157,42 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
   }, [newItemID]);
 
   const cr = app.useOne<ChangeRequest, string>('changeRequests', crID || null).object;
+  const crIsUnderReview = cr ? (cr.timeSubmitted !== undefined && cr.timeResolved === undefined) : undefined;
 
-  const reviewMaterial = useIPCValue
+  const _reviewMaterial = useIPCValue
   <{ changeRequestID: string | null, objectType: string, objectID: string | null }, { toReview?: ConceptRevision }>
-  ('model-changeRequests-read-revision', {}, { changeRequestID: crID, objectType: 'concepts', objectID: crObjectID }).value;
+  ('model-changeRequests-read-revision', {}, { changeRequestID: crID, objectType: 'concepts', objectID: crObjectID });
+
+  const reviewMaterial = _reviewMaterial.value;
 
   const revisionToReview = reviewMaterial.toReview || null;
 
   const _original = app.useOne<MultiLanguageConcept<any>, number>
   ('concepts', revisionToReview ? revisionToReview.object.id : null).object;
 
-  if (!revisionToReview) {
+  if (!revisionToReview || !crObjectID) {
     return null;
   }
 
   const original = _original ? _original[revisionToReview.object.language_code as keyof SupportedLanguages] : null;
 
   const suggestedRevisionParent = revisionToReview.parents.length > 0 ? revisionToReview.parents[0] : null;
-
-  const crIsUnderReview = cr ? (cr.timeSubmitted !== undefined && cr.timeResolved === undefined) : undefined;
-
-  // If data item has a revision referencing the ID of the CR containing this suggested revision,
-  // then consider this suggested revision accepted.
-  const suggestedRevisionWasAccepted = original
-    ? Object.values(original._revisions.tree).find(rev => rev.changeRequestID === crID) !== undefined
-    : undefined;
-
-  const suggestedRevisionWasAcceptedAndIsCurrent = original
-    ? original._revisions.tree[original._revisions.current].changeRequestID === crID
-    : undefined;
-
   const suggestedRevisionIsNewEntry = suggestedRevisionParent === null;
 
+  let suggestedRevisionWasAccepted: boolean;
+  let suggestedRevisionWasAcceptedAndIsCurrent: boolean | undefined;
+  if (original && Object.values(original._revisions.tree).find(rev => rev.changeRequestID === crID) !== undefined) {
+    // If data item has a revision referencing the ID of the CR containing this suggested revision,
+    // then consider this suggested revision accepted.
+    suggestedRevisionWasAccepted = true;
+    suggestedRevisionWasAcceptedAndIsCurrent = original._revisions.tree[original._revisions.current].changeRequestID === crID;
+  } else if (suggestedRevisionIsNewEntry && revisionToReview.createdObjectID !== undefined) {
+    suggestedRevisionWasAccepted = true;
+    suggestedRevisionWasAcceptedAndIsCurrent = true;
+  } else {
+    suggestedRevisionWasAccepted = false;
+    suggestedRevisionWasAcceptedAndIsCurrent = undefined;
+  }
   const suggestedRevisionNeedsRebase = original
     ? (suggestedRevisionWasAccepted === false && suggestedRevisionParent !== null && suggestedRevisionParent !== original._revisions.current)
     : undefined;
@@ -203,9 +207,11 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
     const parent = suggestedRevisionParent;
 
-    if (suggestedRevisionIsNewEntry && _original === null && newItemID !== undefined && newItemID > 0) {
+    let newRevisionID: string;
+
+    if (suggestedRevisionIsNewEntry && _original === null && newItemID !== undefined && newItemID > 0 && crObjectID !== null) {
+      newRevisionID = getNewRevisionID();
       const newConceptID: number = newItemID;
-      const newRevisionID: string = getNewRevisionID();
       const reviewedRevision: ConceptRevision = {
         ...revisionToReview,
         object: {
@@ -236,8 +242,19 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
           },
         },
       });
-    } else if (_original) {
+
       await callIPC<
+        { changeRequestID: string, objectType: string, objectID: string, createdObjectID: ConceptRef },
+        { success: boolean }
+      >('model-changeRequests-mark-revision-as-accepted', {
+        changeRequestID: crID,
+        objectType: 'concepts',
+        objectID: crObjectID,
+        createdObjectID: newConceptID,
+      });
+
+    } else if (_original && crObjectID !== null) {
+      const result = await callIPC<
         { objID: ConceptRef, data: Concept<any, any>, lang: keyof SupportedLanguages, parentRevision: string | null, changeRequestID?: string },
         { newRevisionID: string }
       >('model-concepts-create-revision', {
@@ -247,7 +264,25 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
         changeRequestID: crID,
         parentRevision: parent,
       });
+
+      newRevisionID = result.newRevisionID;
+
+      await callIPC<
+        { changeRequestID: string, objectType: string, objectID: string, createdRevisionID: string },
+        { success: boolean }
+      >('model-changeRequests-mark-revision-as-accepted', {
+        changeRequestID: crID,
+        objectType: 'concepts',
+        objectID: crObjectID,
+        createdRevisionID: newRevisionID,
+      });
+
+    } else {
+      log.error("Cannot apply revision: Required info is missing");
+      throw new Error("Cannot apply revision");
     }
+
+    _reviewMaterial.refresh();
 
     setAcceptInProgress(false);
   }
@@ -276,7 +311,7 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
             <NumericInput
               width={10}
               rightElement={
-                _original === null
+                (_original === null && !suggestedRevisionWasAccepted)
                   ? <Button
                       minimal
                       intent={(newItemID !== undefined && newItemIDIsAvailable) ? "success" : "danger"}
@@ -284,8 +319,8 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
                   : undefined
               }
               onValueChange={(num) => setNewItemID(num || undefined)}
-              disabled={_original !== null}
-              value={_original?.termid || newItemID || 0} />
+              disabled={_original !== null || suggestedRevisionWasAccepted}
+              value={_original?.termid || revisionToReview.createdObjectID || newItemID || 0} />
           </FormGroup>
         : <FormGroup label="Item&nbsp;ID" inline>
             <InputGroup disabled value={original?.id} />
@@ -326,9 +361,9 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
               !userIsManager ||
               acceptInProgress ||
               crIsUnderReview !== true ||
-              (!suggestedRevisionIsNewEntry && !original && !_original) ||
               suggestedRevisionWasAccepted ||
               suggestedRevisionNeedsRebase ||
+              (!suggestedRevisionIsNewEntry && !original && !_original) ||
               (suggestedRevisionIsNewEntry && !_original && newItemID === undefined)}
             onClick={applyRevision}>
           Accept revision

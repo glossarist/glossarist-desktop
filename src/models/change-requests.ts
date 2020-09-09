@@ -1,7 +1,15 @@
+import { AnyIDType } from '@riboseinc/coulomb/db/models';
 import { Revision } from './revisions';
 
 
 /* Generic */
+
+
+export type RevisionInCR<T> = Omit<Revision<T>, 'changeRequestID' | 'author'> & {
+  createdObjectID?: AnyIDType
+  createdRevisionID?: string
+};
+
 
 interface _ChangeRequest<SubmitterMeta extends object, RegistryMeta extends { stage: string }> {
   id: string
@@ -9,7 +17,7 @@ interface _ChangeRequest<SubmitterMeta extends object, RegistryMeta extends { st
 
   revisions: {
     [objectType: string]: {
-      [objectID: string]: Omit<Revision<any>, 'changeRequestID' | 'author'>
+      [objectID: string]: RevisionInCR<any>
     }
   }
   /* Changes contained in this CR.

@@ -6,7 +6,8 @@ import { listen } from '@riboseinc/coulomb/ipc/main';
 import { SupportedLanguages, Concept, LifecycleStage } from '../models/concepts';
 import { Revision, WithRevisions } from 'models/revisions';
 import { app, conf } from '.';
-import { ChangeRequest, LIFECYCLE_STAGES_IN_REVIEW, LIFECYCLE_STAGES_ARCHIVED } from 'models/change-requests';
+import { ChangeRequest, LIFECYCLE_STAGES_IN_REVIEW, LIFECYCLE_STAGES_ARCHIVED, RevisionInCR } from 'models/change-requests';
+import { AnyIDType } from '@riboseinc/coulomb/db/models';
 
 
 interface ChangeRequestManagerQuery {
@@ -220,6 +221,42 @@ extends Manager<WithRevisions<ChangeRequest>, string, ChangeRequestManagerQuery>
       return { success: true };
     });
 
+    listen<{ changeRequestID: string, objectType: string, objectID: string, createdObjectID?: AnyIDType, createdRevisionID?: string }, { success: boolean }>
+    (`${prefix}-mark-revision-as-accepted`, async ({ changeRequestID, objectType, objectID, createdObjectID, createdRevisionID }) => {
+      const cr = await this.read(changeRequestID);
+      const revision = cr.revisions[objectType][objectID];
+
+      if (!revision) {
+        log.error("Cannot find revision to mark as accepted", changeRequestID, objectType, objectID);
+        return { success: false };
+      }
+
+      if (revision.parents.length < 1) {
+        if (createdObjectID !== undefined) {
+          cr.revisions[objectType][objectID].createdObjectID = createdObjectID;
+        } else {
+          log.error("Cannot mark revision for new item as accepted: missing ID for created item",
+            changeRequestID, objectType, objectID, createdObjectID);
+          return { success: false };
+        }
+      } else {
+        if (createdRevisionID !== undefined) {
+          cr.revisions[objectType][objectID].createdRevisionID = createdRevisionID;
+        } else {
+          log.error("Cannot mark new revision for existing item as accepted: missing ID for created revision",
+            changeRequestID, objectType, objectID, createdRevisionID);
+          return { success: false };
+        }
+      }
+
+      await this.update(
+        changeRequestID,
+        cr,
+        `Mark ${objectType}/${objectID} in CR ${changeRequestID} as accepted, creating ${createdObjectID || createdRevisionID}`)
+
+      return { success: true };
+    });
+
     listen<{ changeRequestID?: string, objectType: string, objectID: string, data: object, parentRevisionID: string | null }, { success: true, crID: string }>
     (`${prefix}-save-revision`, async ({ changeRequestID, objectType, objectID, data, parentRevisionID }) => {
       var cr: WithRevisions<ChangeRequest>;
@@ -260,7 +297,7 @@ extends Manager<WithRevisions<ChangeRequest>, string, ChangeRequestManagerQuery>
     });
 
     // TODO: toReview is confusing, change to revision (get-revision)
-    listen<{ changeRequestID: string | null, objectType: string, objectID: string | null }, { toReview?: Revision<R> }>
+    listen<{ changeRequestID: string | null, objectType: string, objectID: string | null }, { toReview?: RevisionInCR<R> }>
     (`${prefix}-read-revision`, async ({ changeRequestID, objectType, objectID }) => {
       if (changeRequestID === null || objectID === null) {
         return {};
