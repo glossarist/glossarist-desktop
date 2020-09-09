@@ -1,13 +1,33 @@
 import React from 'react';
 
-import { Classes } from '@blueprintjs/core';
-
 import { availableLanguages } from '../../../app';
-import { MultiLanguageConcept, ConceptRef, Concept } from 'models/concepts';
+import { MultiLanguageConcept, ConceptRef, Concept, SupportedLanguages, PARENT_RELATIONSHIP } from 'models/concepts';
 import { app } from 'renderer/index';
 
 import styles from '../styles.scss';
 import { RepresentingDesignation } from './designation';
+
+
+interface LazyParentConceptListProps {
+  parentConceptIDs: ConceptRef[]
+  lang: keyof SupportedLanguages
+  className?: string
+}
+export const LazyParentConceptList: React.FC<LazyParentConceptListProps> =
+function ({ parentConceptIDs, lang, className }) {
+  return (
+    <>
+      {(parentConceptIDs && parentConceptIDs.length > 0)
+        ? <span className={`${styles.parents} ${className}`}
+                title="Parent concept (domain, broader concept)">
+            {parentConceptIDs.map(id =>
+              <LazyConceptItem conceptRef={id} lang={lang} />
+            )}
+          </span>
+        : null}
+    </>
+  );
+};
 
 
 interface ConceptItemProps {
@@ -23,13 +43,19 @@ function ({ lang, concept, className }) {
   const isValid = c ? ['retired', 'superseded'].indexOf(c.entry_status) < 0 : undefined;
   const designationValidityClass = isValid === false ? styles.invalidDesignation : '';
 
+  const parents = (concept.relations || []).
+    filter(r => r.type === PARENT_RELATIONSHIP).
+    map(r => r.to);
+
   return (
     <span
         className={`
           ${styles.conceptItem} ${className || ''}
           ${designationValidityClass}
         `}>
-      {c ? <RepresentingDesignation entry={c} /> : <i>missing designation</i>}
+      {c
+        ? <RepresentingDesignation entry={c} parentConceptIDs={parents} />
+        : <i>missing designation</i>}
     </span>
   );
 };
@@ -58,7 +84,8 @@ interface LazyConceptItemProps {
   lang: keyof typeof availableLanguages
   className?: string
 }
-export const LazyConceptItem: React.FC<LazyConceptItemProps> = function ({ conceptRef, lang, className }) {
+export const LazyConceptItem: React.FC<LazyConceptItemProps> =
+function ({ conceptRef, lang, className }) {
   /* Fetches concept data from backend, defers display to ConceptItem.
      NOTE: Should not be used in large lists, too slow.
      For large lists, fetch all concepts in one request and use LazyConceptList.
@@ -72,8 +99,8 @@ export const LazyConceptItem: React.FC<LazyConceptItemProps> = function ({ conce
       className={className}
     />;
   } else {
-    return <span className={`${Classes.SKELETON} ${styles.conceptItem} ${className || ''}`}>
-      Loading…
+    return <span className={`${styles.conceptItem} ${className || ''}`}>
+      {conceptRef}
     </span>
   }
 };

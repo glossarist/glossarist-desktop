@@ -91,11 +91,29 @@
 }
 
 
+:local .representingDesignation {
+  white-space: nowrap;
+
+  div {
+    // MathJax :(
+    display: inline;
+  }
+}
+
 :local .entryDetails {
   padding: 2rem;
   padding-top: 3rem;
   background: white;
   position: relative;
+
+  .domain {
+    position: absolute;
+    top: 1.75rem;
+    font-size: $pt-font-size-large;
+
+    font-weight: normal;
+    font-family: sans-serif;
+  }
 
   .designation {
     font-weight: normal;
@@ -108,22 +126,6 @@
 
     &.normativeStatus-deprecated {
       color: $pt-text-color-disabled;
-    }
-  }
-  .legacyDomain {
-    display: inherit;
-    white-space: nowrap;
-    position: absolute;
-    top: 1.75rem;
-
-    font-weight: normal;
-    font-family: sans-serif;
-    font-size: $pt-font-size-large;
-
-    > :not(:last-child) {
-      &::after {
-        content: ", ";
-      }
     }
   }
   .usageInfo {

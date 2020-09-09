@@ -231,7 +231,7 @@ function ({ onRemoveOutgoingLink, onConceptSelect }) {
       lang={lang.selected as keyof typeof availableLanguages}
       conceptRef={r.to} />,
     icon: <span className={`${sharedStyles.conceptID} ${styles.conceptID}`}>{r.to}</span>,
-    secondaryLabel: <>
+    secondaryLabel: <span style={{ whiteSpace: 'nowrap' }}>
       <Tag minimal>{r.type}</Tag>
       <Button small minimal
         onClick={(evt: React.FormEvent) => {
@@ -240,7 +240,7 @@ function ({ onRemoveOutgoingLink, onConceptSelect }) {
           onRemoveOutgoingLink(r.type, r.to);
         }}
         icon="cross" />
-    </>,
+    </span>,
     nodeData: {
       type: r.type,
       to: r.to,
@@ -255,10 +255,10 @@ function ({ onRemoveOutgoingLink, onConceptSelect }) {
     label: <LazyConceptItem
       lang={lang.selected as keyof typeof availableLanguages}
       conceptRef={r.from} />,
-    secondaryLabel: <>
+    secondaryLabel: <span style={{ whiteSpace: 'nowrap' }}>
       <Tag minimal>{r.type}</Tag>
       <Button disabled small minimal icon="cross" />
-    </>,
+    </span>,
     nodeData: {
       type: r.type,
       ref: r.from,

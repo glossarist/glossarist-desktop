@@ -306,7 +306,54 @@ html, body, #app {
     }
     .conceptItem {
       font-size: 90%;
+
+      .conceptItem {
+        // Undo in nested case (when concept item reflects domain)
+        font-size: 100%;
+      }
     }
+  }
+}
+
+:local .legacyDomain {
+  white-space: nowrap;
+
+  font-weight: normal;
+  font-family: sans-serif;
+
+  > :not(:last-child) {
+    &::after {
+      display: inline;
+      content: ", ";
+    }
+  }
+}
+
+:local .parents {
+  white-space: nowrap;
+
+  &::before {
+    content: "<";
+    color: $pt-text-color-muted;
+  }
+  &::after {
+    content: ">";
+    margin-left: -.25em;
+    color: $pt-text-color-muted;
+  }
+
+  > :not(:last-child) {
+    margin-right: -.25em;
+
+    &::after {
+      display: inline;
+      margin-left: -.25em;
+      content: ", ";
+    }
+  }
+
+  div {
+    display: inline;
   }
 }
 

@@ -4,11 +4,13 @@ import {
   Designation,
   Expression,
   Concept,
+  ConceptRef
 } from 'models/concepts';
 
 import styles from './styles.scss';
 import MathJax from 'react-mathjax2';
 import { useHelp } from 'renderer/help';
+import { LazyParentConceptList } from './item';
 
 
 export const FullDesignation: React.FC<{ d: Designation }> = function ({ d }) {
@@ -59,7 +61,8 @@ export function getRepresentingDesignation(entry: Concept<any, any>): string {
 };
 
 
-export const RepresentingDesignation: React.FC<{ entry: Concept<any, any> }> = function ({ entry }) {
+export const RepresentingDesignation: React.FC<{ parentConceptIDs?: ConceptRef[], entry: Concept<any, any> }> =
+function ({ parentConceptIDs, entry }) {
   const representingTerm: Designation =
     entry.terms.filter(d => d.normative_status === 'preferred')[0] ||
     entry.terms.filter(d => d.normative_status === 'admitted')[0] ||
@@ -68,9 +71,12 @@ export const RepresentingDesignation: React.FC<{ entry: Concept<any, any> }> = f
   const repDesignation = representingTerm?.designation;
   const ref = useHelp('widgets/representing-designation');
 
-  return <div ref={ref as (el: HTMLDivElement) => void}>
+  return <div ref={ref as (el: HTMLDivElement) => void} className={styles.representingDesignation}>
     <MathJax.Text text={repDesignation} />
     {" "}
     {entry.domain ? ' <' + entry.domain + '>' : ''}
+    {(parentConceptIDs && parentConceptIDs.length > 0)
+      ? <LazyParentConceptList parentConceptIDs={parentConceptIDs} lang={entry.language_code} />
+      : null}
   </div>;
 };

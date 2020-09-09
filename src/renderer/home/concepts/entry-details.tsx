@@ -4,9 +4,9 @@ import { Classes, H2 } from '@blueprintjs/core';
 import { Concept, ConceptRef, Designation } from 'models/concepts';
 import { isRTL } from 'app';
 import styles from './styles.scss';
+import sharedStyles from '../styles.scss';
 import { FullDesignation } from './designation';
-import { LazyConceptItem } from './item';
-import { lang } from 'moment';
+import { LazyParentConceptList } from './item';
 
 
 interface EntryDetailsProps {
@@ -37,13 +37,16 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
     <div
         dir={rtl ? 'rtl' : 'ltr'}
         className={`${styles.entryDetails} ${rtl ? Classes.RTL : ''} ${className || ''}`}>
-      {entry.domain ? <span className={styles.legacyDomain}>&lt;{entry.domain}&gt;</span> : null}
+
+      {entry.domain
+        ? <span className={sharedStyles.legacyDomain}>&lt;{entry.domain}&gt;</span>
+        : null}
+
       {(parentConceptIDs && parentConceptIDs.length > 0)
-        ? <span className={styles.legacyDomain} title="Domain (broader concept)">&lt;
-            {parentConceptIDs.map(id =>
-              <LazyConceptItem conceptRef={id} lang={entry.language_code} />
-            )}&gt;
-          </span>
+        ? <LazyParentConceptList
+            className={styles.domain}
+            parentConceptIDs={parentConceptIDs}
+            lang={entry.language_code} />
         : null}
 
       <H2
