@@ -200,9 +200,16 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
     const parent = suggestedRevisionParent;
 
-    if (suggestedRevisionIsNewEntry && _original === null || newItemID !== undefined) {
-      const newConceptID = newItemID;
+    if (suggestedRevisionIsNewEntry && _original === null && newItemID !== undefined && newItemID > 0) {
+      const newConceptID: number = newItemID;
       const newRevisionID: string = getNewRevisionID();
+      const reviewedRevision: ConceptRevision = {
+        ...revisionToReview,
+        object: {
+          ...revisionToReview.object,
+          id: newConceptID,
+        }
+      };
       await callIPC<
         { object: MultiLanguageConcept<any>, commit: boolean },
         { newRevisionID: string }
@@ -211,13 +218,13 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
         object: {
           termid: newConceptID,
           eng: {
-            ...revisionToReview.object,
+            ...reviewedRevision.object,
             id: newConceptID,
             _revisions: {
               current: newRevisionID,
               tree: {
                 [newRevisionID]: {
-                  ...revisionToReview,
+                  ...reviewedRevision,
                   changeRequestID: crID,
                 },
               },
