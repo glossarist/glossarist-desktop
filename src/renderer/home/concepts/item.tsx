@@ -13,7 +13,7 @@ import { RepresentingDesignation } from './designation';
 interface ConceptItemProps {
   concept: MultiLanguageConcept<any>
   lang: keyof typeof availableLanguages
-  className?: string 
+  className?: string
 }
 export const ConceptItem: React.FC<ConceptItemProps> =
 function ({ lang, concept, className }) {
