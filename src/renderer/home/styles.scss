@@ -316,6 +316,12 @@ html, body, #app {
   }
 }
 
+:local .changeRequestsPanel {
+  .panelContents {
+    height: 140px;
+  }
+}
+
 :local .helpPanel {
   .panelContents {
     height: 80px;

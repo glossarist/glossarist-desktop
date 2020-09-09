@@ -10,6 +10,8 @@ import { UserRoleContext } from '../contexts';
 import { PanelConfig } from '../panel-config';
 import { ChangeRequestList } from '../change-requests/list';
 
+import sharedStyles from '../styles.scss';
+
 
 type ChangeRequestLifecyclePhase = 'drafts' | 'submitted' | 'resolved';
 
@@ -93,6 +95,7 @@ const ChangeRequestFilter: React.FC<{}> = function () {
 export default {
   Contents: ChangeRequestsPanel,
   title: "Change requests",
+  className: sharedStyles.changeRequestsPanel,
   TitleComponentSecondary: ChangeRequestFilter,
 } as PanelConfig;
 
