@@ -89,7 +89,7 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
               ? <a onClick={() => openAuthSource(`${entry.authoritative_source.link}`)}>
                   {entry.authoritative_source.ref || entry.authoritative_source.link} {entry.authoritative_source.clause}
                 </a>
-              : <>{entry.authoritative_source.ref} {entry.authoritative_source.clause}</>}
+              : <>{entry.authoritative_source.ref || 'unknown'} {entry.authoritative_source.clause}</>}
           </dd>
         </dl>
       </footer>
