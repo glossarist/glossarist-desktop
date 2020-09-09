@@ -81,9 +81,9 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
 
       <footer>
         <dl dir="ltr" className={styles.label}>
-          <dt>Entry status</dt>
+          <dt>Entry status:</dt>
           <dd>{entry.entry_status || 'unknown'}</dd>
-          <dt>Authoritative source</dt>
+          <dt>Authoritative source:</dt>
           <dd>
             {`${entry.authoritative_source.link || ''}`.trim() !== ''
               ? <a onClick={() => openAuthSource(`${entry.authoritative_source.link}`)}>
