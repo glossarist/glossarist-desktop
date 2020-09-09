@@ -29,12 +29,6 @@ export function convertDraftToAuthSource(authSourceDraft: AuthoritativeSourceDra
   } catch (e) {
     errors.push("You seem to have specified an incorrect URL as authoritative source link.");
   }
-  if (ref === undefined && clause !== undefined) {
-    errors.push("You seem to have specified a clause without a standard reference.");
-  }
-  if (ref === undefined && link === undefined) {
-    errors.push("You seem to have specified neither a standard reference nor a link.");
-  }
 
   return [{ ref, clause, link }, errors];
 }
