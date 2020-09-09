@@ -8,7 +8,7 @@ export function initializeAuthSourceDraft(authSource?: AuthoritativeSource) {
   return {
     ref: '',
     clause: '',
-    link: 'https://example.com/',
+    link: '',
   };
 }
 
