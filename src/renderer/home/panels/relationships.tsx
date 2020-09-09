@@ -1,5 +1,6 @@
+import { remote } from 'electron';
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { InputGroup, Button, ITreeNode, Tree } from '@blueprintjs/core';
+import { InputGroup, Button, ITreeNode, Tree, Tag } from '@blueprintjs/core';
 import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { ConceptRef, MultiLanguageConcept, ConceptRelation } from 'models/concepts';
@@ -23,16 +24,23 @@ import sharedStyles from '../styles.scss';
 const DEFAULT_RELATIONSHIP_TYPE = 'related';
 
 
+interface RelationshipsPanelState {
+  type?: string
+  addingLink?: boolean
+}
+
+
 const Panel: React.FC<{}> = function () {
   const concept = useContext(ConceptContext);
 
   const panel = useContext(PanelContext);
-  const panelState = panel.state as { addingLink?: boolean };
+  const panelState = panel.state as RelationshipsPanelState;
   const addingLink = panelState.addingLink || false;
 
   const [newLinkTarget, setNewLinkTarget] = useState<string>('');
-  const [newLinkType, setNewLinkType] = useState<string>(DEFAULT_RELATIONSHIP_TYPE);
   const [commitInProgress, setCommitInProgress] = useState(false);
+
+  const newLinkType = panelState.type || DEFAULT_RELATIONSHIP_TYPE;
 
   const newLinkInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -79,7 +87,6 @@ const Panel: React.FC<{}> = function () {
         });
 
       setNewLinkTarget('');
-      setNewLinkType(DEFAULT_RELATIONSHIP_TYPE);
       setCommitInProgress(false);
       toggleAddingLink(false);
     }
@@ -141,7 +148,7 @@ const Panel: React.FC<{}> = function () {
 const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isCollapsed }) {
   const concept = useContext(ConceptContext);
   const panel = useContext(PanelContext);
-  const panelState = panel.state as { addingLink?: boolean };
+  const panelState = panel.state as RelationshipsPanelState;
   const addingLink = panelState.addingLink || false;
   const userIsManager = useContext(UserRoleContext).isManager === true;
 
@@ -153,16 +160,47 @@ const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isC
     panel.setState({ addingLink: state });
   }
 
+  function invokeRelationshipTypeMenu() {
+    const m = new remote.Menu();
+    const type = panel.state.type || DEFAULT_RELATIONSHIP_TYPE;
+
+    function selectType(type: string) {
+      toggleAddingLink(true);
+      panel.setState((state: RelationshipsPanelState) =>
+        ({ ...state, type }));
+    }
+
+    m.append(new remote.MenuItem({
+      label: "Parent (domain/broader)",
+      type: 'radio',
+      checked: type === 'parent',
+      click: () => selectType('parent'),
+    }));
+
+    m.append(new remote.MenuItem({
+      label: "Related",
+      type: 'radio',
+      checked: type === 'related',
+      click: () => selectType('related'),
+    }));
+
+    m.popup({ window: remote.getCurrentWindow() });
+  }
+
   if (userIsManager) {
     return (
       <Button
-          small minimal
+          minimal
           icon="add"
           disabled={!concept.active}
           active={addingLink}
           onClick={(evt: React.MouseEvent<HTMLElement>) => {
             evt.stopPropagation();
-            toggleAddingLink(!addingLink);
+            if (!addingLink) {
+              invokeRelationshipTypeMenu();
+            } else {
+              toggleAddingLink(false);
+            }
           }} />
     );
   } else {
@@ -188,14 +226,16 @@ function ({ onRemoveOutgoingLink, onConceptSelect }) {
       lang={lang.selected as keyof typeof availableLanguages}
       conceptRef={r.to} />,
     icon: <span className={`${sharedStyles.conceptID} ${styles.conceptID}`}>{r.to}</span>,
-    secondaryLabel:
+    secondaryLabel: <>
+      <Tag minimal>{r.type}</Tag>
       <Button small minimal
         onClick={(evt: React.FormEvent) => {
           evt.preventDefault();
           evt.stopPropagation();
           onRemoveOutgoingLink(r.type, r.to);
         }}
-        icon="cross" />,
+        icon="cross" />
+    </>,
     nodeData: {
       type: r.type,
       to: r.to,
@@ -210,9 +250,12 @@ function ({ onRemoveOutgoingLink, onConceptSelect }) {
     label: <LazyConceptItem
       lang={lang.selected as keyof typeof availableLanguages}
       conceptRef={r.from} />,
-    secondaryLabel:
-      <Button disabled small minimal icon="cross" />,
+    secondaryLabel: <>
+      <Tag minimal>{r.type}</Tag>
+      <Button disabled small minimal icon="cross" />
+    </>,
     nodeData: {
+      type: r.type,
       ref: r.from,
     },
   }));
