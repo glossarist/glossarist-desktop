@@ -297,4 +297,5 @@ export default {
   Contents: Panel,
   title: "Relationships",
   TitleComponentSecondary: PanelTitleSecondary,
+  helpResourceID: 'relationships',
 } as PanelConfig;
