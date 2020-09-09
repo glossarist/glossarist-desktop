@@ -1,9 +1,6 @@
 import React, { useContext } from 'react';
 
-import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
-
 import { app } from 'renderer';
-import { Revision } from 'models/revisions';
 import { Concept } from 'models/concepts';
 import { PanelConfig } from '../panel-config';
 import { ChangeRequestContext } from '../contexts';
