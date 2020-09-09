@@ -92,9 +92,10 @@ const MainView: React.FC<{}> = function () {
         title="Authoritative source"
         key={`${newRevisionID}-${lang.default}`}>
       <p>
-        Please specify the authoritative source you will use for this concept’s authoritative language entry.
+        Please specify the authoritative source you will use
+        for this concept’s authoritative language entry.
         <br />
-        Either a link or a standard reference is required.
+        A link and/or a standard reference is recommended.
       </p>
       <FormGroup label="Standard reference">
         <InputGroup large fill required
