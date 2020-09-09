@@ -336,12 +336,14 @@ const CRDetailsPanel: React.FC<{}> = function () {
   const committerEmail = useIPCValue<{}, { email: string }>
   ('db-default-get-current-committer-info', { email: '' }).value.email;
 
-  const crID = useContext(ChangeRequestContext).selected;
+  const crCtx = useContext(ChangeRequestContext);
+  const crID = crCtx.selected;
 
   const cr = app.useOne<ChangeRequest, string>('changeRequests', crID || null).object;
 
   const [stageInProgress, setStageInProgress] = useState<boolean>(false);
 
+  const ctx = useContext(ConceptContext);
   const userIsManager = useContext(UserRoleContext).isManager === true;
 
   const revealButtonHelpRef = useHelp('file-reveal-button');
@@ -373,6 +375,9 @@ const CRDetailsPanel: React.FC<{}> = function () {
     ('model-changeRequests-update-stage', { changeRequestID: crID, newStage });
 
     setStageInProgress(false);
+
+    ctx.select(null);
+    crCtx.select(null);
   }
 
   return (
