@@ -123,7 +123,7 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
   const crCtx = useContext(ChangeRequestContext);
   const lang = useContext(LangConfigContext);
 
-  const [acceptInProgress, setAcceptInProgress] = useState<boolean>(false);
+  const [commitInProgress, setCommitInProgress] = useState<boolean>(false);
 
   const [newItemID, setNewItemID] = useState<number | undefined>(undefined);
   const [newItemIDIsAvailable, setNewItemIDIsAvailable] = useState<boolean | undefined>(undefined);
@@ -158,6 +158,7 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
   const cr = app.useOne<ChangeRequest, string>('changeRequests', crID || null).object;
   const crIsUnderReview = cr ? (cr.timeSubmitted !== undefined && cr.timeResolved === undefined) : undefined;
+  const crIsEditableDraft = cr && cr.timeSubmitted === undefined && cr.author.email === committerInfo.email;
 
   const _reviewMaterial = useIPCValue
   <{ changeRequestID: string | null, objectType: string, objectID: string | null }, { toReview?: ConceptRevision }>
@@ -197,13 +198,32 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
     ? (suggestedRevisionWasAccepted === false && suggestedRevisionParent !== null && suggestedRevisionParent !== original._revisions.current)
     : undefined;
 
+  async function deleteRevision() {
+    if (crIsEditableDraft !== true || crID === null || crObjectID === null) {
+      return;
+    }
+
+    setCommitInProgress(true);
+
+    await callIPC<{ changeRequestID: string, objectType: string, objectID: string }, { success: true }>
+    ('model-changeRequests-delete-revision', {
+      changeRequestID: crID,
+      objectType: 'concepts',
+      objectID: crObjectID,
+    });
+
+    _reviewMaterial.refresh();
+
+    setCommitInProgress(false);
+  }
+
   async function applyRevision() {
-    if (revisionToReview === null || acceptInProgress || !crID) {
+    if (revisionToReview === null || commitInProgress || !crID) {
       log.error("Cannot apply revision: No revision to review");
       throw new Error("Cannot apply revision: No revision to review");
     }
 
-    setAcceptInProgress(true);
+    setCommitInProgress(true);
 
     const parent = suggestedRevisionParent;
 
@@ -284,7 +304,7 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
     _reviewMaterial.refresh();
 
-    setAcceptInProgress(false);
+    setCommitInProgress(false);
   }
 
   let acceptHelperText: undefined | string;
@@ -306,26 +326,30 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
   return (
     <>
-      {suggestedRevisionIsNewEntry === true
-        ? <FormGroup label="New&nbsp;item&nbsp;ID" intent="primary">
-            <NumericInput
-              width={10}
-              rightElement={
-                (_original === null && !suggestedRevisionWasAccepted)
-                  ? <Button
-                      minimal
-                      intent={(newItemID !== undefined && newItemIDIsAvailable) ? "success" : "danger"}
-                      icon={(newItemID !== undefined && newItemIDIsAvailable) ? "tick" : "warning-sign"} />
-                  : undefined
-              }
-              onValueChange={(num) => setNewItemID(num || undefined)}
-              disabled={_original !== null || suggestedRevisionWasAccepted}
-              value={_original?.termid || revisionToReview.createdObjectID || newItemID || 0} />
-          </FormGroup>
-        : <FormGroup label="Item&nbsp;ID" inline>
-            <InputGroup disabled value={original?.id} />
-          </FormGroup>
-      }
+      {crIsUnderReview
+        ? <>
+            {suggestedRevisionIsNewEntry === true
+              ? <FormGroup label="New&nbsp;item&nbsp;ID" intent="primary">
+                  <NumericInput
+                    width={10}
+                    rightElement={
+                      (_original === null && !suggestedRevisionWasAccepted)
+                        ? <Button
+                            minimal
+                            intent={(newItemID !== undefined && newItemIDIsAvailable) ? "success" : "danger"}
+                            icon={(newItemID !== undefined && newItemIDIsAvailable) ? "tick" : "warning-sign"} />
+                        : undefined
+                    }
+                    onValueChange={(num) => setNewItemID(num || undefined)}
+                    disabled={_original !== null || suggestedRevisionWasAccepted}
+                    value={_original?.termid || revisionToReview.createdObjectID || newItemID || 0} />
+                </FormGroup>
+              : <FormGroup label="Item&nbsp;ID" inline>
+                  <InputGroup disabled value={original?.id} />
+                </FormGroup>
+            }
+          </>
+        : null}
       {suggestedRevisionIsNewEntry !== true
         ? <FormGroup label="Supersedes&nbsp;revision" inline>
             <InputGroup
@@ -347,28 +371,40 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
           </FormGroup>
         : null
       }
-      <FormGroup
-          intent={suggestedRevisionNeedsRebase ? 'warning' : undefined}
-          helperText={acceptHelperText}
-          inline>
-        <Button
-            fill
-            intent={suggestedRevisionNeedsRebase ? "warning" : "primary"}
-            icon={suggestedRevisionWasAccepted ? 'tick-circle' : 'confirm'}
-            rightIcon={(suggestedRevisionWasAccepted === false && suggestedRevisionNeedsRebase === true) ? 'warning-sign' : undefined}
-            loading={acceptInProgress}
-            disabled={
-              !userIsManager ||
-              acceptInProgress ||
-              crIsUnderReview !== true ||
-              suggestedRevisionWasAccepted ||
-              suggestedRevisionNeedsRebase ||
-              (!suggestedRevisionIsNewEntry && !original && !_original) ||
-              (suggestedRevisionIsNewEntry && !_original && newItemID === undefined)}
-            onClick={applyRevision}>
-          Accept revision
-        </Button>
-      </FormGroup>
+      {crIsEditableDraft
+        ? <FormGroup
+              helperText="Delete revision if you don’t want to propose this change. You cannot do this after you submit the CR."
+              inline>
+            <Button
+                fill
+                onClick={deleteRevision}
+                disabled={commitInProgress}
+                loading={commitInProgress}>
+              Delete revision
+            </Button>
+          </FormGroup>
+        : <FormGroup
+              intent={suggestedRevisionNeedsRebase ? 'warning' : undefined}
+              helperText={acceptHelperText}
+              inline>
+            <Button
+                fill
+                intent={suggestedRevisionNeedsRebase ? "warning" : "primary"}
+                icon={suggestedRevisionWasAccepted ? 'tick-circle' : 'confirm'}
+                rightIcon={(suggestedRevisionWasAccepted === false && suggestedRevisionNeedsRebase === true) ? 'warning-sign' : undefined}
+                loading={commitInProgress}
+                disabled={
+                  !userIsManager ||
+                  commitInProgress ||
+                  crIsUnderReview !== true ||
+                  suggestedRevisionWasAccepted ||
+                  suggestedRevisionNeedsRebase ||
+                  (!suggestedRevisionIsNewEntry && !original && !_original) ||
+                  (suggestedRevisionIsNewEntry && !_original && newItemID === undefined)}
+                onClick={applyRevision}>
+              Accept revision
+            </Button>
+          </FormGroup>}
     </>
   );
 };
