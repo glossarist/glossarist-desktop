@@ -130,6 +130,9 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
 
   const userIsManager = useContext(UserRoleContext).isManager === true;
 
+  const committerInfo = useIPCValue<{}, { email: string, name: string }>
+  ('db-default-get-current-committer-info', { email: '', name: '' }).value;
+
   const crID = crCtx.selected;
   const crObjectID = crCtx.selectedItem;
 
@@ -226,6 +229,7 @@ const SuggestedRevisionPanel: React.FC<{}> = function () {
                 [newRevisionID]: {
                   ...reviewedRevision,
                   changeRequestID: crID,
+                  author: committerInfo,
                 },
               },
             },
