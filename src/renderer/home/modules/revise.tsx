@@ -3,18 +3,21 @@ import { NonIdealState, Icon } from '@blueprintjs/core';
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { availableLanguages } from 'app';
+import { app } from 'renderer';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { EntryEdit } from '../concepts';
 import { ConceptContext, ChangeRequestContext } from '../contexts';
 import sharedStyles from '../styles.scss';
+import { ChangeRequest } from 'models/change-requests';
 
 
 const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
-  const cr = useContext(ChangeRequestContext);
   const active = ctx.active;
+  const crCtx = useContext(ChangeRequestContext);
+  const cr = app.useOne<ChangeRequest, string>('changeRequests', crCtx.selected || null).object;
 
   // Force switch to authoritative language
   useEffect(() => {
@@ -22,6 +25,12 @@ const MainView: React.FC<{}> = function () {
       lang.select(lang.default);
     }
   }, [lang.selected]);
+
+  useEffect(() => {
+    if (cr !== null && cr?.meta.registry.stage !== 'Draft') {
+      crCtx.select(null);
+    }
+  }, [cr]);
 
   const auth = active ? active[lang.default as keyof typeof availableLanguages] : undefined;
 
@@ -39,7 +48,7 @@ const MainView: React.FC<{}> = function () {
   return (
     <div className={sharedStyles.backdrop}>
       <EntryEdit
-        changeRequestID={cr.selected || undefined}
+        changeRequestID={crCtx.selected || undefined}
         key={auth.id}
         entry={auth._revisions.tree[auth._revisions.current].object}
         parentRevisionID={ctx.revisionID}

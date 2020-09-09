@@ -5,6 +5,7 @@ import { AuthoritativeSource, Concept } from 'models/concepts';
 import * as panels from '../panels';
 import { ModuleConfig } from '../module-config';
 import { EntryEdit } from '../concepts';
+import { app } from 'renderer';
 import {
   initializeAuthSourceDraft,
   convertDraftToAuthSource,
@@ -13,6 +14,7 @@ import {
 import { ConceptContext, ChangeRequestContext } from '../contexts';
 import sharedStyles from '../styles.scss';
 import styles from './translate.scss';
+import { ChangeRequest } from 'models/change-requests';
 
 
 const toaster = Toaster.create({ position: Position.TOP });
@@ -21,7 +23,8 @@ const toaster = Toaster.create({ position: Position.TOP });
 const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
-  const cr = useContext(ChangeRequestContext);
+  const crCtx = useContext(ChangeRequestContext);
+  const cr = app.useOne<ChangeRequest, string>('changeRequests', crCtx.selected || null).object;
 
   const [proposedAuthSource, setProposedAuthSource] =
     useState<undefined | AuthoritativeSource>
@@ -33,6 +36,12 @@ const MainView: React.FC<{}> = function () {
   useEffect(() => {
     ctx.select(-1);
   }, [ctx.ref]);
+
+  useEffect(() => {
+    if (cr !== null && cr?.meta.registry.stage !== 'Draft') {
+      crCtx.select(null);
+    }
+  }, [cr]);
 
   // Force switch to authoritative language
   useEffect(() => {
@@ -120,7 +129,7 @@ const MainView: React.FC<{}> = function () {
       <div>
         {entryWithSource
           ? <EntryEdit
-              changeRequestID={cr.selected || undefined}
+              changeRequestID={crCtx.selected || undefined}
               key={`-1-${lang.default}`}
               entry={entryWithSource}
               parentRevisionID={null}

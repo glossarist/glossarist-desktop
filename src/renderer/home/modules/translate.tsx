@@ -12,7 +12,9 @@ import {
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { AuthoritativeSource, Concept } from 'models/concepts';
+import { ChangeRequest } from 'models/change-requests';
 import { availableLanguages } from 'app';
+import { app } from 'renderer';
 import * as panels from '../panels';
 import { ConceptContext, ModuleContext, ChangeRequestContext } from '../contexts';
 import { EntryEdit, EntryDetails } from '../concepts';
@@ -29,7 +31,8 @@ const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
   const mod = useContext(ModuleContext);
-  const cr = useContext(ChangeRequestContext);
+  const crCtx = useContext(ChangeRequestContext);
+  const cr = app.useOne<ChangeRequest, string>('changeRequests', crCtx.selected || null).object;
 
   const active = ctx.active;
   const entry = active
@@ -56,6 +59,12 @@ const MainView: React.FC<{}> = function () {
     updateAuthSourceDraft(
       initializeAuthSourceDraft(entry?.authoritative_source));
   }, [lang.selected, active?.termid]);
+
+  useEffect(() => {
+    if (cr !== null && cr?.meta.registry.stage !== 'Draft') {
+      crCtx.select(null);
+    }
+  }, [cr]);
 
   if (active === null) {
     return <NonIdealState title="No concept is selected" />;
@@ -164,7 +173,7 @@ const MainView: React.FC<{}> = function () {
       <div>
         {entryWithSource !== undefined
           ? <EntryEdit
-              changeRequestID={cr.selected || undefined}
+              changeRequestID={crCtx.selected || undefined}
               key={`${active.termid}-${lang.selected}`}
               entry={entryWithSource}
               parentRevisionID={entry !== undefined ? entry._revisions.current : null}
