@@ -4,6 +4,7 @@ import { NonIdealState, Icon } from '@blueprintjs/core';
 
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
+import { PARENT_RELATIONSHIP } from 'models/concepts';
 import { EntryDetails } from '../concepts';
 import { ModuleConfig } from '../module-config';
 import { ConceptContext } from '../contexts';
@@ -15,7 +16,12 @@ const MainView: React.FC<{}> = function () {
   const lang = useContext(LangConfigContext);
   const ctx = useContext(ConceptContext);
   const concept = ctx.revision;
+  const mlgtConcept = ctx.active;
   const isLoading = ctx.isLoading;
+
+  const parents = (mlgtConcept?.relations || []).
+    filter(r => r.type === PARENT_RELATIONSHIP).
+    map(r => r.to);
 
   let conceptDetails: JSX.Element;
 
@@ -26,7 +32,7 @@ const MainView: React.FC<{}> = function () {
   } else if (concept === undefined) {
     conceptDetails = <NonIdealState title="No concept is selected" />
   } else {
-    conceptDetails = <EntryDetails isLoading={isLoading} entry={concept} />;
+    conceptDetails = <EntryDetails isLoading={isLoading} entry={concept} parentConceptIDs={parents} />;
   }
   return (
     <div className={sharedStyles.backdrop}>

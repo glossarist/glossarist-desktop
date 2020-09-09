@@ -6,6 +6,8 @@ import { WithRevisions } from './revisions';
 
 /* Concepts */
 
+export const PARENT_RELATIONSHIP = 'parent' as const
+
 export type ConceptRelation =
   { type: string, to: ConceptRef };
 // Stored in the database

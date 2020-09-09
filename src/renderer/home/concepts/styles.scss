@@ -111,11 +111,20 @@
     }
   }
   .legacyDomain {
+    display: inherit;
+    white-space: nowrap;
+    position: absolute;
+    top: 1.75rem;
+
     font-weight: normal;
     font-family: sans-serif;
     font-size: $pt-font-size-large;
-    position: absolute;
-    top: 1.75rem;
+
+    > :not(:last-child) {
+      &::after {
+        content: ", ";
+      }
+    }
   }
   .usageInfo {
     color: $pt-text-color-muted;

@@ -3,7 +3,12 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { InputGroup, Button, ITreeNode, Tree, Tag } from '@blueprintjs/core';
 import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
-import { ConceptRef, MultiLanguageConcept, ConceptRelation } from 'models/concepts';
+import {
+  ConceptRef,
+  MultiLanguageConcept,
+  ConceptRelation,
+  PARENT_RELATIONSHIP,
+} from 'models/concepts';
 import { PanelContext } from 'coulomb-panel/panel';
 
 import {
@@ -173,8 +178,8 @@ const PanelTitleSecondary: React.FC<{ isCollapsed?: boolean }> = function ({ isC
     m.append(new remote.MenuItem({
       label: "Parent (domain/broader)",
       type: 'radio',
-      checked: type === 'parent',
-      click: () => selectType('parent'),
+      checked: type === PARENT_RELATIONSHIP,
+      click: () => selectType(PARENT_RELATIONSHIP),
     }));
 
     m.append(new remote.MenuItem({

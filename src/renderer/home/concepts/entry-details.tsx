@@ -1,18 +1,21 @@
 import React from 'react';
 import MathJax from 'react-mathjax2';
 import { Classes, H2 } from '@blueprintjs/core';
-import { Concept, Designation } from 'models/concepts';
+import { Concept, ConceptRef, Designation } from 'models/concepts';
 import { isRTL } from 'app';
 import styles from './styles.scss';
 import { FullDesignation } from './designation';
+import { LazyConceptItem } from './item';
+import { lang } from 'moment';
 
 
 interface EntryDetailsProps {
   isLoading?: boolean
   entry: Concept<any, any>
   className?: string
+  parentConceptIDs?: ConceptRef[]
 }
-export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, entry, className }) {
+export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, entry, className, parentConceptIDs }) {
   const loadingClass = isLoading ? Classes.SKELETON : undefined;
 
   const primaryDesignation = entry.terms[0];
@@ -35,6 +38,13 @@ export const EntryDetails: React.FC<EntryDetailsProps> = function ({ isLoading, 
         dir={rtl ? 'rtl' : 'ltr'}
         className={`${styles.entryDetails} ${rtl ? Classes.RTL : ''} ${className || ''}`}>
       {entry.domain ? <span className={styles.legacyDomain}>&lt;{entry.domain}&gt;</span> : null}
+      {(parentConceptIDs && parentConceptIDs.length > 0)
+        ? <span className={styles.legacyDomain} title="Domain (broader concept)">&lt;
+            {parentConceptIDs.map(id =>
+              <LazyConceptItem conceptRef={id} lang={entry.language_code} />
+            )}&gt;
+          </span>
+        : null}
 
       <H2
           className={`${styles.primaryDesignation} ${loadingClass}`}>
