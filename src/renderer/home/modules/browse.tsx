@@ -2,7 +2,7 @@ import update from 'immutability-helper';
 import { debounce } from 'throttle-debounce';
 import { remote } from 'electron';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Text, InputGroup, Button, Tag, ButtonGroup, Icon } from '@blueprintjs/core';
+import { Text, InputGroup, Button, Tag, ButtonGroup, Icon, NonIdealState, Spinner } from '@blueprintjs/core';
 import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 
 import { MultiLanguageConcept, SupportedLanguages } from 'models/concepts';
@@ -29,6 +29,10 @@ const MainView: React.FC<{}> = function () {
       return <Tag minimal icon="translate" intent="danger">Not translated</Tag>
     }
     return <></>;
+  }
+
+  if (source.isLoading) {
+    return <NonIdealState title={<Spinner />} />
   }
 
   return (
