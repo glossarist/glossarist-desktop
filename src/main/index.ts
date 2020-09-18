@@ -1,4 +1,6 @@
 import * as path from 'path';
+import log from 'electron-log';
+import fs from 'fs-extra';
 import { app as electronApp } from 'electron';
 
 import { MainConfig } from '@riboseinc/coulomb/config/main';
@@ -16,9 +18,11 @@ import { default as ConceptManagerCls } from './concept-manager';
 import { default as ConceptChangeRequestManagerCls } from './change-request-manager';
 import { default as CollectionManagerCls } from './collection-manager';
 import { ChangeRequest } from 'models/change-requests';
+import { listen } from '@riboseinc/coulomb/ipc/main';
 
 
 const appDataPath = electronApp.getPath('userData');
+const dbWorkingDir = path.join(appDataPath, 'glossarist-database');
 
 
 export const conf: MainConfig<typeof appConf> = {
@@ -34,7 +38,7 @@ export const conf: MainConfig<typeof appConf> = {
     default: {
       backend: BackendCls,
       options: {
-        workDir: path.join(appDataPath, 'glossarist-database'),
+        workDir: dbWorkingDir,
         fsWrapperClass: FSWrapper,
       },
     },
@@ -67,6 +71,24 @@ export const conf: MainConfig<typeof appConf> = {
     },
   },
 };
+
+
+listen<{}, { success: true }>
+('clear-app-data', async () => {
+  log.warn('Clearing app data!');
+  await fs.remove(appDataPath);
+  electronApp.quit();
+  return { success: true };
+})
+
+
+listen<{}, { success: true }>
+('clear-working-copy', async () => {
+  log.warn('Clearing working copy!');
+  await fs.remove(dbWorkingDir);
+  electronApp.quit();
+  return { success: true };
+})
 
 
 export const app = initMain(conf);

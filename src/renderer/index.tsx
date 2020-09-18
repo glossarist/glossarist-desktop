@@ -10,7 +10,7 @@ export const conf: RendererConfig<typeof appConf> = {
   windowComponents: {
     default: () => import('./home'),
     batchCommit: () => import('./batch-commit'),
-    settings: () => import('@riboseinc/coulomb/settings/renderer'),
+    settings: () => import('./settings'),
   },
 
   databaseStatusComponents: {
