@@ -137,7 +137,9 @@
     },
     "snap": {
       "artifactName": "glossarist-desktop-${version}.${ext}",
-      "publish": ["github"]
+      "publish": [
+        "github"
+      ]
     },
     "publish": [
       {
