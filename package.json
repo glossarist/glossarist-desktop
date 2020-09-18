@@ -151,7 +151,7 @@
     "@blueprintjs/datetime": "^3.18.2",
     "@blueprintjs/icons": "^3.18.1",
     "@blueprintjs/select": "^3.13.3",
-    "@riboseinc/coulomb": "^0.9.8",
+    "@riboseinc/coulomb": "^0.9.9",
     "async-lock": "^1.2.2",
     "axios": "^0.19.2",
     "coulomb-panel": "https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.5-gitpkg",
