@@ -989,10 +989,10 @@
     "@nodelib/fs.scandir" "2.1.3"
     fastq "^1.6.0"
 
-"@riboseinc/coulomb@^0.9.9":
-  version "0.9.9"
-  resolved "https://registry.yarnpkg.com/@riboseinc/coulomb/-/coulomb-0.9.9.tgz#b7b0645a6b18acd75d7ded8feacd9b7e9fa6d688"
-  integrity sha512-yrBGTRcmGrLw7IrljLxOnTiBA7Sz3eixfuGHadMOlqP9tgrvvpOpvDtyIH987vRit7UoeoXUn6Ymb8xZtbjdpg==
+"@riboseinc/coulomb@^0.9.10":
+  version "0.9.10"
+  resolved "https://registry.yarnpkg.com/@riboseinc/coulomb/-/coulomb-0.9.10.tgz#2ddd64a388cb731344223cf6c8f81a86b08b9050"
+  integrity sha512-+MmGr1Pi3ue0kYnfxNyv4O2pqWbkhs5p4UvODmI/gMg3jYDmOfrgrgrMVcmCpmv6hfopz7D6jglHfz4Zp9N84A==
   dependencies:
     async-lock "^1.2.2"
     fs-extra "^9.0.1"
@@ -1946,7 +1946,7 @@ binary-extensions@^2.0.0:
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.0.0.tgz#23c0df14f6a88077f5f986c0d167ec03c3d5537c"
   integrity sha512-Phlt0plgpIIBOGTT/ehfFnbNlfsDEiqmzE2KRXoX1bLIlir4X/MR+zSyBEkL05ffWgnRSf/DXv+WrUAVr93/ow==
 
-bl@^4.0.1:
+bl@^4.0.3:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/bl/-/bl-4.0.3.tgz#12d6287adc29080e22a705e5764b2a9522cdc489"
   integrity sha512-fs4G6/Hu4/EE+F75J8DuN/0IpQqNjAdC7aEQv7Qt8MHGUH7Ckv2MwTEEeN9QehD0pfIDkMI1bkHYkKy7xHyKIg==
@@ -5751,9 +5751,9 @@ isobject@^3.0.0, isobject@^3.0.1:
   integrity sha1-TkMekrEalzFjaqH5yNHMvP2reN8=
 
 isomorphic-git@^1.7.3:
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-1.7.4.tgz#940ee5c03f58fa37d90fac116fdc670552c831a5"
-  integrity sha512-gzVg61bZLmfojR287p+nT9bbuFhSH0Us9f6pRVp4J9CA/1A/mghBEvcsCgRxalv+XKJ1sQMxWTc90tzn8WnYVA==
+  version "1.7.8"
+  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-1.7.8.tgz#26ad3c6fb201e994df675a9778af55a60075d579"
+  integrity sha512-fSTsgp8J4s1aIfB/woR7slOAtX9wNprxs/iJaItE3yn5a/KjDAgIDcdutes88/0uC/VdCQFyuDZq1fdtYftrDw==
   dependencies:
     async-lock "^1.1.0"
     clean-git-ref "^2.0.1"
@@ -6744,9 +6744,9 @@ node-abi@^2.7.0:
     semver "^5.4.1"
 
 node-addon-api@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.0.0.tgz#812446a1001a54f71663bed188314bba07e09247"
-  integrity sha512-sSHCgWfJ+Lui/u+0msF3oyCgvdkhxDbkCS6Q8uiJquzOimkJBvX6hl5aSSA7DR1XbMpdM8r7phjcF63sF4rkKg==
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.0.2.tgz#04bc7b83fd845ba785bb6eae25bc857e1ef75681"
+  integrity sha512-+D4s2HCnxPd5PjjI0STKwncjXTUKKqm74MDMz9OPXavjsGmjkvwgLtA5yoxJUdmpj52+2u+RrXgPipahKczMKg==
 
 node-forge@0.9.0:
   version "0.9.0"
@@ -9616,11 +9616,11 @@ tar-fs@^2.0.0:
     tar-stream "^2.0.0"
 
 tar-stream@^2.0.0:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/tar-stream/-/tar-stream-2.1.3.tgz#1e2022559221b7866161660f118255e20fa79e41"
-  integrity sha512-Z9yri56Dih8IaK8gncVPx4Wqt86NDmQTSh49XLZgjWpGZL9GK9HKParS2scqHCC4w6X9Gh2jwaU45V47XTKwVA==
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/tar-stream/-/tar-stream-2.1.4.tgz#c4fb1a11eb0da29b893a5b25476397ba2d053bfa"
+  integrity sha512-o3pS2zlG4gxr67GmFYBLlq+dM8gyRGUOvsrHclSkvtVtQbjV0s/+ZE8OpICbaj8clrX3tjeHngYGP7rweaBnuw==
   dependencies:
-    bl "^4.0.1"
+    bl "^4.0.3"
     end-of-stream "^1.4.1"
     fs-constants "^1.0.0"
     inherits "^2.0.3"
