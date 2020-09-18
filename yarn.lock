@@ -989,10 +989,10 @@
     "@nodelib/fs.scandir" "2.1.3"
     fastq "^1.6.0"
 
-"@riboseinc/coulomb@^0.9.10":
-  version "0.9.10"
-  resolved "https://registry.yarnpkg.com/@riboseinc/coulomb/-/coulomb-0.9.10.tgz#2ddd64a388cb731344223cf6c8f81a86b08b9050"
-  integrity sha512-+MmGr1Pi3ue0kYnfxNyv4O2pqWbkhs5p4UvODmI/gMg3jYDmOfrgrgrMVcmCpmv6hfopz7D6jglHfz4Zp9N84A==
+"@riboseinc/coulomb@^0.9.11":
+  version "0.9.11"
+  resolved "https://registry.yarnpkg.com/@riboseinc/coulomb/-/coulomb-0.9.11.tgz#40d66e29e0b72287b07d5b8fd4951168e48be9bf"
+  integrity sha512-IyWS3hou3A8+h54GuslYTQjoXmixh+hRxuLAPLqzNGFmDbHb1Daqi0AaDiydHf5UdX2mGFbNamMIkguqjHCLLw==
   dependencies:
     async-lock "^1.2.2"
     fs-extra "^9.0.1"
