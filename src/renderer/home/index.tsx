@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import log from 'electron-log';
 
 import Mousetrap from 'mousetrap';
 // Import needed to define Mousetrap.bindGlobal() as a side-effect:
@@ -16,6 +17,7 @@ import { DBSyncScreen } from '@riboseinc/coulomb/db/isogit-yaml/renderer/status'
 
 import { useHelp } from 'renderer/help';
 
+import { conf } from '../../app';
 import { ModuleContext, DocsContext, HoveredItem } from './contexts';
 import { ModuleConfig } from './module-config';
 import styles from './styles.scss';
@@ -87,6 +89,7 @@ const Window: React.FC<WindowComponentProps> = function () {
   const db = useContext(SingleDBStatusContext);
 
   const [syncScreenRequested, requestSyncScreen] = useState(false);
+  const [syncInProgress, setSyncInProgress] = useState(false);
 
   useEffect(() => {
     const showInitializationScreen = (
@@ -104,15 +107,25 @@ const Window: React.FC<WindowComponentProps> = function () {
   }, [JSON.stringify(db)]);
 
   const handleRequestSync = async () => {
-    requestSyncScreen(true);
-    await callIPC('db-default-git-request-push');
-    await callIPC('db-default-git-trigger-sync');
+    setSyncInProgress(true);
+    try {
+      await callIPC('db-default-git-request-push');
+      await callIPC('db-default-git-trigger-sync');
+      requestSyncScreen(true);
+    } catch (e) {
+      log.error("Error requesting sync", e);
+    } finally {
+      setSyncInProgress(false);
+    }
   };
 
   if (db === null) {
     return <NonIdealState title="Preparing DB synchronization…" />;
+  } else if (!syncScreenRequested && syncInProgress) {
+    return <NonIdealState title="Starting sync…" />;
   } else if (syncScreenRequested) {
     return <DBSyncScreen
+      settingsWindowID={(conf.settingsWindowID as string) || undefined}
       onDismiss={() => requestSyncScreen(false)}
       dbName="default"
       db={db} />;
