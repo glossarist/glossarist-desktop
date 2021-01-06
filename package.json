@@ -155,7 +155,7 @@
     "@blueprintjs/select": "^3.13.3",
     "@riboseinc/coulomb": "^0.9.11",
     "async-lock": "^1.2.2",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "coulomb-panel": "https://github.com/riboseinc/coulomb-panel#coulomb-panel-v0.0.5-gitpkg",
     "cytoscape": "3",
     "electron-log": "^4.2.2",
